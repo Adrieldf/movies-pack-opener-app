@@ -58,6 +58,16 @@ export default function Home() {
   const [showTrailerIdx, setShowTrailerIdx] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [newCardIds, setNewCardIds] = useState<Set<string>>(new Set());
+  const [isAutoMode, setIsAutoMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("auto") === "true") {
+        setIsAutoMode(true);
+      }
+    }
+  }, []);
 
   const playSound = useCallback((type: "tear" | "flip" | "sparkle" | "swoosh" | Rarity) => {
     if (isMuted) return;
@@ -187,7 +197,7 @@ export default function Home() {
     setTimeout(() => {
       setPackState("revealing");
     }, 800);
-  }, [controls]);
+  }, [controls, collection]);
 
   const updateTear = (clientX: number) => {
     if (topPartRef.current && !isOpenedRef.current) {
@@ -248,6 +258,32 @@ export default function Home() {
       setPackState("done");
     }
   };
+
+  useEffect(() => {
+    if (!isAutoMode) return;
+
+    if (packState === "sealed") {
+      const timer = setTimeout(() => {
+        handleOpen();
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+
+    if (packState === "revealing") {
+      const isFlipped = flippedCards[activeCardIndex];
+      if (!isFlipped) {
+        const timer = setTimeout(() => {
+          handleFlip(activeCardIndex);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        const timer = setTimeout(() => {
+          handleNextCard();
+        }, 2500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isAutoMode, packState, activeCardIndex, flippedCards, handleOpen, handleFlip, handleNextCard]);
 
   const resetPack = () => {
     isOpenedRef.current = false;
@@ -412,6 +448,7 @@ export default function Home() {
                   exit={{ y: -50, opacity: 0, scale: 0.9 }}
                   transition={{ type: "spring", bounce: 0.4, duration: 0.6 }}
                   onClick={() => {
+                    if (isAutoMode) return;
                     if (packState === "revealing") {
                       if (!isFlipped) {
                         handleFlip(idx);
@@ -420,7 +457,7 @@ export default function Home() {
                       }
                     }
                   }}
-                  className="absolute cursor-pointer perspective-1000 w-[368px] h-[461px]"
+                  className={`absolute ${isAutoMode ? "pointer-events-none" : "cursor-pointer"} perspective-1000 w-[368px] h-[461px]`}
                   style={{ zIndex }}
                 >
                   <motion.div
@@ -547,12 +584,12 @@ export default function Home() {
                 {/* TOP TEARABLE PART */}
                 <motion.div
                   ref={topPartRef}
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  onPointerCancel={handlePointerUp}
+                  onPointerDown={(e) => !isAutoMode && handlePointerDown(e)}
+                  onPointerMove={(e) => !isAutoMode && handlePointerMove(e)}
+                  onPointerUp={(e) => !isAutoMode && handlePointerUp(e)}
+                  onPointerCancel={(e) => !isAutoMode && handlePointerUp(e)}
                   animate={controls}
-                  className="relative h-1/4 w-full cursor-pointer z-40 touch-none"
+                  className={`relative h-1/4 w-full ${isAutoMode ? "pointer-events-none" : "cursor-pointer"} z-40 touch-none`}
                   style={{
                     transformOrigin: "100% 100%",
                     transform: tearProgress > 0
