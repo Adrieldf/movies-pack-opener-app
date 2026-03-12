@@ -1,48 +1,45 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X } from "lucide-react";
 import confetti from "canvas-confetti";
 
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+type SortOption = "name_asc" | "name_desc" | "rarity_high" | "rarity_low" | "year_new" | "year_old" | "rating_high" | "rating_low";
 
-interface CardData {
-  id: string;
-  rarity: Rarity;
-  name: string;
-}
+import { CardData, fetchRandomMovies } from "../lib/tmdb";
 
-const RARITY_COLORS: Record<Rarity, { bg: string; text: string; icon: string; border: string }> = {
-  Common: { bg: "from-slate-300 via-gray-200 to-slate-400", text: "text-slate-800", icon: "text-slate-100", border: "border-slate-100/50" },
-  Uncommon: { bg: "from-green-300 via-emerald-200 to-green-400", text: "text-green-900", icon: "text-green-100", border: "border-green-100/50" },
-  Rare: { bg: "from-blue-300 via-cyan-200 to-blue-400", text: "text-blue-900", icon: "text-blue-100", border: "border-blue-100/50" },
-  Epic: { bg: "from-purple-300 via-fuchsia-200 to-purple-400", text: "text-purple-900", icon: "text-purple-100", border: "border-purple-100/50" },
-  Legendary: { bg: "from-yellow-300 via-amber-200 to-orange-400", text: "text-amber-900", icon: "text-yellow-100", border: "border-yellow-100/50" },
-};
+const ScrollableTitle = ({ title, baseClass }: { title: string; baseClass: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLHeadingElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
 
-const generatePack = (): CardData[] => {
-  const getRarity = (pool: Rarity[], chances: number[]): Rarity => {
-    const r = Math.random();
-    let sum = 0;
-    for (let i = 0; i < pool.length; i++) {
-      sum += chances[i];
-      if (r <= sum) return pool[i];
+  useEffect(() => {
+    if (containerRef.current && textRef.current) {
+      setShouldScroll(textRef.current.scrollWidth > containerRef.current.clientWidth);
     }
-    return pool[pool.length - 1];
-  };
+  }, [title]);
 
-  return [
-    { id: Math.random().toString(), rarity: getRarity(["Common", "Uncommon"], [0.8, 0.2]), name: "" },
-    { id: Math.random().toString(), rarity: getRarity(["Common", "Uncommon", "Rare"], [0.7, 0.25, 0.05]), name: "" },
-    { id: Math.random().toString(), rarity: getRarity(["Uncommon", "Rare", "Epic"], [0.7, 0.25, 0.05]), name: "" },
-    { id: Math.random().toString(), rarity: getRarity(["Rare", "Epic", "Legendary"], [0.6, 0.3, 0.1]), name: "" },
-    { id: Math.random().toString(), rarity: getRarity(["Rare", "Epic", "Legendary"], [0.3, 0.4, 0.3]), name: "" },
-  ].map((c, i) => ({
-    ...c,
-    name: `Mystic ${c.rarity} Relic`,
-  }));
+  return (
+    <div 
+      ref={containerRef} 
+      className={`w-full overflow-hidden mb-3 relative ${shouldScroll ? 'mask-image-edges' : 'flex justify-center'}`}
+      style={shouldScroll ? { WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" } : {}}
+    >
+      <div className={shouldScroll ? "w-max animate-marquee whitespace-nowrap flex" : "w-full text-center flex flex-col items-center"}>
+        <h2 ref={textRef} className={`${baseClass} ${shouldScroll ? 'pr-8' : 'line-clamp-2'}`}>
+          {title}
+        </h2>
+        {shouldScroll && (
+          <h2 className={`${baseClass} pr-8`}>
+            {title}
+          </h2>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default function Home() {
@@ -50,20 +47,46 @@ export default function Home() {
   const [tearProgress, setTearProgress] = useState(0);
   const [isTearing, setIsTearing] = useState(false);
   const [cards, setCards] = useState<CardData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
   const [isGridView, setIsGridView] = useState(false);
+  const [collection, setCollection] = useState<CardData[]>([]);
+  const [isCollectionView, setIsCollectionView] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("rarity_high");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("gacha_collection");
+    if (saved) {
+      try {
+        setCollection(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse local collection", e);
+      }
+    }
+  }, []);
 
   const topPartRef = useRef<HTMLDivElement>(null);
   const isOpenedRef = useRef(false);
   const controls = useAnimation();
 
-  const handleOpen = useCallback(() => {
+  const handleOpen = useCallback(async () => {
     if (isOpenedRef.current) return;
     isOpenedRef.current = true;
+    setIsLoading(true);
+
+    const fetchedCards = await fetchRandomMovies(5);
+    setCards(fetchedCards);
+    setIsLoading(false);
+
+    setCollection((prev) => {
+      const newCollection = [...prev, ...fetchedCards];
+      localStorage.setItem("gacha_collection", JSON.stringify(newCollection));
+      return newCollection;
+    });
+
     setPackState("opened");
     setTearProgress(100);
-    setCards(generatePack());
     
     controls.start({
       y: -150,
@@ -158,33 +181,95 @@ export default function Home() {
 
   const topFoilContent = (
     <div className="w-full h-full flex flex-col pointer-events-none">
-      <div className="w-full h-4 bg-gradient-to-b from-slate-400 to-slate-500 rounded-t-lg overflow-hidden flex shrink-0">
+      <div className="w-full h-4 bg-gradient-to-b from-slate-500 to-slate-600 rounded-t-lg overflow-hidden flex shrink-0">
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={`crimp-${i}`} className="flex-1 border-r border-slate-600/30"></div>
+          <div key={`crimp-${i}`} className="flex-1 border-r border-slate-700/30"></div>
         ))}
       </div>
-      <div className="w-full flex-1 bg-gradient-to-b from-purple-600 to-purple-700 relative overflow-hidden border-b border-purple-500/50 shadow-inner">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+      <div className="w-full flex-1 bg-gradient-to-b from-slate-800 to-slate-900 relative overflow-hidden border-b border-slate-700/50 shadow-inner">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
         <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 flex items-center justify-center px-4">
-          {(packState === "sealed" || packState === "tearing") && tearProgress < 10 && (
-            <div className="bg-white/20 backdrop-blur text-white text-xs py-1 px-3 rounded-full font-semibold animate-pulse shadow-lg border border-white/20">
+          {isLoading && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-xl">
+              <div className="flex flex-col items-center">
+                <RefreshCcw className="w-8 h-8 text-white animate-spin mb-2" />
+                <span className="text-white font-medium text-sm animate-pulse">Fetching Movies...</span>
+              </div>
+            </div>
+          )}
+          {(packState === "sealed" || packState === "tearing") && tearProgress < 10 && !isLoading && (
+            <div className="bg-black/40 backdrop-blur text-white/90 text-xs py-1 px-3 rounded-full font-semibold animate-pulse shadow-lg border border-white/10">
               Swipe to Tear ✨
             </div>
           )}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] border-b-2 border-dashed border-white/30 truncate"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] border-b-2 border-dashed border-white/20 truncate"></div>
       </div>
     </div>
   );
+
+  const getRarityColors = (rarity: Rarity) => {
+    const colors: Record<Rarity, { bg: string; text: string; icon: string; border: string }> = {
+      Common: { bg: "from-slate-300 via-gray-200 to-slate-400", text: "text-slate-800", icon: "text-slate-100", border: "border-slate-100/50" },
+      Uncommon: { bg: "from-green-300 via-emerald-200 to-green-400", text: "text-green-900", icon: "text-green-100", border: "border-green-100/50" },
+      Rare: { bg: "from-blue-300 via-cyan-200 to-blue-400", text: "text-blue-900", icon: "text-blue-100", border: "border-blue-100/50" },
+      Epic: { bg: "from-purple-300 via-fuchsia-200 to-purple-400", text: "text-purple-900", icon: "text-purple-100", border: "border-purple-100/50" },
+      Legendary: { bg: "from-yellow-300 via-amber-200 to-orange-400", text: "text-amber-900", icon: "text-yellow-100", border: "border-yellow-100/50" },
+    };
+    return colors[rarity] || colors.Common;
+  };
+
+  const rarityOrder: Record<Rarity, number> = {
+    Common: 0,
+    Uncommon: 1,
+    Rare: 2,
+    Epic: 3,
+    Legendary: 4,
+  };
+
+  const getSortedCards = (cardList: CardData[]) => {
+    return [...cardList].sort((a, b) => {
+      switch (sortBy) {
+        case "name_asc":
+          return a.name.localeCompare(b.name);
+        case "name_desc":
+          return b.name.localeCompare(a.name);
+        case "rarity_high":
+          return rarityOrder[b.rarity] - rarityOrder[a.rarity] || a.name.localeCompare(b.name);
+        case "rarity_low":
+          return rarityOrder[a.rarity] - rarityOrder[b.rarity] || a.name.localeCompare(b.name);
+        case "year_new":
+          return (b.year || 0) - (a.year || 0) || a.name.localeCompare(b.name);
+        case "year_old":
+          return (a.year || 9999) - (b.year || 9999) || a.name.localeCompare(b.name);
+        case "rating_high":
+          return b.rating - a.rating || a.name.localeCompare(b.name);
+        case "rating_low":
+          return a.rating - b.rating || a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center overflow-hidden font-sans text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(120,0,255,0.1),_rgba(0,0,0,1))] pointer-events-none" />
 
       <main className="relative z-10 w-full max-w-md mx-auto p-6 h-[100dvh] flex flex-col items-center justify-center">
-        <h1 className="absolute top-12 text-3xl font-bold text-center tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 w-full">
-          Pocket Pack Opener
-        </h1>
+        <div className="absolute top-6 w-full px-6 flex justify-between items-center z-50 pointer-events-none left-0 right-0 max-w-md">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 pointer-events-auto">
+            Pack Opener
+          </h1>
+          <button 
+            onClick={() => setIsCollectionView(true)}
+            className="pointer-events-auto bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold py-2 px-3 sm:px-4 rounded-full shadow-lg transition-all text-xs sm:text-sm flex items-center gap-1 sm:gap-2"
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span className="hidden sm:inline">Collection</span>
+            <span className="bg-pink-600/80 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold">{collection.length}</span>
+          </button>
+        </div>
 
         <div className="flex-1 w-full relative flex items-center justify-center select-none pt-16">
 
@@ -230,37 +315,79 @@ export default function Home() {
                   >
                     {/* Card Back */}
                     <div
-                      className="absolute inset-0 w-full h-full bg-blue-900 rounded-xl border-4 border-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.5)] flex items-center justify-center backface-hidden"
+                      className="absolute inset-0 w-full h-full bg-slate-900 rounded-xl border-4 border-slate-500 shadow-[0_0_20px_rgba(100,116,139,0.5)] flex flex-col items-center justify-center backface-hidden overflow-hidden"
                       style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                     >
-                      <div className="text-blue-300 font-bold text-2xl tracking-widest uppercase rotate-45 opacity-50">
-                        GATCHA
+                      {/* Film strip borders */}
+                      <div className="absolute left-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-30">
+                        {Array.from({ length: 24 }).map((_, i) => <div key={`l-${i}`} className="w-full h-2 bg-black rounded-sm"></div>)}
                       </div>
+                      <div className="absolute right-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-30">
+                        {Array.from({ length: 24 }).map((_, i) => <div key={`r-${i}`} className="w-full h-2 bg-black rounded-sm"></div>)}
+                      </div>
+                      
+                      <div className="w-24 h-24 rounded-full border-2 border-slate-500/30 flex items-center justify-center p-2 mb-4 relative drop-shadow-xl">
+                        <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/60 animate-[spin_20s_linear_infinite]"></div>
+                        <div className="text-4xl filter grayscale brightness-150">🎬</div>
+                      </div>
+
+                      <div className="text-slate-300 font-black text-xl tracking-[0.2em] font-serif text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                        CINEMA<br/>COLLECTION
+                      </div>
+
                       {packState === "revealing" && !isFlipped && (
-                        <div className="absolute bottom-4 left-0 right-0 text-center text-sm text-blue-200 animate-pulse">
-                          Tap to flip
+                        <div className="absolute bottom-6 left-0 right-0 text-center text-xs font-bold tracking-widest text-slate-400/80 animate-pulse">
+                          TAP TO FLIP
                         </div>
                       )}
                     </div>
 
                     {/* Card Front */}
                     <div
-                      className={`absolute inset-0 w-full h-full bg-gradient-to-br ${RARITY_COLORS[card.rarity].bg} rounded-xl p-1 shadow-2xl backface-hidden`}
+                      className={`absolute inset-0 w-full h-full bg-gradient-to-br ${getRarityColors(card.rarity).bg} rounded-xl p-1 shadow-2xl backface-hidden`}
                       style={{ backfaceVisibility: "hidden" }}
                     >
-                      <div className={`w-full h-full border-2 ${RARITY_COLORS[card.rarity].border} rounded-lg flex flex-col items-center bg-black/10 backdrop-blur-sm p-4 relative overflow-hidden`}>
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/30 rounded-full blur-2xl"></div>
-                        <div className="w-full h-1/2 bg-white/20 rounded-md mb-4 flex items-center justify-center">
-                          <Sparkles className={`w-16 h-16 ${RARITY_COLORS[card.rarity].icon}`} />
+                      <div className={`w-full h-full border-2 ${getRarityColors(card.rarity).border} rounded-lg flex flex-col bg-black/40 backdrop-blur-sm relative overflow-hidden`}>
+                        {/* Background Poster Cover */}
+                        {card.poster && (
+                          <div 
+                            className="absolute inset-0 bg-cover bg-center opacity-80 mix-blend-overlay"
+                            style={{ backgroundImage: `url(${card.poster})` }}
+                          />
+                        )}
+
+                        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/80 via-black/30 to-transparent" />
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+
+                        {/* Top Area: Rarity & Rating */}
+                        <div className="relative z-10 flex justify-between items-start w-full p-3">
+                           <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
+                             <Sparkles className={`w-4 h-4 ${getRarityColors(card.rarity).icon}`} />
+                             <span className={`text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
+                           </div>
+                           <div className="bg-black/50 backdrop-blur rounded px-2 py-1">
+                             <span className="text-yellow-400 font-bold text-sm">⭐ {card.rating.toFixed(1)}</span>
+                           </div>
                         </div>
-                        <h2 className={`text-xl font-black ${RARITY_COLORS[card.rarity].text} w-full text-center uppercase tracking-wider mb-2`}>
-                          {card.rarity}
-                        </h2>
-                        <p className={`${RARITY_COLORS[card.rarity].text} text-sm text-center font-medium opacity-80`}>
-                          {card.name}
-                        </p>
+
+                        {/* Bottom Area: Title & Links */}
+                        <div className="relative z-10 mt-auto p-4 w-full flex flex-col items-center">
+                          <ScrollableTitle title={card.name} baseClass="text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
+                          <div className="flex gap-2 w-full justify-center">
+                            {card.trailer && (
+                              <a href={card.trailer} target="_blank" rel="noopener noreferrer" className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors" onClick={(e) => e.stopPropagation()}>
+                                Trailer
+                              </a>
+                            )}
+                            {card.imdb_link && (
+                              <a href={card.imdb_link} target="_blank" rel="noopener noreferrer" className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors" onClick={(e) => e.stopPropagation()}>
+                                IMDb
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -303,20 +430,44 @@ export default function Home() {
                 </motion.div>
 
                 {/* BOTTOM MAIN BODY */}
-                <div className="h-3/4 w-full bg-gradient-to-b from-purple-700 to-indigo-900 relative rounded-b-lg overflow-hidden shadow-2xl border-t border-indigo-800">
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+                <div className="h-3/4 w-full bg-gradient-to-b from-slate-800 to-black relative rounded-b-lg overflow-hidden shadow-2xl border-t border-slate-700">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                  
+                  {/* Film reel details */}
+                  <div className="absolute left-4 top-0 bottom-0 w-4 flex flex-col py-4 space-y-3 opacity-20 mix-blend-overlay">
+                    {Array.from({ length: 8 }).map((_, i) => <div key={`fl-${i}`} className="w-full h-8 bg-white rounded-sm"></div>)}
+                  </div>
+                  <div className="absolute right-4 top-0 bottom-0 w-4 flex flex-col py-4 space-y-3 opacity-20 mix-blend-overlay">
+                    {Array.from({ length: 8 }).map((_, i) => <div key={`fr-${i}`} className="w-full h-8 bg-white rounded-sm"></div>)}
+                  </div>
+
                   <div className="absolute inset-0 flex items-center justify-center p-6">
-                    <div className="w-32 h-32 rounded-full border-4 border-purple-400/30 flex items-center justify-center relative">
-                      <div className="absolute inset-0 rounded-full border-4 border-t-purple-300 border-r-pink-300 border-b-transparent border-l-transparent rotate-45 opacity-50"></div>
-                      <Sparkles className="w-12 h-12 text-pink-300 opacity-80" />
+                    <div className="w-32 h-28 bg-slate-900 rounded-md shadow-2xl relative flex flex-col overflow-hidden rotate-[-4deg] border border-slate-700 drop-shadow-xl">
+                      {/* Clapper stick */}
+                      <div className="h-7 w-full relative overflow-hidden border-b-2 border-slate-800 z-10 shrink-0">
+                        <div className="flex w-[150%] h-full -ml-6">
+                          {Array.from({ length: 10 }).map((_, i) => (
+                            <div key={`clap-${i}`} className={`w-8 h-full transform -skew-x-[35deg] ${i % 2 === 0 ? 'bg-slate-200' : 'bg-slate-950'}`}></div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Clapper body */}
+                      <div className="flex-1 flex flex-col p-2 bg-slate-800 shadow-inner relative justify-center items-center">
+                        <div className="absolute top-1 left-2 text-[10px] text-slate-400 font-mono font-bold tracking-widest uppercase opacity-70">Scene</div>
+                        <div className="absolute top-1 right-2 text-[10px] text-slate-400 font-mono font-bold tracking-widest uppercase opacity-70">Take</div>
+                        
+                        {/* Center Icon */}
+                        <div className="text-4xl mt-3 drop-shadow-lg filter grayscale brightness-125">🎥</div>
+                      </div>
                     </div>
                   </div>
-                  <div className="absolute bottom-6 left-0 right-0 text-center font-bold text-lg text-purple-200 uppercase tracking-widest shadow-black drop-shadow-md">
-                    Series 1
+                  <div className="absolute bottom-8 left-0 right-0 text-center font-black text-xl text-slate-200 uppercase tracking-[0.2em] shadow-black drop-shadow-lg">
+                    Movies Pack
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-500 to-slate-400 rounded-b-lg overflow-hidden flex">
+                  <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-600 to-slate-500 rounded-b-lg overflow-hidden flex">
                     {Array.from({ length: 20 }).map((_, i) => (
-                      <div key={`crimp-b-${i}`} className="flex-1 border-r border-slate-600/30"></div>
+                      <div key={`crimp-b-${i}`} className="flex-1 border-r border-slate-700/30"></div>
                     ))}
                   </div>
                 </div>
@@ -371,56 +522,150 @@ export default function Home() {
 
       {/* GRID OVERLAY */}
       <AnimatePresence>
-        {isGridView && (
+        {(isGridView || isCollectionView) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="fixed inset-0 z-50 bg-neutral-950/95 backdrop-blur-xl flex flex-col items-center p-6 sm:p-12 overflow-y-auto"
           >
-            <div className="w-full max-w-5xl flex flex-col items-center pb-24">
-              <h2 className="text-3xl font-bold mb-12 mt-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-                Pack Review
+            <button
+              onClick={() => {
+                setIsGridView(false);
+                setIsCollectionView(false);
+              }}
+              className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 group flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold p-2 sm:p-3 rounded-full shadow-lg transition-all"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+            </button>
+            <div className="w-full max-w-5xl flex flex-col items-center pb-24 mt-8 sm:mt-0">
+              <h2 className="text-3xl font-bold mt-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-4 sm:mb-8">
+                {isCollectionView ? "My Collection" : "Pack Review"}
               </h2>
+
+              {isCollectionView && (
+                <div className="flex flex-col sm:flex-row items-center justify-between w-full max-w-xs sm:max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6 mb-8 gap-4 shadow-xl">
+                  <div className="flex flex-col items-center sm:items-start w-full sm:w-auto">
+                    <span className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">Total Cards</span>
+                    <span className="text-2xl font-black text-white">{collection.length}</span>
+                  </div>
+                  
+                  <div className="h-px sm:h-12 w-full sm:w-px bg-white/10"></div>
+                  
+                  <div className="flex flex-col items-center sm:items-start w-full sm:w-auto relative">
+                    <span className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">Sort By</span>
+                    <div className="relative w-full">
+                      <select 
+                        value={sortBy} 
+                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        className="appearance-none w-full bg-black/40 border border-white/20 text-white font-medium text-sm rounded-lg pl-3 pr-8 py-2 outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all cursor-pointer hover:bg-black/60 shadow-inner"
+                      >
+                        <option value="rarity_high">Highest Rarity</option>
+                        <option value="rarity_low">Lowest Rarity</option>
+                        <option value="rating_high">Highest Rating</option>
+                        <option value="rating_low">Lowest Rating</option>
+                        <option value="name_asc">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                        <option value="year_new">Newest Release</option>
+                        <option value="year_old">Oldest Release</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white/70">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {!isCollectionView && <div className="mb-8"></div>}
+
+              {/* Empty State */}
+              {isCollectionView && collection.length === 0 && (
+                <div className="text-center text-white/50 mt-12 flex flex-col items-center">
+                  <div className="w-24 h-32 border-2 border-dashed border-white/20 rounded-xl mb-4 flex items-center justify-center">
+                    <span className="text-4xl text-white/20">?</span>
+                  </div>
+                  <p>Your collection is empty.</p>
+                  <p className="text-sm">Open some packs to find cards!</p>
+                </div>
+              )}
+
               <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
-                {cards.map((card, idx) => (
+                {getSortedCards(isCollectionView ? collection : cards).map((card, idx) => (
                   <motion.div 
-                    key={`grid-${card.id}`}
+                    key={`grid-${card.id}-${idx}`}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="relative w-56 h-72 sm:w-64 sm:h-80"
+                    transition={{ delay: (idx % 10) * 0.05 }} // modulo for large collections
+                    className="relative w-40 h-52 sm:w-56 sm:h-72 lg:w-64 lg:h-80 cursor-pointer group transition-transform hover:scale-105"
+                    onClick={() => {
+                      if (card.imdb_link) window.open(card.imdb_link, "_blank");
+                      else if (card.trailer) window.open(card.trailer, "_blank");
+                    }}
                   >
-                    <div className={`w-full h-full bg-gradient-to-br ${RARITY_COLORS[card.rarity].bg} rounded-xl p-1 shadow-2xl relative`}>
-                      <div className={`w-full h-full border-2 ${RARITY_COLORS[card.rarity].border} rounded-lg flex flex-col items-center bg-black/10 backdrop-blur-sm p-4 relative overflow-hidden`}>
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/30 rounded-full blur-2xl"></div>
-                        <div className="w-full h-1/2 bg-white/20 rounded-md mb-4 flex items-center justify-center">
-                          <Sparkles className={`w-12 h-12 sm:w-16 sm:h-16 ${RARITY_COLORS[card.rarity].icon}`} />
+                    <div className={`w-full h-full bg-gradient-to-br ${getRarityColors(card.rarity).bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative`}>
+                      <div className={`w-full h-full border sm:border-2 ${getRarityColors(card.rarity).border} rounded-lg flex flex-col bg-black/50 backdrop-blur-sm relative overflow-hidden group`}>
+                        {/* Background Poster Cover */}
+                        {card.poster && (
+                          <div 
+                            className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-100 mix-blend-luminosity transition-opacity duration-300"
+                            style={{ backgroundImage: `url(${card.poster})` }}
+                          />
+                        )}
+
+                        <div className="relative z-10 flex justify-between items-start w-full p-2 sm:p-3 bg-gradient-to-b from-black/80 to-transparent">
+                           <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1 flex items-center gap-0.5 sm:gap-1">
+                             <Sparkles className={`w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 ${getRarityColors(card.rarity).icon}`} />
+                             <span className={`text-[8px] sm:text-[10px] lg:text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
+                           </div>
+                           <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1">
+                             <span className="text-yellow-400 font-bold text-[10px] sm:text-xs lg:text-sm">⭐ {card.rating.toFixed(1)}</span>
+                           </div>
                         </div>
-                        <h2 className={`text-lg sm:text-xl font-black ${RARITY_COLORS[card.rarity].text} w-full text-center uppercase tracking-wider mb-2`}>
-                          {card.rarity}
-                        </h2>
-                        <p className={`${RARITY_COLORS[card.rarity].text} text-xs sm:text-sm text-center font-medium opacity-80`}>
-                          {card.name}
-                        </p>
+
+                        <div className="relative z-10 mt-auto p-2 sm:p-4 w-full flex flex-col items-center bg-gradient-to-t from-black/90 via-black/70 to-transparent">
+                           <ScrollableTitle title={card.name} baseClass="text-xs sm:text-sm lg:text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
+                           {card.year && (
+                             <span className="text-[10px] sm:text-xs text-white/70 font-bold mb-1">{card.year}</span>
+                           )}
+                           <div className="flex gap-1.5 sm:gap-2 w-full justify-center mt-1 sm:mt-2">
+                             {card.trailer && (
+                              <a href={card.trailer} target="_blank" rel="noopener noreferrer" className="bg-red-600 hover:bg-red-700 text-white text-[8px] sm:text-[10px] lg:text-xs font-bold py-1 px-1.5 sm:px-2 rounded shadow" onClick={(e) => e.stopPropagation()}>
+                                Trailer
+                              </a>
+                            )}
+                            {card.imdb_link && (
+                              <a href={card.imdb_link} target="_blank" rel="noopener noreferrer" className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-[8px] sm:text-[10px] lg:text-xs font-bold py-1 px-1.5 sm:px-2 rounded shadow" onClick={(e) => e.stopPropagation()}>
+                                IMDb
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
                     </div>
                   </motion.div>
                 ))}
               </div>
 
-              <button
-                onClick={() => setIsGridView(false)}
-                className="mt-16 group flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all"
-              >
-                <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                Close Review
-              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* TMDB ATTRIBUTION */}
+      <div className="absolute bottom-4 right-4 flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-40 pointer-events-auto">
+        <img 
+          src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" 
+          alt="TMDB Logo" 
+          className="h-3 sm:h-4 w-auto drop-shadow-md" 
+        />
+        <span className="text-[8px] sm:text-[10px] text-white/70 max-w-[120px] sm:max-w-[150px] leading-tight font-medium text-right drop-shadow-md">
+          This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </span>
+      </div>
     </div>
   );
 }
