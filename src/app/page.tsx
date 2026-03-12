@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { Sparkles, RefreshCcw, ChevronRight } from "lucide-react";
+import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X } from "lucide-react";
 import confetti from "canvas-confetti";
 
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
@@ -52,6 +52,7 @@ export default function Home() {
   const [cards, setCards] = useState<CardData[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
+  const [isGridView, setIsGridView] = useState(false);
 
   const topPartRef = useRef<HTMLDivElement>(null);
   const isOpenedRef = useRef(false);
@@ -151,6 +152,7 @@ export default function Home() {
     setCards([]);
     setActiveCardIndex(0);
     setFlippedCards({});
+    setIsGridView(false);
     controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
   };
 
@@ -324,7 +326,7 @@ export default function Home() {
         </div>
 
         {/* CONTROLS */}
-        <div className="h-24 flex items-center justify-center w-full">
+        <div className="h-24 flex items-center justify-center w-full z-40 mt-8">
           <AnimatePresence mode="wait">
             {packState === "revealing" && flippedCards[activeCardIndex] && (
               <motion.button
@@ -341,20 +343,84 @@ export default function Home() {
             )}
 
             {packState === "done" && (
-              <motion.button
-                key="refresh-btn"
+              <motion.div
+                key="done-controls"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                onClick={resetPack}
-                className="group flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-pink-500/25 transition-all transform hover:scale-105 active:scale-95"
+                className="flex flex-col sm:flex-row items-center gap-4"
               >
-                <RefreshCcw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
-                Open Another Pack
-              </motion.button>
+                <button
+                  onClick={() => setIsGridView(true)}
+                  className="group flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all"
+                >
+                  <LayoutGrid className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  View Details
+                </button>
+                <button
+                  onClick={resetPack}
+                  className="group flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-pink-500/25 transition-all transform hover:scale-105 active:scale-95"
+                >
+                  <RefreshCcw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
+                  Open Another
+                </button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
       </main>
+
+      {/* GRID OVERLAY */}
+      <AnimatePresence>
+        {isGridView && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed inset-0 z-50 bg-neutral-950/95 backdrop-blur-xl flex flex-col items-center p-6 sm:p-12 overflow-y-auto"
+          >
+            <div className="w-full max-w-5xl flex flex-col items-center pb-24">
+              <h2 className="text-3xl font-bold mb-12 mt-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                Pack Review
+              </h2>
+              <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
+                {cards.map((card, idx) => (
+                  <motion.div 
+                    key={`grid-${card.id}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="relative w-56 h-72 sm:w-64 sm:h-80"
+                  >
+                    <div className={`w-full h-full bg-gradient-to-br ${RARITY_COLORS[card.rarity].bg} rounded-xl p-1 shadow-2xl relative`}>
+                      <div className={`w-full h-full border-2 ${RARITY_COLORS[card.rarity].border} rounded-lg flex flex-col items-center bg-black/10 backdrop-blur-sm p-4 relative overflow-hidden`}>
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/30 rounded-full blur-2xl"></div>
+                        <div className="w-full h-1/2 bg-white/20 rounded-md mb-4 flex items-center justify-center">
+                          <Sparkles className={`w-12 h-12 sm:w-16 sm:h-16 ${RARITY_COLORS[card.rarity].icon}`} />
+                        </div>
+                        <h2 className={`text-lg sm:text-xl font-black ${RARITY_COLORS[card.rarity].text} w-full text-center uppercase tracking-wider mb-2`}>
+                          {card.rarity}
+                        </h2>
+                        <p className={`${RARITY_COLORS[card.rarity].text} text-xs sm:text-sm text-center font-medium opacity-80`}>
+                          {card.name}
+                        </p>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setIsGridView(false)}
+                className="mt-16 group flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all"
+              >
+                <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                Close Review
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
