@@ -1,4 +1,4 @@
-type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
 export interface CardData {
   id: string;
@@ -21,6 +21,7 @@ const getRarityByRating = (rating: number): Rarity => {
   if (rating >= 7.5) return "Epic";
   if (rating >= 6.5) return "Rare";
   if (rating >= 5.5) return "Uncommon";
+  if (rating <= 0.5) return "Junk";
   return "Common";
 };
 
@@ -138,6 +139,7 @@ export const fetchRandomPack = async (count: number = 5): Promise<CardData[]> =>
 
     // Sort by rarity
     const rarityOrder: Record<Rarity, number> = {
+      Junk: -1,
       Common: 0,
       Uncommon: 1,
       Rare: 2,

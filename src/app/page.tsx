@@ -6,7 +6,7 @@ import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv } from "luc
 import confetti from "canvas-confetti";
 
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
-type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 type SortOption = "name_asc" | "name_desc" | "rarity_high" | "rarity_low" | "year_new" | "year_old" | "rating_high" | "rating_low";
 type TypeFilter = "all" | "movie" | "tv";
 
@@ -43,6 +43,84 @@ const ScrollableTitle = ({ title, baseClass }: { title: string; baseClass: strin
   );
 };
 
+/** Animated green smoke + fly overlay for the Junk rarity */
+const JunkEffect = ({ onDone }: { onDone: () => void }) => {
+  useEffect(() => {
+    const t = setTimeout(onDone, 4000);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  const smokeParticles = Array.from({ length: 10 }, (_, i) => ({
+    id: i,
+    x: 25 + (i * 7) % 50,
+    delay: i * 0.22,
+    size: 45 + (i % 3) * 20,
+    drift: (i % 2 === 0 ? 1 : -1) * (20 + i * 5),
+  }));
+
+  // Card is 368px wide. Flies positioned in the top portion using fixed pixel coords.
+  const flies = [
+    { id: 0, left: 40,  top: 60,  delay: 0.0 },
+    { id: 1, left: 110, top: 40,  delay: 0.3 },
+    { id: 2, left: 180, top: 75,  delay: 0.55 },
+    { id: 3, left: 245, top: 35,  delay: 0.15 },
+    { id: 4, left: 305, top: 65,  delay: 0.45 },
+    { id: 5, left: 80,  top: 110, delay: 0.7 },
+  ];
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl z-50">
+      {/* Smoke puffs rising */}
+      {smokeParticles.map(p => (
+        <motion.div
+          key={p.id}
+          initial={{ opacity: 0, y: 0, x: 0, scale: 0.4 }}
+          animate={{
+            opacity: [0, 0.5, 0.25, 0],
+            y: [-10, -140 - p.id * 12],
+            x: [0, p.drift],
+            scale: [0.4, 2 + p.id * 0.08],
+          }}
+          transition={{ duration: 2.6, delay: p.delay, ease: "easeOut" }}
+          style={{
+            position: "absolute",
+            bottom: "22%",
+            left: `${p.x}%`,
+            width: p.size,
+            height: p.size,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(85,107,47,0.8) 0%, rgba(61,79,37,0.5) 55%, transparent 100%)",
+            filter: "blur(14px)",
+          }}
+        />
+      ))}
+
+      {/* Fly emojis buzzing over the top of the card */}
+      {flies.map(f => (
+        <motion.div
+          key={f.id}
+          initial={{ opacity: 0, x: 0, y: 0 }}
+          animate={{
+            x: [0, 14, -10, 8, -6, 12, 0],
+            y: [0, -12, 6, -8, 10, -4, 0],
+            opacity: [0, 1, 1, 1, 1, 1, 0],
+          }}
+          transition={{ duration: 3.2, delay: f.delay, ease: "easeInOut" }}
+          style={{
+            position: "absolute",
+            left: f.left,
+            top: f.top,
+            fontSize: "20px",
+            lineHeight: 1,
+          }}
+        >
+          🪰
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
 export default function Home() {
   const [packState, setPackState] = useState<PackState>("sealed");
   const [tearProgress, setTearProgress] = useState(0);
@@ -63,6 +141,8 @@ export default function Home() {
   const [packSize, setPackSize] = useState(5);
   const [showClearModal, setShowClearModal] = useState(false);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [junkEffectCardIdx, setJunkEffectCardIdx] = useState<number | null>(null);
+  const [collectionCount, setCollectionCount] = useState(0);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -88,6 +168,7 @@ export default function Home() {
       flip: "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3", // simple flip
       swoosh: "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3", // move
       sparkle: "https://assets.mixkit.co/active_storage/sfx/1998/1998-preview.mp3", // Cinematic magic whoosh
+      Junk: "https://assets.mixkit.co/active_storage/sfx/2046/2046-preview.mp3", // sad fail trumpet
       Common: "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3",
       Uncommon: "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3",
       Rare: "https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3",
@@ -129,12 +210,32 @@ export default function Home() {
         playSound(card.rarity);
 
         if (card.rarity === "Legendary") {
+          // Double burst from both sides
           confetti({
-            particleCount: 150,
-            spread: 80,
-            origin: { y: 0.6 },
+            particleCount: 250,
+            spread: 70,
+            angle: 60,
+            origin: { x: 0.2, y: 0.6 },
             colors: ["#FBBF24", "#F59E0B", "#D97706", "#FFFBEB"],
           });
+          setTimeout(() => {
+            confetti({
+              particleCount: 250,
+              spread: 70,
+              angle: 120,
+              origin: { x: 0.8, y: 0.6 },
+              colors: ["#FBBF24", "#F59E0B", "#D97706", "#FFFBEB"],
+            });
+          }, 200);
+        } else if (card.rarity === "Epic") {
+          confetti({
+            particleCount: 60,
+            spread: 50,
+            origin: { y: 0.6 },
+            colors: ["#C084FC", "#E879F9", "#A855F7", "#F3E8FF"],
+          });
+        } else if (card.rarity === "Junk") {
+          setJunkEffectCardIdx(activeCardIndex);
         }
       }
     }
@@ -160,14 +261,16 @@ export default function Home() {
       rarity: card.rarity ?? "Common",
     }));
 
+  // Load only the count from localStorage at startup — full data loads lazily on demand
   useEffect(() => {
-    const saved = localStorage.getItem("gacha_collection");
-    if (saved) {
-      try {
-        setCollection(sanitizeCards(JSON.parse(saved)));
-      } catch (e) {
-        console.error("Failed to parse local collection", e);
+    try {
+      const saved = localStorage.getItem("gacha_collection");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setCollectionCount(parsed.length);
       }
+    } catch (e) {
+      console.error("Failed to read collection count", e);
     }
   }, []);
 
@@ -182,8 +285,13 @@ export default function Home() {
     setIsLoading(true);
     const fetchedCards = await fetchRandomPack(packSize);
 
-    // Check which IDs are new
-    const existingIds = new Set(collection.map(c => c.id));
+    // Check which IDs are new — read directly from localStorage (collection state is lazy)
+    let existingIdsArr: string[] = [];
+    try {
+      const saved = localStorage.getItem("gacha_collection");
+      if (saved) existingIdsArr = (JSON.parse(saved) as CardData[]).map(c => c.id);
+    } catch { /* ignore */ }
+    const existingIds = new Set(existingIdsArr);
     const newlyFoundIds = new Set<string>();
     fetchedCards.forEach((c: CardData) => {
       if (!existingIds.has(c.id)) {
@@ -195,11 +303,15 @@ export default function Home() {
     setCards(fetchedCards);
     setIsLoading(false);
 
-    setCollection((prev) => {
-      const newCollection = [...prev, ...fetchedCards];
-      localStorage.setItem("gacha_collection", JSON.stringify(newCollection));
-      return newCollection;
-    });
+    // Save to localStorage and update count — don't load full array into state
+    const saved = localStorage.getItem("gacha_collection");
+    let existing: CardData[] = [];
+    try {
+      if (saved) existing = sanitizeCards(JSON.parse(saved));
+    } catch { /* ignore */ }
+    const newCollection = [...existing, ...fetchedCards];
+    localStorage.setItem("gacha_collection", JSON.stringify(newCollection));
+    setCollectionCount(newCollection.length);
 
     setPackState("opened");
     setTearProgress(100);
@@ -313,7 +425,7 @@ export default function Home() {
     }
   }, [isAutoMode, packState, activeCardIndex, flippedCards, handleOpen, handleFlip, handleNextCard]);
 
-  const resetPack = () => {
+  function resetPack() {
     isOpenedRef.current = false;
     setPackState("sealed");
     setTearProgress(0);
@@ -334,6 +446,7 @@ export default function Home() {
   const confirmClearCollection = () => {
     localStorage.removeItem("gacha_collection");
     setCollection([]);
+    setCollectionCount(0);
     setShowClearModal(false);
   };
 
@@ -368,6 +481,7 @@ export default function Home() {
 
   const getRarityColors = (rarity: Rarity) => {
     const colors: Record<Rarity, { bg: string; text: string; icon: string; border: string }> = {
+      Junk: { bg: "from-[#4a5c2f] via-[#6b7c3a] to-[#3d4f25]", text: "text-lime-100", icon: "text-lime-300", border: "border-lime-900/50" },
       Common: { bg: "from-slate-300 via-gray-200 to-slate-400", text: "text-slate-800", icon: "text-slate-100", border: "border-slate-100/50" },
       Uncommon: { bg: "from-green-300 via-emerald-200 to-green-400", text: "text-green-900", icon: "text-green-100", border: "border-green-100/50" },
       Rare: { bg: "from-blue-300 via-cyan-200 to-blue-400", text: "text-blue-900", icon: "text-blue-100", border: "border-blue-100/50" },
@@ -378,6 +492,7 @@ export default function Home() {
   };
 
   const rarityOrder: Record<Rarity, number> = {
+    Junk: -1,
     Common: 0,
     Uncommon: 1,
     Rare: 2,
@@ -454,12 +569,20 @@ export default function Home() {
               )}
             </button>
             <button
-              onClick={() => { setCollection(prev => sanitizeCards(prev)); setIsCollectionView(true); }}
+              onClick={() => {
+                // Lazy-load collection from localStorage only when opened
+                try {
+                  const saved = localStorage.getItem("gacha_collection");
+                  if (saved) setCollection(sanitizeCards(JSON.parse(saved)));
+                  else setCollection([]);
+                } catch { setCollection([]); }
+                setIsCollectionView(true);
+              }}
               className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold py-2 px-3 sm:px-4 rounded-full shadow-lg transition-all text-xs sm:text-sm flex items-center gap-1 sm:gap-2"
             >
               <LayoutGrid className="w-4 h-4" />
               <span className="hidden sm:inline">Collection</span>
-              <span className="bg-pink-600/80 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold">{collection.length}</span>
+              <span className="bg-pink-600/80 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold">{collectionCount}</span>
             </button>
           </div>
         </div>
@@ -470,6 +593,7 @@ export default function Home() {
           <AnimatePresence>
             {(packState === "revealing" || packState === "done") && cards.map((card, idx) => {
               if (packState === "revealing" && idx !== activeCardIndex) return null;
+              if (isAutoMode && packState === "done") return null;
 
               const isFlipped = flippedCards[idx] || packState === "done";
               const zIndex = packState === "done" ? cards.length - idx : 20;
@@ -575,31 +699,28 @@ export default function Home() {
                         <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/80 via-black/30 to-transparent" />
                         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
 
+
                         {/* Top Area: Rarity & Rating */}
                         <div className="relative z-10 flex justify-between items-start w-full p-3">
+                          {/* Left: Rarity */}
                           <div className="flex flex-col gap-1">
                             <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
                               <Sparkles className={`w-4 h-4 ${getRarityColors(card.rarity).icon}`} />
                               <span className={`text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
                             </div>
-                            {newCardIds.has(card.id) && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg uppercase tracking-tighter w-fit"
-                              >
-                                New!
-                              </motion.div>
-                            )}
-                            <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1 mt-1">
+                          </div>
+                          {/* Right: Rating + type tag below */}
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="bg-black/50 backdrop-blur rounded px-2 py-1">
+                              <span className="text-yellow-400 font-bold text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
+                            </div>
+                            <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
                               {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : <Tv className="w-3 h-3 text-slate-300" />}
                               <span className="text-[10px] font-bold uppercase text-slate-300">{card.type}</span>
                             </div>
                           </div>
-                          <div className="bg-black/50 backdrop-blur rounded px-2 py-1">
-                            <span className="text-yellow-400 font-bold text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
-                          </div>
                         </div>
+
 
                         {/* Bottom Area: Title & Links */}
                         <div className="relative z-10 mt-auto p-4 w-full flex flex-col items-center">
@@ -619,7 +740,29 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
+
+                      {/* NEW! Wax-seal stamp – outside overflow-hidden so it shows on top */}
+                      {newCardIds.has(card.id) && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -20 }}
+                          animate={{ scale: 1, rotate: -15 }}
+                          transition={{ type: "spring", bounce: 0.5, delay: 0.3 }}
+                          className="absolute -top-5 -left-5 z-30 w-11 h-11 rounded-full bg-red-600 border-[3px] border-red-300/70 flex items-center justify-center"
+                          style={{ boxShadow: "0 0 0 2px rgba(255,80,80,0.25), 0 4px 14px rgba(180,0,0,0.6)" }}
+                        >
+                          <span className="text-white text-[9px] font-black uppercase tracking-tighter text-center leading-tight">
+                            NEW!
+                          </span>
+                        </motion.div>
+                      )}
+
                     </div>
+
+                    {/* Junk smoke + flies effect */}
+                    {card.rarity === "Junk" && junkEffectCardIdx === idx && isFlipped && (
+                      <JunkEffect onDone={() => setJunkEffectCardIdx(null)} />
+                    )}
+
                   </motion.div>
                 </motion.div>
               );
