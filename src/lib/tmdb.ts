@@ -10,7 +10,7 @@ export interface CardData {
   trailer?: string;
   imdb_link?: string;
   year?: number;
-  type: "movie" | "tv" | "game";
+  type: "movie" | "tv" | "game" | "music";
   platforms?: string[];
 }
 
