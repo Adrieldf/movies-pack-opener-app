@@ -2,8 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv } from "lucide-react";
+import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { useTwitchChat, TwitchConfig } from "../lib/useTwitchChat";
+import { useGameAudio, SoundType, SOUND_LABELS, SOUND_ACCENT, DEFAULT_SOUND_URLS } from "../lib/useGameAudio";
 
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
 type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
@@ -121,6 +123,53 @@ const JunkEffect = ({ onDone }: { onDone: () => void }) => {
   );
 };
 
+/** A single row in the Sound Settings modal. */
+const SoundRow = ({
+  type,
+  isCustom,
+  onPreview,
+  onUpload,
+  onReset,
+}: {
+  type: import("../lib/useGameAudio").SoundType;
+  isCustom: boolean;
+  onPreview: () => void;
+  onUpload: () => void;
+  onReset: () => void;
+}) => (
+  <div className="flex items-center gap-2 px-3 py-2.5 bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+    <span className={`w-2 h-2 rounded-full shrink-0 ${SOUND_ACCENT[type]}`} />
+    <span className="text-white/75 text-xs font-medium flex-1 min-w-0 truncate">{SOUND_LABELS[type]}</span>
+    {isCustom ? (
+      <span className="text-[9px] bg-purple-600/30 border border-purple-500/30 text-purple-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">
+        Custom
+      </span>
+    ) : (
+      <span className="text-[9px] text-white/20 font-semibold uppercase">Default</span>
+    )}
+    {/* Preview */}
+    <button
+      onClick={onPreview}
+      title="Preview"
+      className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all text-xs"
+    >▶</button>
+    {/* Upload */}
+    <button
+      onClick={onUpload}
+      title="Upload custom sound"
+      className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-purple-600/50 text-white/60 hover:text-white transition-all text-xs"
+    >↑</button>
+    {/* Reset – only visible when custom */}
+    {isCustom && (
+      <button
+        onClick={onReset}
+        title="Reset to default"
+        className="w-7 h-7 flex items-center justify-center rounded-lg bg-red-900/30 hover:bg-red-700/50 text-red-400 hover:text-white transition-all text-xs"
+      >✕</button>
+    )}
+  </div>
+);
+
 export default function Home() {
   const [packState, setPackState] = useState<PackState>("sealed");
   const [tearProgress, setTearProgress] = useState(0);
@@ -135,7 +184,10 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortOption>("rarity_high");
   const [gridSize, setGridSize] = useState<"sm" | "md" | "lg">("md");
   const [showTrailerIdx, setShowTrailerIdx] = useState<number | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const { isMuted, setIsMuted, playSound, customSounds, setCustomSound, resetSound, previewSound } = useGameAudio();
+  const [showSoundModal, setShowSoundModal] = useState(false);
+  const [uploadTarget, setUploadTarget] = useState<SoundType | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [newCardIds, setNewCardIds] = useState<Set<string>>(new Set());
   const [isAutoMode, setIsAutoMode] = useState(false);
   const [packSize, setPackSize] = useState(5);
@@ -143,6 +195,17 @@ export default function Home() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [junkEffectCardIdx, setJunkEffectCardIdx] = useState<number | null>(null);
   const [collectionCount, setCollectionCount] = useState(0);
+
+  // ── Twitch ────────────────────────────────────────────────────────────────
+  const { status: twitchStatus, config: twitchConfig, connect: twitchConnect, disconnect: twitchDisconnect, sendMessage: twitchSend } = useTwitchChat();
+  const [showTwitchModal, setShowTwitchModal] = useState(false);
+  const [twitchForm, setTwitchForm] = useState<TwitchConfig>({ channel: "", username: "", token: "" });
+  const twitchNotified = useRef<Set<number>>(new Set());
+
+  // Populate form from persisted config when modal opens
+  useEffect(() => {
+    if (showTwitchModal) setTwitchForm(twitchConfig);
+  }, [showTwitchModal, twitchConfig]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -160,46 +223,19 @@ export default function Home() {
     }
   }, []);
 
-  const playSound = useCallback((type: "tear" | "flip" | "sparkle" | "swoosh" | Rarity) => {
-    if (isMuted) return;
-
-    const urls = {
-      tear: "https://assets.mixkit.co/active_storage/sfx/147/147-preview.mp3", // tear
-      flip: "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3", // simple flip
-      swoosh: "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3", // move
-      sparkle: "https://assets.mixkit.co/active_storage/sfx/1998/1998-preview.mp3", // Cinematic magic whoosh
-      Junk: "https://assets.mixkit.co/active_storage/sfx/2046/2046-preview.mp3", // sad fail trumpet
-      Common: "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3",
-      Uncommon: "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3",
-      Rare: "https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3",
-      Epic: "https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3",
-      Legendary: "https://assets.mixkit.co/active_storage/sfx/1998/1998-preview.mp3"
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadTarget) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setCustomSound(uploadTarget, dataUrl);
     };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }, [uploadTarget, setCustomSound]);
 
-    const audio = new Audio(urls[type as keyof typeof urls] || urls.flip);
-
-    let baseVolume = 0.08;
-    if (type === "Legendary" || type === "sparkle") baseVolume = 0.4; // High impact
-    if (type === "Epic") baseVolume = 0.15;
-    if (type === "Rare") baseVolume = 0.12;
-
-    audio.volume = baseVolume;
-    audio.play().catch(e => console.log("Audio play blocked", e));
-
-    const duration = (type === "Legendary" || type === "sparkle") ? 3000 : 500;
-    setTimeout(() => {
-      const fadeOut = setInterval(() => {
-        if (audio.volume > 0.01) {
-          audio.volume -= 0.01;
-        } else {
-          audio.pause();
-          clearInterval(fadeOut);
-        }
-      }, 20);
-    }, duration);
-  }, [isMuted]);
-
-  // Effect to sync reveal sounds with flip state
+  // Effect to sync reveal sounds AND Twitch chat messages with flip state
   useEffect(() => {
     if (packState !== "revealing") return;
 
@@ -237,9 +273,21 @@ export default function Home() {
         } else if (card.rarity === "Junk") {
           setJunkEffectCardIdx(activeCardIndex);
         }
+
+        // ── Send to Twitch chat ──────────────────────────────────────
+        if (twitchStatus === "connected" && !twitchNotified.current.has(activeCardIndex)) {
+          twitchNotified.current.add(activeCardIndex);
+          const rarityEmoji: Record<Rarity, string> = {
+            Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
+          };
+          const typeLabel = card.type === "movie" ? "🎬 Movie" : "📺 TV Series";
+          const stars = "⭐".repeat(Math.round(card.rating / 2)); // scale 0-10 → 0-5 stars
+          const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+          twitchSend(msg);
+        }
       }
     }
-  }, [flippedCards, activeCardIndex, packState, cards, playSound]);
+  }, [flippedCards, activeCardIndex, packState, cards, playSound, twitchStatus, twitchSend]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -436,6 +484,7 @@ export default function Home() {
     setShowTrailerIdx(null);
     setNewCardIds(new Set());
     playedRevealSounds.current.clear();
+    twitchNotified.current.clear();
     controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
   };
 
@@ -548,6 +597,14 @@ export default function Home() {
 
       <main className="relative z-10 w-full max-w-md mx-auto p-6 h-[100dvh] flex flex-col items-center justify-center">
         <div className="absolute top-6 w-full px-6 flex justify-between items-center z-50 pointer-events-none left-0 right-0 max-w-md">
+          {/* Hidden file input for custom sound uploads */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 pointer-events-auto">
             Pack Opener
           </h1>
@@ -557,6 +614,42 @@ export default function Home() {
                 Auto Mode
               </div>
             )}
+
+            {/* Sound Settings button */}
+            <button
+              id="sound-settings-btn"
+              onClick={() => setShowSoundModal(true)}
+              title="Sound Settings"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full shadow-lg transition-all group"
+            >
+              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+
+            {/* Twitch connect button */}
+            <button
+              id="twitch-settings-btn"
+              onClick={() => setShowTwitchModal(true)}
+              title={twitchStatus === "connected" ? `Connected to #${twitchConfig.channel}` : "Connect to Twitch"}
+              className={`relative bg-white/10 hover:bg-white/20 backdrop-blur-md border text-white p-2 rounded-full shadow-lg transition-all group ${
+                twitchStatus === "connected" ? "border-purple-500/70" :
+                twitchStatus === "connecting" ? "border-yellow-500/70" :
+                twitchStatus === "error" ? "border-red-500/70" :
+                "border-white/20"
+              }`}
+            >
+              {/* Twitch logo SVG */}
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+              </svg>
+              {/* Status dot */}
+              <span className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full border border-neutral-900 ${
+                twitchStatus === "connected" ? "bg-purple-400" :
+                twitchStatus === "connecting" ? "bg-yellow-400 animate-pulse" :
+                twitchStatus === "error" ? "bg-red-500" :
+                "bg-white/20"
+              }`} />
+            </button>
+
             <button
               onClick={() => setIsMuted(!isMuted)}
               className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full shadow-lg transition-all group"
@@ -1195,6 +1288,233 @@ export default function Home() {
           This product uses the TMDB API but is not endorsed or certified by TMDB.
         </span>
       </div>
+
+      {/* ── SOUND SETTINGS MODAL ───────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showSoundModal && (
+          <motion.div
+            key="sound-modal-backdrop"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.80)", backdropFilter: "blur(10px)" }}
+            onClick={() => setShowSoundModal(false)}
+          >
+            <motion.div
+              key="sound-modal-box"
+              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 20 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+              className="relative bg-neutral-900 border border-white/10 rounded-2xl shadow-2xl p-5 sm:p-7 w-full max-w-sm flex flex-col gap-4 max-h-[90dvh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                  <Volume2 className="w-5 h-5 text-white/80" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Sound Settings</h3>
+                  <p className="text-white/40 text-xs">Upload custom SFX per rarity</p>
+                </div>
+                <button onClick={() => setShowSoundModal(false)} className="ml-auto text-white/40 hover:text-white transition-colors p-1">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Pack Actions group */}
+              <div>
+                <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Pack Actions</p>
+                <div className="flex flex-col divide-y divide-white/5 rounded-xl overflow-hidden border border-white/10">
+                  {(["tear", "flip", "swoosh", "sparkle"] as SoundType[]).map((type) => (
+                    <SoundRow
+                      key={type}
+                      type={type}
+                      isCustom={!!customSounds[type]}
+                      onPreview={() => previewSound(type)}
+                      onUpload={() => { setUploadTarget(type); fileInputRef.current?.click(); }}
+                      onReset={() => resetSound(type)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Rarity Reveals group */}
+              <div>
+                <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Rarity Reveals</p>
+                <div className="flex flex-col divide-y divide-white/5 rounded-xl overflow-hidden border border-white/10">
+                  {(["Junk", "Common", "Uncommon", "Rare", "Epic", "Legendary"] as SoundType[]).map((type) => (
+                    <SoundRow
+                      key={type}
+                      type={type}
+                      isCustom={!!customSounds[type]}
+                      onPreview={() => previewSound(type)}
+                      onUpload={() => { setUploadTarget(type); fileInputRef.current?.click(); }}
+                      onReset={() => resetSound(type)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-white/20 text-[10px] text-center">
+                MP3 · WAV · OGG · M4A supported. Custom sounds are saved locally in your browser.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── TWITCH SETTINGS MODAL ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {showTwitchModal && (
+          <motion.div
+            key="twitch-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+            style={{ backgroundColor: "rgba(0,0,0,0.80)", backdropFilter: "blur(10px)" }}
+            onClick={() => setShowTwitchModal(false)}
+          >
+            <motion.div
+              key="twitch-modal-box"
+              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 20 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+              className="relative bg-neutral-900 border border-white/10 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full flex flex-col gap-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Twitch Integration</h3>
+                  <p className="text-white/50 text-xs">Post card reveals to your chat</p>
+                </div>
+                <button
+                  onClick={() => setShowTwitchModal(false)}
+                  className="ml-auto text-white/40 hover:text-white transition-colors p-1"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Status badge */}
+              <div className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold border ${
+                twitchStatus === "connected" ? "bg-purple-900/30 border-purple-500/40 text-purple-300" :
+                twitchStatus === "connecting" ? "bg-yellow-900/30 border-yellow-500/40 text-yellow-300" :
+                twitchStatus === "error" ? "bg-red-900/30 border-red-500/40 text-red-300" :
+                "bg-white/5 border-white/10 text-white/40"
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${
+                  twitchStatus === "connected" ? "bg-purple-400" :
+                  twitchStatus === "connecting" ? "bg-yellow-400 animate-pulse" :
+                  twitchStatus === "error" ? "bg-red-400" :
+                  "bg-white/20"
+                }`} />
+                {twitchStatus === "connected" && `Connected to #${twitchConfig.channel}`}
+                {twitchStatus === "connecting" && "Connecting…"}
+                {twitchStatus === "error" && "Auth failed — check your token"}
+                {twitchStatus === "disconnected" && "Not connected"}
+              </div>
+
+              {/* Form */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Channel Name</label>
+                  <input
+                    id="twitch-channel"
+                    type="text"
+                    placeholder="your_channel"
+                    value={twitchForm.channel}
+                    onChange={e => setTwitchForm(f => ({ ...f, channel: e.target.value }))}
+                    className="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/30 transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-white/60 text-xs font-semibold uppercase tracking-wider">Twitch Username</label>
+                  <input
+                    id="twitch-username"
+                    type="text"
+                    placeholder="your_username"
+                    value={twitchForm.username}
+                    onChange={e => setTwitchForm(f => ({ ...f, username: e.target.value }))}
+                    className="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/30 transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-white/60 text-xs font-semibold uppercase tracking-wider flex items-center justify-between">
+                    OAuth Token
+                    <a
+                      href="https://twitchapps.com/tmi/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-purple-400 hover:text-purple-300 font-bold normal-case tracking-normal text-[11px] transition-colors"
+                    >
+                      Get token ↗
+                    </a>
+                  </label>
+                  <input
+                    id="twitch-token"
+                    type="password"
+                    placeholder="oauth:xxxxxxxxxxxxxx"
+                    value={twitchForm.token}
+                    onChange={e => {
+                      // Strip "oauth:" prefix if pasted with it
+                      const val = e.target.value.replace(/^oauth:/i, "");
+                      setTwitchForm(f => ({ ...f, token: val }));
+                    }}
+                    className="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/30 transition-all font-mono"
+                  />
+                  <p className="text-white/30 text-[10px] leading-relaxed">
+                    Stored only in your browser&apos;s localStorage. Never sent anywhere except directly to Twitch.
+                  </p>
+                </div>
+              </div>
+
+              {/* Message preview */}
+              <div className="bg-black/30 border border-white/10 rounded-xl px-3 py-2">
+                <p className="text-white/30 text-[10px] uppercase font-semibold mb-1">Preview message</p>
+                <p className="text-white/70 text-xs font-mono break-all">
+                  🌟 [LEGENDARY] Inception | 🎬 Movie | ⭐ 8.8/10 ⭐⭐⭐⭐⭐
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                {twitchStatus === "connected" ? (
+                  <button
+                    id="twitch-disconnect-btn"
+                    onClick={() => { twitchDisconnect(); setShowTwitchModal(false); }}
+                    className="flex-1 bg-red-900/40 hover:bg-red-700/50 border border-red-500/40 text-red-300 hover:text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm"
+                  >
+                    Disconnect
+                  </button>
+                ) : (
+                  <button
+                    id="twitch-connect-btn"
+                    onClick={() => {
+                      if (!twitchForm.channel || !twitchForm.username || !twitchForm.token) return;
+                      twitchConnect(twitchForm);
+                    }}
+                    disabled={!twitchForm.channel || !twitchForm.username || !twitchForm.token || twitchStatus === "connecting"}
+                    className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-purple-900/30 transition-all text-sm flex items-center justify-center gap-2"
+                  >
+                    {twitchStatus === "connecting" ? (
+                      <><RefreshCcw className="w-4 h-4 animate-spin" /> Connecting…</>
+                    ) : "Connect"}
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
