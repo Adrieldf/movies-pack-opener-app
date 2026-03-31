@@ -70,18 +70,25 @@ export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[
       urls.map(url => fetch(url).then(res => res.ok ? res.json() : { results: [] }))
     );
 
+    // Shuffle the master list first so any track from an album has an equal chance to be the one picked
     const allSongs = responses.flatMap(data => data.results || []);
     if (allSongs.length === 0) return [];
 
-    const uniqueMap = new Map();
-    allSongs.forEach(item => {
-      if (!uniqueMap.has(item.trackId)) uniqueMap.set(item.trackId, item);
-    });
-    
-    const uniquePool = Array.from(uniqueMap.values());
-    for (let i = uniquePool.length - 1; i > 0; i--) {
+    for (let i = allSongs.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [uniquePool[i], uniquePool[j]] = [uniquePool[j], uniquePool[i]];
+      [allSongs[i], allSongs[j]] = [allSongs[j], allSongs[i]];
+    }
+
+    const uniqueAlbums = new Set();
+    const uniquePool: any[] = [];
+
+    for (const item of allSongs) {
+      // Use collectionId for albums, fallback to collectionName, fallback to trackId if it's a true singleton
+      const albumKey = item.collectionId || item.collectionName || item.trackId;
+      if (!uniqueAlbums.has(albumKey)) {
+        uniqueAlbums.add(albumKey);
+        uniquePool.push(item);
+      }
     }
 
     const selectedItems = uniquePool.slice(0, Math.min(count, uniquePool.length));
