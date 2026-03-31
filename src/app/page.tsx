@@ -339,7 +339,8 @@ export default function Home() {
           };
           const typeLabel = card.type === "movie" ? "🎬 Movie" : card.type === "game" ? "🎮 Game" : card.type === "music" ? "🎵 Music" : "📺 TV Series";
           const stars = "⭐".repeat(Math.round(card.rating / 2)); // scale 0-10 → 0-5 stars
-          const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+          const musicInfo = card.type === "music" && card.description ? ` - ${card.description}` : "";
+          const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${musicInfo} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
           twitchSend(msg);
         }
       }
@@ -532,11 +533,11 @@ export default function Home() {
         }
         const timer = setTimeout(() => {
           handleNextCard();
-        }, 6000);
+        }, cards[activeCardIndex]?.type === "music" ? 12000 : 6000);
         return () => clearTimeout(timer);
       }
     }
-  }, [isAutoMode, packState, activeCardIndex, flippedCards, handleOpen, handleFlip, handleNextCard]);
+  }, [isAutoMode, packState, activeCardIndex, flippedCards, handleOpen, handleFlip, handleNextCard, cards]);
 
   function resetPack() {
     isOpenedRef.current = false;
