@@ -99,7 +99,12 @@ export function useTwitchChat() {
 
   const sendMessage = useCallback((message: string) => {
     if (!ws.current || ws.current.readyState !== WebSocket.OPEN) return;
-    ws.current.send(`PRIVMSG #${config.channel.toLowerCase()} :${message}`);
+    const channel = config.channel.toLowerCase();
+    setTimeout(() => {
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(`PRIVMSG #${channel} :${message}`);
+      }
+    }, 2000);
   }, [config.channel]);
 
   // Auto-connect if config is available on mount
