@@ -1,31 +1,59 @@
 import { CardData, Rarity } from "./tmdb";
 
+const LASTFM_API_KEY = process.env.NEXT_PUBLIC_LASTFM_API_KEY || "";
+
 const getRarityByRating = (rating10: number): Rarity => {
-  if (rating10 >= 9.0) return "Legendary";
-  if (rating10 >= 8.2) return "Epic";
-  if (rating10 >= 7.2) return "Rare";
+  if (rating10 >= 9.2) return "Legendary";
+  if (rating10 >= 8.5) return "Epic";
+  if (rating10 >= 7.5) return "Rare";
   if (rating10 >= 6.0) return "Uncommon";
-  if (rating10 <= 1.0) return "Junk";
+  if (rating10 <= 1.5) return "Junk";
   return "Common";
 };
 
-const getRatingFromId = (id: number): number => {
-  // Deterministic pseudo-random based on ID to ensure the same track always gets the same rating
+const getRandomRating = (id: number): number => {
   const seededRandom = Math.abs(Math.sin(id * 10.51) * 10000);
   const rand0to1 = seededRandom - Math.floor(seededRandom);
-  return Number((1.0 + rand0to1 * 9.0).toFixed(1)); 
+  return Number((2.0 + rand0to1 * 8.0).toFixed(1)); 
 };
+
+/** Use Last.fm to get a real-world popularity score */
+const getRealMusicRating = async (artist: string, track: string, id: number): Promise<{ rating: number; listeners: number }> => {
+    if (!LASTFM_API_KEY) return { rating: getRandomRating(id), listeners: 0 };
+
+    try {
+        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&format=json`;
+        const res = await fetch(url);
+        if (!res.ok) return { rating: getRandomRating(id), listeners: 0 };
+        
+        const data = await res.json();
+        const listeners = parseInt(data.track?.listeners || "0", 10);
+        
+        if (listeners === 0) return { rating: getRandomRating(id), listeners: 0 };
+
+        /** 
+         * LOGARITHMIC SCALING 
+         */
+        const logScore = Math.log10(listeners);
+        let rating = (logScore / 7) * 10; 
+        
+        return { 
+          rating: Number(Math.min(10, Math.max(1, rating)).toFixed(1)), 
+          listeners 
+        };
+    } catch (e) {
+        return { rating: getRandomRating(id), listeners: 0 };
+    }
+}
 
 export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[]> => {
   const terms = [
-    "rock", "pop", "hip hop", "jazz", "electronic", "classical", 
-    "hits", "indie", "metal", "r&b", "soul", "reggae", "viral", 
-    "2020", "2010s", "80s", "90s", "soundtrack", "synthwave"
+    "hits", "top charts", "classic rock", "r&b", "90s house", "80s synth", 
+    "viral", "soundtrack", "top tracks", "pop 2024", "hip hop", "alternative"
   ];
   
   try {
     const urls = [];
-    // iTunes limits to 50 commonly without issues, getting a few pages of random stuff
     for(let i = 0; i < Math.ceil(count / 10); i++) {
         const randomTerm = terms[Math.floor(Math.random() * terms.length)];
         urls.push(`https://itunes.apple.com/search?term=${randomTerm}&media=music&entity=song&limit=50`);
@@ -40,14 +68,10 @@ export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[
 
     const uniqueMap = new Map();
     allSongs.forEach(item => {
-      // Avoid duplicate tracks
-      if (!uniqueMap.has(item.trackId)) {
-        uniqueMap.set(item.trackId, item);
-      }
+      if (!uniqueMap.has(item.trackId)) uniqueMap.set(item.trackId, item);
     });
     
     const uniquePool = Array.from(uniqueMap.values());
-
     for (let i = uniquePool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [uniquePool[i], uniquePool[j]] = [uniquePool[j], uniquePool[i]];
@@ -55,15 +79,12 @@ export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[
 
     const selectedItems = uniquePool.slice(0, Math.min(count, uniquePool.length));
 
-    const musicCards: CardData[] = selectedItems.map((item: any): CardData => {
+    const musicCards: CardData[] = await Promise.all(selectedItems.map(async (item: any): Promise<CardData> => {
       let year: number | undefined;
-      if (item.releaseDate) {
-        year = parseInt(item.releaseDate.split('-')[0], 10);
-      }
+      if (item.releaseDate) year = parseInt(item.releaseDate.split('-')[0], 10);
 
-      const rating10 = getRatingFromId(item.trackId || item.collectionId);
+      const { rating: rating10, listeners } = await getRealMusicRating(item.artistName, item.trackName, item.trackId || item.collectionId);
 
-      // iTunes gives artworkUrl100, we want high res (e.g., 600x600 or 1000x1000 for crisp rendering)
       const poster = item.artworkUrl100?.replace('100x100bb', '600x600bb') || "";
 
       return {
@@ -73,23 +94,16 @@ export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[
         description: `${item.artistName} • ${item.collectionName || "Single"}`,
         poster: poster,
         rating: rating10,
-        trailer: item.previewUrl || "", // iTunes song endpoint almost always has a 30s preview URL!
+        listeners: listeners,
+        trailer: item.previewUrl || "",
         imdb_link: item.trackViewUrl || item.collectionViewUrl,
         year: year,
         type: "music",
-        platforms: item.primaryGenreName ? [item.primaryGenreName] : [] // Display genre as the 'platform' tag!
+        platforms: item.primaryGenreName ? [item.primaryGenreName] : []
       };
-    });
+    }));
 
-    const rarityOrder: Record<Rarity, number> = {
-      Junk: -1,
-      Common: 0,
-      Uncommon: 1,
-      Rare: 2,
-      Epic: 3,
-      Legendary: 4,
-    };
-
+    const rarityOrder: Record<Rarity, number> = { Junk: -1, Common: 0, Uncommon: 1, Rare: 2, Epic: 3, Legendary: 4 };
     return musicCards.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
 
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2, Gamepad2, Laptop, Smartphone, Monitor, Disc, Music, Headphones } from "lucide-react";
+import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2, Gamepad2, Laptop, Smartphone, Monitor, Disc, Music, Headphones, Users } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useTwitchChat, TwitchConfig } from "../lib/useTwitchChat";
 import { useGameAudio, SoundType, SOUND_LABELS, SOUND_ACCENT, DEFAULT_SOUND_URLS } from "../lib/useGameAudio";
@@ -211,6 +211,13 @@ const PackSelector = ({ onSelect }: { onSelect: (type: "movies" | "games" | "mus
   );
 };
 
+export const formatListeners = (num?: number) => {
+  if (!num) return "0";
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+  return num.toString();
+};
+
 export default function Home() {
   const [packState, setPackState] = useState<PackState>("sealed");
   const [packType, setPackType] = useState<"movies" | "games" | "music" | null>(null);
@@ -282,6 +289,25 @@ export default function Home() {
     e.target.value = "";
   }, [uploadTarget, setCustomSound]);
 
+  const fadeOutPreviewAudio = useCallback(() => {
+    if (!currentPreviewAudio.current) return;
+    const audio = currentPreviewAudio.current;
+    currentPreviewAudio.current = null;
+    let fadeStep = 0;
+    const fade = setInterval(() => {
+      fadeStep++;
+      if (fadeStep >= 10 || audio.volume <= 0) {
+        clearInterval(fade);
+        audio.pause();
+        audio.volume = 0;
+      } else {
+        try {
+          audio.volume = Math.max(0, audio.volume - 0.05);
+        } catch { /* ignore edge case where audio is already disposed */ }
+      }
+    }, 100);
+  }, []);
+
   // Effect to sync reveal sounds AND Twitch chat messages with flip state
   useEffect(() => {
     if (packState !== "revealing") return;
@@ -294,9 +320,7 @@ export default function Home() {
 
         // Auto-play music preview
         if (card.type === "music" && card.trailer && !isMuted) {
-          if (currentPreviewAudio.current) {
-            currentPreviewAudio.current.pause();
-          }
+          fadeOutPreviewAudio();
           currentPreviewAudio.current = new Audio(card.trailer);
           currentPreviewAudio.current.volume = 0.5;
           currentPreviewAudio.current.play().catch(() => {});
@@ -340,7 +364,8 @@ export default function Home() {
           const typeLabel = card.type === "movie" ? "🎬 Movie" : card.type === "game" ? "🎮 Game" : card.type === "music" ? "🎵 Music" : "📺 TV Series";
           const stars = "⭐".repeat(Math.round(card.rating / 2)); // scale 0-10 → 0-5 stars
           const musicInfo = card.type === "music" && card.description ? ` - ${card.description}` : "";
-          const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${musicInfo} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+          const listenerInfo = card.type === "music" && card.listeners ? ` | 🎧 ${formatListeners(card.listeners)} listens` : "";
+          const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${musicInfo}${listenerInfo} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
           twitchSend(msg);
         }
       }
@@ -492,6 +517,7 @@ export default function Home() {
   };
 
   const handleNextCard = () => {
+    fadeOutPreviewAudio();
     if (activeCardIndex < cards.length - 1) {
       setActiveCardIndex(prev => prev + 1);
     } else {
@@ -500,6 +526,7 @@ export default function Home() {
   };
 
   const handleSkipAll = () => {
+    fadeOutPreviewAudio();
     const allFlipped: Record<number, boolean> = {};
     cards.forEach((_, idx) => {
       allFlipped[idx] = true;
@@ -531,13 +558,20 @@ export default function Home() {
           // Keep the last card visible indefinitely in auto mode
           return;
         }
+        const duration = cards[activeCardIndex]?.type === "music" ? 10000 : 6000;
+        const fadeTimer = setTimeout(() => {
+          fadeOutPreviewAudio();
+        }, duration - 1000);
         const timer = setTimeout(() => {
           handleNextCard();
-        }, cards[activeCardIndex]?.type === "music" ? 12000 : 6000);
-        return () => clearTimeout(timer);
+        }, duration);
+        return () => {
+          clearTimeout(fadeTimer);
+          clearTimeout(timer);
+        };
       }
     }
-  }, [isAutoMode, packState, activeCardIndex, flippedCards, handleOpen, handleFlip, handleNextCard, cards]);
+  }, [isAutoMode, packState, activeCardIndex, flippedCards, handleOpen, handleFlip, handleNextCard, fadeOutPreviewAudio, cards]);
 
   function resetPack() {
     isOpenedRef.current = false;
@@ -551,10 +585,7 @@ export default function Home() {
     setNewCardIds(new Set());
     playedRevealSounds.current.clear();
     twitchNotified.current.clear();
-    if (currentPreviewAudio.current) {
-      currentPreviewAudio.current.pause();
-      currentPreviewAudio.current = null;
-    }
+    fadeOutPreviewAudio();
     controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
   };
 
@@ -905,6 +936,14 @@ export default function Home() {
                               {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : card.type === "game" ? <Gamepad2 className="w-3 h-3 text-slate-300" /> : card.type === "music" ? <Headphones className="w-3 h-3 text-slate-300" /> : <Tv className="w-3 h-3 text-slate-300" />}
                               <span className="text-[10px] font-bold uppercase text-slate-300">{card.type}</span>
                             </div>
+                            {card.type === "music" && card.listeners !== undefined && (
+                              <div className="bg-green-950/40 backdrop-blur border border-green-500/20 rounded px-2 py-0.5 mt-0.5 flex items-center gap-1 self-end">
+                                <Users className="w-2.5 h-2.5 text-green-400" />
+                                <span className="text-[9px] font-black text-green-300 tracking-wider">
+                                  {formatListeners(card.listeners)}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         

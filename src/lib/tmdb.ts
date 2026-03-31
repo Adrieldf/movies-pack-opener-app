@@ -12,6 +12,7 @@ export interface CardData {
   year?: number;
   type: "movie" | "tv" | "game" | "music";
   platforms?: string[];
+  listeners?: number;
 }
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
