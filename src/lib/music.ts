@@ -49,14 +49,21 @@ const getRealMusicRating = async (artist: string, track: string, id: number): Pr
 export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[]> => {
   const terms = [
     "hits", "top charts", "classic rock", "r&b", "90s house", "80s synth", 
-    "viral", "soundtrack", "top tracks", "pop 2024", "hip hop", "alternative"
+    "viral", "soundtrack", "top tracks", "pop 2024", "hip hop", "alternative",
+    "jazz", "blues", "country", "EDM", "indie", "metal", "classical", "k-pop",
+    "reggae", "punk", "disco", "funk", "grunge", "lo-fi", "chill", "workout",
+    "acoustic", "ambient", "folk", "latin", "salsa", "heavy metal", "techno"
   ];
   
   try {
     const urls = [];
-    for(let i = 0; i < Math.ceil(count / 10); i++) {
-        const randomTerm = terms[Math.floor(Math.random() * terms.length)];
-        urls.push(`https://itunes.apple.com/search?term=${randomTerm}&media=music&entity=song&limit=50`);
+    // At least 3 distinct genres per pack, or more if the pack is very large
+    const numGenres = Math.max(3, Math.ceil(count / 5)); 
+    const shuffledTerms = [...terms].sort(() => 0.5 - Math.random());
+    const selectedTerms = shuffledTerms.slice(0, numGenres);
+
+    for(const term of selectedTerms) {
+        urls.push(`https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=40`);
     }
 
     const responses = await Promise.all(
