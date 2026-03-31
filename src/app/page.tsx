@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2 } from "lucide-react";
+import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2, Gamepad2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useTwitchChat, TwitchConfig } from "../lib/useTwitchChat";
 import { useGameAudio, SoundType, SOUND_LABELS, SOUND_ACCENT, DEFAULT_SOUND_URLS } from "../lib/useGameAudio";
@@ -10,9 +10,10 @@ import { useGameAudio, SoundType, SOUND_LABELS, SOUND_ACCENT, DEFAULT_SOUND_URLS
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
 type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 type SortOption = "name_asc" | "name_desc" | "rarity_high" | "rarity_low" | "year_new" | "year_old" | "rating_high" | "rating_low";
-type TypeFilter = "all" | "movie" | "tv";
+type TypeFilter = "all" | "movie" | "tv" | "game";
 
 import { CardData, fetchRandomPack } from "../lib/tmdb";
+import { fetchRandomGamePack } from "../lib/games";
 
 const ScrollableTitle = ({ title, baseClass }: { title: string; baseClass: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -170,8 +171,41 @@ const SoundRow = ({
   </div>
 );
 
+const PackSelector = ({ onSelect }: { onSelect: (type: "movies" | "games") => void }) => {
+  return (
+    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 text-white font-sans overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(120,0,255,0.1),_rgba(0,0,0,1))] pointer-events-none" />
+        <h1 className="text-3xl sm:text-5xl font-black mb-12 text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-pink-600 drop-shadow-lg z-10 text-center uppercase tracking-widest">
+           Choose Your Pack
+        </h1>
+        <div className="flex flex-col sm:flex-row gap-8 w-full max-w-4xl z-10 justify-center items-center">
+             <button onClick={() => onSelect("movies")} className="group relative w-72 h-96 rounded-2xl border-4 border-slate-700 bg-slate-900 overflow-hidden hover:border-purple-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] transition-all duration-300 transform hover:scale-105">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
+                   <div className="w-24 h-24 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-4xl mb-6 shadow-xl group-hover:scale-110 transition-transform shadow-purple-900/50">🎬</div>
+                   <h2 className="text-3xl font-black uppercase tracking-widest text-slate-200">Movies & TV</h2>
+                   <p className="text-slate-400 text-sm mt-4 text-center font-medium">Open cinematic packs featuring legendary movies and TV shows.</p>
+                </div>
+                <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-purple-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+             </button>
+
+             <button onClick={() => onSelect("games")} className="group relative w-72 h-96 rounded-2xl border-4 border-slate-700 bg-slate-900 overflow-hidden hover:border-blue-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)] transition-all duration-300 transform hover:scale-105">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
+                   <div className="w-24 h-24 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-4xl mb-6 shadow-xl group-hover:scale-110 transition-transform shadow-blue-900/50">🎮</div>
+                   <h2 className="text-3xl font-black uppercase tracking-widest text-slate-200">Video Games</h2>
+                   <p className="text-slate-400 text-sm mt-4 text-center font-medium">Open gaming packs featuring the greatest games of all time.</p>
+                </div>
+                <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-blue-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+             </button>
+        </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [packState, setPackState] = useState<PackState>("sealed");
+  const [packType, setPackType] = useState<"movies" | "games" | null>(null);
   const [tearProgress, setTearProgress] = useState(0);
   const [isTearing, setIsTearing] = useState(false);
   const [cards, setCards] = useState<CardData[]>([]);
@@ -219,6 +253,10 @@ export default function Home() {
         if (!isNaN(parsedCount)) {
           setPackSize(Math.max(1, Math.min(100, parsedCount)));
         }
+      }
+      const pType = params.get("pack");
+      if (pType === "movies" || pType === "games") {
+        setPackType(pType as "movies" | "games");
       }
     }
   }, []);
@@ -280,7 +318,7 @@ export default function Home() {
           const rarityEmoji: Record<Rarity, string> = {
             Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
           };
-          const typeLabel = card.type === "movie" ? "🎬 Movie" : "📺 TV Series";
+          const typeLabel = card.type === "movie" ? "🎬 Movie" : card.type === "game" ? "🎮 Game" : "📺 TV Series";
           const stars = "⭐".repeat(Math.round(card.rating / 2)); // scale 0-10 → 0-5 stars
           const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
           twitchSend(msg);
@@ -331,7 +369,7 @@ export default function Home() {
     if (isOpenedRef.current) return;
     isOpenedRef.current = true;
     setIsLoading(true);
-    const fetchedCards = await fetchRandomPack(packSize);
+    const fetchedCards = packType === "games" ? await fetchRandomGamePack(packSize) : await fetchRandomPack(packSize);
 
     // Check which IDs are new — read directly from localStorage (collection state is lazy)
     let existingIdsArr: string[] = [];
@@ -375,7 +413,7 @@ export default function Home() {
     setTimeout(() => {
       setPackState("revealing");
     }, 800);
-  }, [controls, collection, packSize]);
+  }, [controls, collection, packSize, packType]);
 
   const updateTear = (clientX: number) => {
     if (topPartRef.current && !isOpenedRef.current) {
@@ -591,6 +629,17 @@ export default function Home() {
     return cardList.filter(card => card.type === typeFilter);
   };
 
+  if (packType === null) {
+    return (
+      <PackSelector onSelect={(t) => {
+        setPackType(t);
+        const url = new URL(window.location.href);
+        url.searchParams.set("pack", t);
+        window.history.pushState({}, '', url);
+      }} />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center overflow-hidden font-sans text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(120,0,255,0.1),_rgba(0,0,0,1))] pointer-events-none" />
@@ -747,11 +796,11 @@ export default function Home() {
 
                       <div className="w-24 h-24 rounded-full border-2 border-slate-500/30 flex items-center justify-center p-2 mb-4 relative drop-shadow-xl">
                         <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/60 animate-[spin_20s_linear_infinite]"></div>
-                        <div className="text-4xl filter grayscale brightness-150">🎬</div>
+                        <div className="text-4xl filter grayscale brightness-150">{packType === "games" ? "🎮" : "🎬"}</div>
                       </div>
 
                       <div className="text-slate-300 font-black text-xl tracking-[0.2em] font-serif text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                        CINEMA<br />COLLECTION
+                        {packType === "games" ? <>GAMING<br />COLLECTION</> : <>CINEMA<br />COLLECTION</>}
                       </div>
 
                       {packState === "revealing" && !isFlipped && (
@@ -808,7 +857,7 @@ export default function Home() {
                               <span className="text-yellow-400 font-bold text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
                             </div>
                             <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
-                              {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : <Tv className="w-3 h-3 text-slate-300" />}
+                              {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : card.type === "game" ? <Gamepad2 className="w-3 h-3 text-slate-300" /> : <Tv className="w-3 h-3 text-slate-300" />}
                               <span className="text-[10px] font-bold uppercase text-slate-300">{card.type}</span>
                             </div>
                           </div>
@@ -826,7 +875,7 @@ export default function Home() {
                             )}
                             {card.imdb_link && (
                               <a href={card.imdb_link} target="_blank" rel="noopener noreferrer" className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors" onClick={(e) => e.stopPropagation()}>
-                                IMDb
+                                {card.type === "game" ? "RAWG" : "IMDb"}
                               </a>
                             )}
                           </div>
@@ -900,37 +949,71 @@ export default function Home() {
                 <div className="h-3/4 w-full bg-gradient-to-b from-slate-800 to-black relative rounded-b-lg overflow-hidden shadow-2xl border-t border-slate-700">
                   <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
 
-                  {/* Film reel details */}
-                  <div className="absolute left-4 top-0 bottom-0 w-4 flex flex-col py-4 space-y-3 opacity-20 mix-blend-overlay">
-                    {Array.from({ length: 8 }).map((_, i) => <div key={`fl-${i}`} className="w-full h-8 bg-white rounded-sm"></div>)}
-                  </div>
-                  <div className="absolute right-4 top-0 bottom-0 w-4 flex flex-col py-4 space-y-3 opacity-20 mix-blend-overlay">
-                    {Array.from({ length: 8 }).map((_, i) => <div key={`fr-${i}`} className="w-full h-8 bg-white rounded-sm"></div>)}
-                  </div>
+                  {/* Pack specific background edges */}
+                  {packType === "games" ? (
+                    <>
+                      <div className="absolute left-2 top-0 bottom-0 w-6 flex flex-col py-6 space-y-4 opacity-30 mix-blend-overlay justify-center">
+                        {Array.from({ length: 6 }).map((_, i) => <div key={`gl-${i}`} className="w-full h-2 bg-slate-500 rounded-full"></div>)}
+                      </div>
+                      <div className="absolute right-2 top-0 bottom-0 w-6 flex flex-col py-6 space-y-4 opacity-30 mix-blend-overlay justify-center">
+                        {Array.from({ length: 6 }).map((_, i) => <div key={`gr-${i}`} className="w-full h-2 bg-slate-500 rounded-full"></div>)}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Film reel details */}
+                      <div className="absolute left-4 top-0 bottom-0 w-4 flex flex-col py-4 space-y-3 opacity-20 mix-blend-overlay">
+                        {Array.from({ length: 8 }).map((_, i) => <div key={`fl-${i}`} className="w-full h-8 bg-white rounded-sm"></div>)}
+                      </div>
+                      <div className="absolute right-4 top-0 bottom-0 w-4 flex flex-col py-4 space-y-3 opacity-20 mix-blend-overlay">
+                        {Array.from({ length: 8 }).map((_, i) => <div key={`fr-${i}`} className="w-full h-8 bg-white rounded-sm"></div>)}
+                      </div>
+                    </>
+                  )}
 
                   <div className="absolute inset-0 flex items-center justify-center p-6">
-                    <div className="w-32 h-28 bg-slate-900 rounded-md shadow-2xl relative flex flex-col overflow-hidden rotate-[-4deg] border border-slate-700 drop-shadow-xl">
-                      {/* Clapper stick */}
-                      <div className="h-7 w-full relative overflow-hidden border-b-2 border-slate-800 z-10 shrink-0">
-                        <div className="flex w-[150%] h-full -ml-6">
-                          {Array.from({ length: 10 }).map((_, i) => (
-                            <div key={`clap-${i}`} className={`w-8 h-full transform -skew-x-[35deg] ${i % 2 === 0 ? 'bg-slate-200' : 'bg-slate-950'}`}></div>
-                          ))}
+                    {packType === "games" ? (
+                      <div className="w-28 h-32 bg-slate-300 rounded-t-xl rounded-b-sm shadow-2xl relative flex flex-col overflow-hidden rotate-[3deg] border-2 border-slate-400 drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)]">
+                        {/* Cartridge Ridges top */}
+                        <div className="h-4 w-full flex justify-between px-3 pt-2 opacity-60">
+                            {Array.from({ length: 5 }).map((_, i) => <div key={`ridge-${i}`} className="w-2.5 h-full bg-slate-500 rounded-sm"></div>)}
+                        </div>
+                        
+                        {/* Label sticker - Vibrant Gaming Color */}
+                        <div className="flex-1 m-2 mt-4 bg-gradient-to-br from-cyan-600 via-blue-500 to-emerald-500 rounded border border-white/40 flex flex-col items-center justify-center relative overflow-hidden shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)]">
+                            <div className="absolute top-0 left-0 right-0 h-4 bg-white/10 skew-y-[-10deg] -translate-y-2"></div>
+                            <span className="text-[9px] font-black text-white tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] mt-1">RAWG</span>
+                            <div className="text-3xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] mb-2 mt-1">👾</div>
+                            <div className="absolute bottom-1 right-1 text-[7px] text-white/80 font-mono font-bold">V-SYNC</div>
+                        </div>
+
+                        {/* Bottom Indent */}
+                        <div className="h-2 border border-b-0 border-slate-500 w-1/2 mx-auto rounded-t-lg mb-0 bg-slate-100/50 shadow-inner"></div>
+                      </div>
+                    ) : (
+                      <div className="w-32 h-28 bg-slate-900 rounded-md shadow-2xl relative flex flex-col overflow-hidden rotate-[-4deg] border border-slate-700 drop-shadow-xl">
+                        {/* Clapper stick */}
+                        <div className="h-7 w-full relative overflow-hidden border-b-2 border-slate-800 z-10 shrink-0">
+                          <div className="flex w-[150%] h-full -ml-6">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                              <div key={`clap-${i}`} className={`w-8 h-full transform -skew-x-[35deg] ${i % 2 === 0 ? 'bg-slate-200' : 'bg-slate-950'}`}></div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Clapper body */}
+                        <div className="flex-1 flex flex-col p-2 bg-slate-800 shadow-inner relative justify-center items-center">
+                          <div className="absolute top-1 left-2 text-[10px] text-slate-400 font-mono font-bold tracking-widest uppercase opacity-70">Scene</div>
+                          <div className="absolute top-1 right-2 text-[10px] text-slate-400 font-mono font-bold tracking-widest uppercase opacity-70">Take</div>
+
+                          {/* Center Icon */}
+                          <div className="text-4xl mt-3 drop-shadow-lg filter grayscale brightness-125">🎥</div>
                         </div>
                       </div>
-
-                      {/* Clapper body */}
-                      <div className="flex-1 flex flex-col p-2 bg-slate-800 shadow-inner relative justify-center items-center">
-                        <div className="absolute top-1 left-2 text-[10px] text-slate-400 font-mono font-bold tracking-widest uppercase opacity-70">Scene</div>
-                        <div className="absolute top-1 right-2 text-[10px] text-slate-400 font-mono font-bold tracking-widest uppercase opacity-70">Take</div>
-
-                        {/* Center Icon */}
-                        <div className="text-4xl mt-3 drop-shadow-lg filter grayscale brightness-125">🎥</div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                   <div className="absolute bottom-8 left-0 right-0 text-center font-black text-xl text-slate-200 uppercase tracking-[0.2em] shadow-black drop-shadow-lg">
-                    Cinema Pack
+                    {packType === "games" ? "Gaming Pack" : "Cinema Pack"}
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-600 to-slate-500 rounded-b-lg overflow-hidden flex">
                     {Array.from({ length: 20 }).map((_, i) => (
@@ -988,6 +1071,19 @@ export default function Home() {
                 </button>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <button
+                    onClick={() => {
+                        resetPack();
+                        setPackType(null);
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete("pack");
+                        window.history.pushState({}, '', url);
+                    }}
+                    className="group flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white/70 hover:text-white font-medium py-3 px-6 rounded-full shadow-lg transition-all"
+                  >
+                    <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                    Change Pack
+                  </button>
                   <button
                     onClick={() => setIsGridView(true)}
                     className="group flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all"
@@ -1077,6 +1173,7 @@ export default function Home() {
                         <button onClick={() => setTypeFilter("all")} className={`px-2 py-1 text-[10px] sm:text-xs font-bold rounded ${typeFilter === "all" ? "bg-white/20 text-white" : "text-white/50 hover:text-white transition-colors"}`}>All</button>
                         <button onClick={() => setTypeFilter("movie")} className={`px-2 py-1 text-[10px] sm:text-xs font-bold rounded flex items-center gap-1 ${typeFilter === "movie" ? "bg-white/20 text-white" : "text-white/50 hover:text-white transition-colors"}`}><Film className="w-3 h-3" /> Movies</button>
                         <button onClick={() => setTypeFilter("tv")} className={`px-2 py-1 text-[10px] sm:text-xs font-bold rounded flex items-center gap-1 ${typeFilter === "tv" ? "bg-white/20 text-white" : "text-white/50 hover:text-white transition-colors"}`}><Tv className="w-3 h-3" /> TV</button>
+                        <button onClick={() => setTypeFilter("game")} className={`px-2 py-1 text-[10px] sm:text-xs font-bold rounded flex items-center gap-1 ${typeFilter === "game" ? "bg-white/20 text-white" : "text-white/50 hover:text-white transition-colors"}`}><Gamepad2 className="w-3 h-3" /> Games</button>
                       </div>
                     </div>
 
@@ -1175,7 +1272,7 @@ export default function Home() {
                               </div>
                               <div className="flex flex-col gap-1 items-end">
                                 <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 flex items-center gap-1 border border-white/10">
-                                  {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
+                                  {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
                                   <span className="text-[8px] font-black uppercase text-slate-400">{card.type}</span>
                                 </div>
                                 {!isCollectionView && newCardIds.has(card.id) && (
@@ -1202,7 +1299,7 @@ export default function Home() {
                                 )}
                                 {card.imdb_link && (
                                   <a href={card.imdb_link} target="_blank" rel="noopener noreferrer" className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-[8px] sm:text-[10px] lg:text-xs font-bold py-1 px-1.5 sm:px-2 rounded shadow" onClick={(e) => e.stopPropagation()}>
-                                    IMDb
+                                    {card.type === "game" ? "RAWG" : "IMDb"}
                                   </a>
                                 )}
                               </div>

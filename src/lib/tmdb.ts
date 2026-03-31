@@ -1,4 +1,4 @@
-type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+export type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
 export interface CardData {
   id: string;
@@ -10,7 +10,7 @@ export interface CardData {
   trailer?: string;
   imdb_link?: string;
   year?: number;
-  type: "movie" | "tv";
+  type: "movie" | "tv" | "game";
 }
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
