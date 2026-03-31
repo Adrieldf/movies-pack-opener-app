@@ -539,13 +539,14 @@ export default function Home() {
 
   const topFoilContent = (
     <div className="w-full h-full flex flex-col pointer-events-none">
-      <div className="w-full h-4 bg-gradient-to-b from-slate-500 to-slate-600 rounded-t-lg overflow-hidden flex shrink-0">
+      <div className={`w-full h-4 ${packType === 'games' ? 'bg-gradient-to-b from-blue-400 to-blue-600' : 'bg-gradient-to-b from-slate-500 to-slate-600'} rounded-t-lg overflow-hidden flex shrink-0`}>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={`crimp-${i}`} className="flex-1 border-r border-slate-700/30"></div>
+          <div key={`crimp-${i}`} className={`flex-1 border-r ${packType === 'games' ? 'border-blue-300/30' : 'border-slate-700/30'}`}></div>
         ))}
       </div>
-      <div className="w-full flex-1 bg-gradient-to-b from-slate-800 to-slate-900 relative overflow-hidden border-b border-slate-700/50 shadow-inner">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+      <div className={`w-full flex-1 ${packType === 'games' ? 'bg-gradient-to-b from-blue-700 via-indigo-900 to-blue-900 border-blue-400/30' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700/50'} relative overflow-hidden border-b shadow-inner`}>
+        <div className={`absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] ${packType === 'games' ? 'opacity-20 hue-rotate-180' : 'opacity-10'} mix-blend-overlay`}></div>
+        {packType === 'games' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(56,189,248,0.4),_transparent)]"></div>}
         <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 flex items-center justify-center px-4">
           {isLoading && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-xl">
@@ -561,7 +562,7 @@ export default function Home() {
             </div>
           )}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] border-b-2 border-dashed border-white/20 truncate"></div>
+        <div className={`absolute bottom-0 left-0 right-0 h-[2px] border-b-2 border-dashed ${packType === 'games' ? 'border-blue-400/40' : 'border-white/20'} truncate`}></div>
       </div>
     </div>
   );
@@ -883,16 +884,16 @@ export default function Home() {
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
 
-                      {/* NEW! Wax-seal stamp – outside overflow-hidden so it shows on top */}
+                      {/* NEW! Wax-seal stamp – positioned slightly inward */}
                       {newCardIds.has(card.id) && (
                         <motion.div
                           initial={{ scale: 0, rotate: -20 }}
                           animate={{ scale: 1, rotate: -15 }}
                           transition={{ type: "spring", bounce: 0.5, delay: 0.3 }}
-                          className="absolute -top-5 -left-5 z-30 w-11 h-11 rounded-full bg-red-600 border-[3px] border-red-300/70 flex items-center justify-center"
-                          style={{ boxShadow: "0 0 0 2px rgba(255,80,80,0.25), 0 4px 14px rgba(180,0,0,0.6)" }}
+                          className="absolute -top-2 -left-2 z-30 w-9 h-9 rounded-full bg-red-600 border-[2px] border-red-300/70 flex items-center justify-center p-1"
+                          style={{ boxShadow: "0 0 0 1px rgba(255,80,80,0.25), 0 3px 10px rgba(180,0,0,0.6)" }}
                         >
-                          <span className="text-white text-[9px] font-black uppercase tracking-tighter text-center leading-tight">
+                          <span className="text-white text-[8px] font-black uppercase tracking-tighter text-center leading-[0.85]">
                             NEW!
                           </span>
                         </motion.div>
@@ -946,17 +947,18 @@ export default function Home() {
                 </motion.div>
 
                 {/* BOTTOM MAIN BODY */}
-                <div className="h-3/4 w-full bg-gradient-to-b from-slate-800 to-black relative rounded-b-lg overflow-hidden shadow-2xl border-t border-slate-700">
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                <div className={`h-3/4 w-full ${packType === 'games' ? 'bg-gradient-to-b from-blue-900 via-indigo-950 to-black' : 'bg-gradient-to-b from-slate-800 to-black'} relative rounded-b-lg overflow-hidden shadow-2xl border-t ${packType === 'games' ? 'border-blue-400/50' : 'border-slate-700'}`}>
+                  <div className={`absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] ${packType === 'games' ? 'opacity-20 hue-rotate-180' : 'opacity-10'} mix-blend-overlay`}></div>
+                  {packType === 'games' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,_rgba(56,189,248,0.2),_transparent)]"></div>}
 
                   {/* Pack specific background edges */}
                   {packType === "games" ? (
                     <>
-                      <div className="absolute left-2 top-0 bottom-0 w-6 flex flex-col py-6 space-y-4 opacity-30 mix-blend-overlay justify-center">
-                        {Array.from({ length: 6 }).map((_, i) => <div key={`gl-${i}`} className="w-full h-2 bg-slate-500 rounded-full"></div>)}
+                      <div className="absolute left-2 top-0 bottom-0 w-6 flex flex-col py-6 space-y-4 opacity-40 mix-blend-overlay justify-center">
+                        {Array.from({ length: 6 }).map((_, i) => <div key={`gl-${i}`} className="w-full h-2 bg-blue-300 rounded-full shadow-[0_0_8px_rgba(147,197,253,0.5)]"></div>)}
                       </div>
-                      <div className="absolute right-2 top-0 bottom-0 w-6 flex flex-col py-6 space-y-4 opacity-30 mix-blend-overlay justify-center">
-                        {Array.from({ length: 6 }).map((_, i) => <div key={`gr-${i}`} className="w-full h-2 bg-slate-500 rounded-full"></div>)}
+                      <div className="absolute right-2 top-0 bottom-0 w-6 flex flex-col py-6 space-y-4 opacity-40 mix-blend-overlay justify-center">
+                        {Array.from({ length: 6 }).map((_, i) => <div key={`gr-${i}`} className="w-full h-2 bg-blue-300 rounded-full shadow-[0_0_8px_rgba(147,197,253,0.5)]"></div>)}
                       </div>
                     </>
                   ) : (
@@ -1013,11 +1015,15 @@ export default function Home() {
                     )}
                   </div>
                   <div className="absolute bottom-8 left-0 right-0 text-center font-black text-xl text-slate-200 uppercase tracking-[0.2em] shadow-black drop-shadow-lg">
-                    {packType === "games" ? "Gaming Pack" : "Cinema Pack"}
+                    {packType === "games" ? (
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 drop-shadow-[0_0_10px_rgba(147,197,253,0.5)]">
+                        GAMING PACK
+                      </span>
+                    ) : "Cinema Pack"}
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-600 to-slate-500 rounded-b-lg overflow-hidden flex">
+                  <div className={`absolute bottom-0 left-0 right-0 h-4 ${packType === 'games' ? 'bg-gradient-to-t from-blue-700 to-blue-500' : 'bg-gradient-to-t from-slate-600 to-slate-500'} rounded-b-lg overflow-hidden flex`}>
                     {Array.from({ length: 20 }).map((_, i) => (
-                      <div key={`crimp-b-${i}`} className="flex-1 border-r border-slate-700/30"></div>
+                      <div key={`crimp-b-${i}`} className={`flex-1 border-r ${packType === 'games' ? 'border-blue-400/30' : 'border-slate-700/30'}`}></div>
                     ))}
                   </div>
                 </div>
