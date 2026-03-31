@@ -73,6 +73,9 @@ export const fetchRandomGamePack = async (count: number = 5): Promise<CardData[]
         trailerUrl = item.clip.clip;
       }
 
+      const platformNames = item.parent_platforms?.map((p: any) => p.platform.name) || 
+                             item.platforms?.map((p: any) => p.platform.name) || [];
+
       return {
         id: `game-${item.id}`,
         rarity: getRarityByRating(rating10),
@@ -83,7 +86,8 @@ export const fetchRandomGamePack = async (count: number = 5): Promise<CardData[]
         trailer: trailerUrl,
         imdb_link: `https://rawg.io/games/${item.slug}`,
         year: year,
-        type: "game" as any
+        type: "game" as any,
+        platforms: platformNames.slice(0, 10) // Include up to 10 platforms
       };
     });
 

@@ -11,6 +11,7 @@ export interface CardData {
   imdb_link?: string;
   year?: number;
   type: "movie" | "tv" | "game";
+  platforms?: string[];
 }
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";

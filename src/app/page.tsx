@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2, Gamepad2 } from "lucide-react";
+import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Film, Tv, Volume2, Gamepad2, Laptop, Smartphone, Monitor, Disc } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useTwitchChat, TwitchConfig } from "../lib/useTwitchChat";
 import { useGameAudio, SoundType, SOUND_LABELS, SOUND_ACCENT, DEFAULT_SOUND_URLS } from "../lib/useGameAudio";
@@ -846,12 +846,23 @@ export default function Home() {
                         {/* Top Area: Rarity & Rating */}
                         <div className="relative z-10 flex justify-between items-start w-full p-3">
                           {/* Left: Rarity */}
-                          <div className="flex flex-col gap-1">
-                            <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
-                              <Sparkles className={`w-4 h-4 ${getRarityColors(card.rarity).icon}`} />
-                              <span className={`text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
-                            </div>
-                          </div>
+                          <div className="flex flex-col gap-1.5 items-start">
+                             <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
+                               <Sparkles className={`w-4 h-4 ${getRarityColors(card.rarity).icon}`} />
+                               <span className={`text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
+                             </div>
+
+                             {/* Vertical Game Platforms */}
+                             {card.type === "game" && card.platforms && card.platforms.length > 0 && (
+                               <div className="flex flex-col gap-1 items-start pl-1">
+                                 {card.platforms.map((p, pi) => (
+                                   <div key={pi} className="bg-blue-900/50 backdrop-blur-md border border-cyan-400/40 text-cyan-100 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-[0_0_8px_rgba(34,211,238,0.2)]">
+                                     {p}
+                                   </div>
+                                 ))}
+                               </div>
+                             )}
+                           </div>
                           {/* Right: Rating + type tag below */}
                           <div className="flex flex-col items-end gap-1">
                             <div className="bg-black/50 backdrop-blur rounded px-2 py-1">
@@ -863,8 +874,7 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-
-
+                        
                         {/* Bottom Area: Title & Links */}
                         <div className="relative z-10 mt-auto p-4 w-full flex flex-col items-center">
                           <ScrollableTitle title={card.name} baseClass="text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
@@ -1272,9 +1282,21 @@ export default function Home() {
                             )}
 
                             <div className="relative z-10 flex justify-between items-start w-full p-2 sm:p-3 bg-gradient-to-b from-black/80 to-transparent">
-                              <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1 flex items-center gap-0.5 sm:gap-1">
-                                <Sparkles className={`w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 ${getRarityColors(card.rarity).icon}`} />
-                                <span className={`text-[8px] sm:text-[10px] lg:text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
+                              <div className="flex flex-col gap-1 items-start">
+                                <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1 flex items-center gap-0.5 sm:gap-1">
+                                  <Sparkles className={`w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 ${getRarityColors(card.rarity).icon}`} />
+                                  <span className={`text-[8px] sm:text-[10px] lg:text-xs font-bold uppercase tracking-wider ${getRarityColors(card.rarity).text}`}>{card.rarity}</span>
+                                </div>
+                                {/* Vertical platforms in grid */}
+                                {card.type === "game" && card.platforms && card.platforms.length > 0 && (
+                                  <div className="flex flex-col gap-1 items-start pl-0.5">
+                                    {card.platforms.map((p, pi) => (
+                                      <div key={pi} className="bg-blue-900/50 backdrop-blur-md border border-cyan-400/30 text-cyan-50 text-[7px] sm:text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded shadow-sm">
+                                        {p}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex flex-col gap-1 items-end">
                                 <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 flex items-center gap-1 border border-white/10">
@@ -1291,7 +1313,6 @@ export default function Home() {
                                 <span className="text-yellow-400 font-bold text-[10px] sm:text-xs lg:text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
                               </div>
                             </div>
-
                             <div className="relative z-10 mt-auto p-2 sm:p-4 w-full flex flex-col items-center bg-gradient-to-t from-black/90 via-black/70 to-transparent">
                               <ScrollableTitle title={card.name} baseClass="text-xs sm:text-sm lg:text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
                               {card.year && (
