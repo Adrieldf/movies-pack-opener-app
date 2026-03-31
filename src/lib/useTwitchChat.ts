@@ -102,6 +102,14 @@ export function useTwitchChat() {
     ws.current.send(`PRIVMSG #${config.channel.toLowerCase()} :${message}`);
   }, [config.channel]);
 
+  // Auto-connect if config is available on mount
+  useEffect(() => {
+    if (config.channel && config.username && config.token && status === "disconnected") {
+      connect(config);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
