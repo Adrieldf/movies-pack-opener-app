@@ -173,9 +173,20 @@ export default function Home() {
           };
           const typeLabel = card.type === "movie" ? "🎬 Movie" : card.type === "game" ? "🎮 Game" : card.type === "music" ? "🎵 Music" : "📺 TV Series";
           const stars = "⭐".repeat(Math.round(card.rating / 2)); // scale 0-10 → 0-5 stars
-          const musicInfo = card.type === "music" && card.description ? ` - ${card.description}` : "";
-          const listenerInfo = card.type === "music" && card.listeners ? ` | 🎧 ${formatListeners(card.listeners)} listens` : "";
-          const msg = `${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${musicInfo}${listenerInfo} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+          let extraInfo = "";
+          if (card.type === "movie" || card.type === "tv") {
+            if (card.year) extraInfo = ` (${card.year})`;
+          } else if (card.type === "game") {
+            const platforms = card.platforms?.slice(0, 3).join(", ");
+            if (platforms) extraInfo = ` [${platforms}${card.platforms!.length > 3 ? "..." : ""}]`;
+          } else if (card.type === "music") {
+            const artist = card.description?.split(" • ")[0] || "";
+            const artistPart = artist ? `by ${artist}` : "";
+            const listens = card.listeners ? ` | 🎧 ${formatListeners(card.listeners)} listens` : "";
+            extraInfo = ` ${artistPart}${listens}`;
+          }
+
+          const msg = `${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
           twitchSend(msg);
         }
       }
