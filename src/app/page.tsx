@@ -88,7 +88,11 @@ export default function Home() {
       if (!isNaN(n)) setPackSize(Math.max(1, Math.min(100, n)));
     }
     const pType = params.get("pack");
-    if (pType === "movies" || pType === "games" || pType === "music" || pType === "musics" || pType === "anime" || pType === "pokemon" || pType === "boardgame" || pType === "giphy") {
+    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg"];
+    if (pType === "random") {
+      const chosen = validTypes[Math.floor(Math.random() * validTypes.length)];
+      setPackType(chosen);
+    } else if (pType && (validTypes.includes(pType as PackType) || pType === "musics")) {
       setPackType((pType === "musics" ? "music" : pType) as PackType);
     }
   }, []);
@@ -339,7 +343,12 @@ export default function Home() {
   if (packType === null) {
     return (
       <PackSelector onSelect={(t) => {
-        setPackType(t);
+        let finalType = t;
+        if (t === "random") {
+          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg"];
+          finalType = validTypes[Math.floor(Math.random() * validTypes.length)];
+        }
+        setPackType(finalType);
         const url = new URL(window.location.href);
         url.searchParams.set("pack", t === "music" ? "musics" : t);
         window.history.pushState({}, '', url);

@@ -79,13 +79,18 @@ export const CardReveal = ({
           className="absolute inset-0 w-full h-full rounded-xl border-4 flex flex-col items-center justify-center backface-hidden overflow-hidden border-slate-500 shadow-[0_0_20px_rgba(100,116,139,0.5)]"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
-          {(packType === "yugioh" || packType === "mtg") ? (
-            <div 
-              className="absolute inset-0 bg-cover bg-center w-full h-full" 
-              style={{ backgroundImage: `url('${packType === "yugioh" ? "/yugioh-back.png" : "/mtg-back.png"}')` }} 
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-2 relative bg-slate-900">
+          {/* The Actual Card Back Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center w-full h-full" 
+            style={{ 
+              backgroundImage: `url('${packType === "yugioh" ? "yugioh-back.png" : "mtg-back.png"}')`,
+              backfaceVisibility: "hidden" 
+            }} 
+          />
+
+          {/* Optional Overlay branding for non-TCG packs (Still using the MTG back as base) */}
+          {packType !== "yugioh" && packType !== "mtg" && (
+            <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center p-2 relative bg-black/40 backdrop-blur-[2px]">
               {/* Film strip borders for others */}
               <div className="absolute left-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-30">
                 {Array.from({ length: 24 }).map((_, i) => <div key={`l-${i}`} className="w-full h-2 bg-black rounded-sm"></div>)}
@@ -94,17 +99,17 @@ export const CardReveal = ({
                 {Array.from({ length: 24 }).map((_, i) => <div key={`r-${i}`} className="w-full h-2 bg-black rounded-sm"></div>)}
               </div>
 
-              <div className="w-24 h-24 rounded-full border-2 border-slate-500/30 flex items-center justify-center p-2 mb-4 relative drop-shadow-xl">
-                <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/60 animate-[spin_20s_linear_infinite]"></div>
-                <div className="text-4xl filter grayscale brightness-150">
+              <div className="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center p-2 mb-4 relative drop-shadow-2xl">
+                <div className="absolute inset-2 rounded-full border border-dashed border-white/40 animate-[spin_20s_linear_infinite]"></div>
+                <div className="text-4xl filter drop-shadow-md">
                   {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : "🎬"}
                 </div>
               </div>
 
-              <div className="text-slate-300 font-black text-xl tracking-[0.2em] font-serif text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+              <div className="text-white font-black text-xl tracking-[0.2em] font-serif text-center drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
                  {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : "CINEMA"}
                  <br />
-                 <span className="text-[10px] opacity-60 tracking-[0.4em]">COLLECTION</span>
+                 <span className="text-[10px] opacity-80 tracking-[0.4em]">COLLECTION</span>
               </div>
             </div>
           )}

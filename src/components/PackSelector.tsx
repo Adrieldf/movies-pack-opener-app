@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg";
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "random";
 
 const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; accent: string; glow: string }> = {
   movies: { label: "Cinema", icon: "🎬", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-pink-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
@@ -11,11 +11,12 @@ const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; a
   giphy: { label: "Giphy", icon: "🖼️", bg: "from-slate-900 to-cyan-950", accent: "from-cyan-400 to-blue-500", glow: "group-hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]" },
   yugioh: { label: "Yu-Gi-Oh!", icon: "🃏", bg: "from-slate-900 to-amber-950", accent: "from-amber-500 to-yellow-600", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
   mtg: { label: "MTG", icon: "🔮", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-indigo-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
-  boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30_rgba(245,158,11,0.4)]" }
+  boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30_rgba(245,158,11,0.4)]" },
+  random: { label: "Surprise!", icon: "🎲", bg: "from-slate-800 via-purple-900 to-slate-900", accent: "from-white/40 to-white/10", glow: "group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" }
 };
 
 export const PackSelector = ({ onSelect }: { onSelect: (type: PackType) => void }) => {
-  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "boardgame");
+  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "boardgame" && t !== "random");
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-8 font-sans overflow-y-auto">
@@ -75,6 +76,29 @@ export const PackSelector = ({ onSelect }: { onSelect: (type: PackType) => void 
               </motion.button>
             );
           })}
+
+          {/* Random / Surprise Pack */}
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: packs.length * 0.05 }}
+            onClick={() => onSelect("random")}
+            className="group relative aspect-[4/5] sm:aspect-square rounded-2xl sm:rounded-3xl p-0.5 transition-all duration-500 group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:scale-[1.05] active:scale-95"
+          >
+            <div className="w-full h-full rounded-[0.9rem] sm:rounded-[1.4rem] bg-gradient-to-br from-slate-800 via-purple-900 to-slate-900 border border-white/20 flex flex-col items-center justify-center relative overflow-hidden">
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.1),_transparent)] transform group-hover:scale-150 transition-transform duration-1000"></div>
+               <div className="relative z-10 flex flex-col items-center gap-2 sm:gap-4 p-4 text-center">
+                  <span className="text-3xl sm:text-5xl drop-shadow-2xl group-hover:rotate-12 transition-transform duration-500">🎲</span>
+                  <div className="flex flex-col items-center">
+                     <h3 className="text-sm sm:text-lg font-black uppercase tracking-widest text-white leading-tight">Surprise!</h3>
+                     <span className="text-[8px] sm:text-[10px] text-white/40 font-bold uppercase tracking-tighter mt-1">Random Collection</span>
+                  </div>
+               </div>
+               
+               {/* Shifting animated border/glow effect */}
+               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_2s_infinite]"></div>
+            </div>
+          </motion.button>
         </div>
       </div>
     </div>

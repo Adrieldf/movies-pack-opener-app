@@ -5,7 +5,7 @@ import { motion, useAnimation } from "framer-motion";
 type AnimationControls = ReturnType<typeof useAnimation>;
 import { RefreshCcw } from "lucide-react";
 
-export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg";
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "random";
 
 interface PackVisualProps {
   packType: PackType;
