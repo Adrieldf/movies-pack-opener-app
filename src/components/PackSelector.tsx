@@ -1,38 +1,83 @@
-export const PackSelector = ({ onSelect }: { onSelect: (type: "movies" | "games" | "music") => void }) => {
+import { motion } from "framer-motion";
+
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg";
+
+const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; accent: string; glow: string }> = {
+  movies: { label: "Cinema", icon: "🎬", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-pink-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
+  games: { label: "Games", icon: "🎮", bg: "from-slate-900 to-blue-950", accent: "from-blue-400 to-indigo-500", glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]" },
+  music: { label: "Music", icon: "🎧", bg: "from-slate-900 to-emerald-950", accent: "from-green-400 to-emerald-500", glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]" },
+  anime: { label: "Anime", icon: "🌸", bg: "from-slate-900 to-rose-950", accent: "from-rose-400 to-pink-500", glow: "group-hover:shadow-[0_0_30px_rgba(244,114,182,0.4)]" },
+  pokemon: { label: "Pokémon", icon: "🌟", bg: "from-slate-900 to-red-950", accent: "from-yellow-400 to-red-500", glow: "group-hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]" },
+  giphy: { label: "Giphy", icon: "🖼️", bg: "from-slate-900 to-cyan-950", accent: "from-cyan-400 to-blue-500", glow: "group-hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]" },
+  yugioh: { label: "Yu-Gi-Oh!", icon: "🃏", bg: "from-slate-900 to-amber-950", accent: "from-amber-500 to-yellow-600", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
+  mtg: { label: "MTG", icon: "🔮", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-indigo-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
+  boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30_rgba(245,158,11,0.4)]" }
+};
+
+export const PackSelector = ({ onSelect }: { onSelect: (type: PackType) => void }) => {
+  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "boardgame");
+
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 text-white font-sans overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(120,0,255,0.1),_rgba(0,0,0,1))] pointer-events-none" />
-        <h1 className="text-3xl sm:text-5xl font-black mb-12 text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-pink-600 drop-shadow-lg z-10 text-center uppercase tracking-widest">
-           Choose Your Pack
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-8 font-sans overflow-y-auto">
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_15%,_rgba(120,0,255,0.1),_transparent)] pointer-events-none" />
+      
+      {/* Branding */}
+      <div className="absolute top-8 left-8 hidden md:block">
+        <h1 className="text-xl font-black tracking-tighter text-white opacity-80 uppercase">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">PACK</span> OPENER
         </h1>
-        <div className="flex flex-col md:flex-row gap-6 lg:gap-8 w-full max-w-6xl z-10 justify-center items-center flex-wrap">
-             <button onClick={() => onSelect("movies")} className="group relative w-72 h-80 lg:h-96 rounded-2xl border-4 border-slate-700 bg-slate-900 overflow-hidden hover:border-purple-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] transition-all duration-300 transform hover:scale-105">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
-                   <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-4xl mb-6 shadow-xl group-hover:scale-110 transition-transform shadow-purple-900/50">🎬</div>
-                   <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-widest text-slate-200">Cinema</h2>
-                </div>
-                <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-purple-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-             </button>
+      </div>
 
-             <button onClick={() => onSelect("games")} className="group relative w-72 h-80 lg:h-96 rounded-2xl border-4 border-slate-700 bg-slate-900 overflow-hidden hover:border-blue-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)] transition-all duration-300 transform hover:scale-105">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
-                   <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-4xl mb-6 shadow-xl group-hover:scale-110 transition-transform shadow-blue-900/50">🎮</div>
-                   <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-widest text-slate-200">Games</h2>
-                </div>
-                <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-blue-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-             </button>
+      <div className="w-full max-w-4xl z-10 py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl sm:text-6xl font-black tracking-tighter text-white mb-2 uppercase">
+            Select <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 italic">Pack</span>
+          </h2>
+          <p className="text-white/40 text-xs sm:text-sm font-bold uppercase tracking-[0.3em]">Choose your collection</p>
+        </motion.div>
 
-             <button onClick={() => onSelect("music")} className="group relative w-72 h-80 lg:h-96 rounded-2xl border-4 border-slate-700 bg-slate-900 overflow-hidden hover:border-green-500 hover:shadow-[0_0_40px_rgba(34,197,94,0.4)] transition-all duration-300 transform hover:scale-105">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
-                   <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-4xl mb-6 shadow-xl group-hover:scale-110 transition-transform shadow-green-900/50">🎧</div>
-                   <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-widest text-slate-200">Music</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+          {packs.map((type, idx) => {
+            const config = PACK_CONFIG[type];
+            return (
+              <motion.button
+                key={type}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.05 }}
+                onClick={() => onSelect(type)}
+                className={`group relative aspect-[4/5] sm:aspect-square rounded-2xl sm:rounded-3xl p-0.5 transition-all duration-500 ${config.glow} hover:scale-[1.03] active:scale-95`}
+              >
+                <div className={`w-full h-full rounded-[0.9rem] sm:rounded-[1.4rem] bg-gradient-to-br ${config.bg} border border-white/10 flex flex-col items-center justify-center relative overflow-hidden`}>
+                  {/* Themed Accent Glow */}
+                  <div className={`absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-br ${config.accent} opacity-5 blur-[60px] group-hover:opacity-20 transition-opacity`} />
+                  
+                  <div className="relative z-10 flex flex-col items-center gap-2 sm:gap-4 p-4 text-center">
+                    <span className="text-3xl sm:text-5xl drop-shadow-2xl group-hover:scale-110 transition-transform duration-500">{config.icon}</span>
+                    <div>
+                      <h3 className="text-sm sm:text-lg font-black uppercase tracking-widest text-white leading-tight">
+                        {config.label}
+                      </h3>
+                      <div className={`h-1 w-0 group-hover:w-full bg-gradient-to-r ${config.accent} mx-auto mt-1 transition-all duration-500 rounded-full`} />
+                    </div>
+                  </div>
+
+                  {/* Corner detail */}
+                  <div className={`absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl ${config.accent} opacity-10 group-hover:opacity-30 transition-opacity rounded-bl-3xl`} />
+                  
+                  {/* Subtle noise pattern */}
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                 </div>
-                <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-green-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-             </button>
+              </motion.button>
+            );
+          })}
         </div>
+      </div>
     </div>
   );
 };
+

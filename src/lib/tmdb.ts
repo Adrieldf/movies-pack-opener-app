@@ -10,9 +10,10 @@ export interface CardData {
   trailer?: string;
   imdb_link?: string;
   year?: number;
-  type: "movie" | "tv" | "game" | "music";
+  type: "movie" | "tv" | "game" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg";
   platforms?: string[];
   listeners?: number;
+  cryUrl?: string;
 }
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
