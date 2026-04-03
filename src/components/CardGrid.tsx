@@ -224,10 +224,10 @@ export const CardGrid = ({
             )}
 
             {/* Grid */}
-            <div className={`grid gap-2 sm:gap-4 justify-items-center w-full max-w-7xl mx-auto ${
-              gridSize === "sm" ? "grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" :
-              gridSize === "md" ? "grid-cols-2 min-[500px]:grid-cols-3" :
-              "grid-cols-1 min-[500px]:grid-cols-2"
+            <div className={`grid gap-3 sm:gap-6 justify-items-center w-full max-w-7xl mx-auto ${
+              gridSize === "sm" ? "grid-cols-2 min-[640px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" :
+              gridSize === "md" ? "grid-cols-1 min-[580px]:grid-cols-2 min-[850px]:grid-cols-3" :
+              "grid-cols-1 min-[768px]:grid-cols-2"
             }`}>
               {(isCollectionView
                 ? getGroupedCollection(getSortedCards(getFilteredCollection(collection, typeFilter), sortBy))
@@ -239,10 +239,10 @@ export const CardGrid = ({
                 const baseHeight = isTcg ? 536 : 461;
                 
                 const dims = gridSize === "sm"
-                  ? { container: "w-[184px]", height: Math.round(184 * baseHeight / baseWidth), content: `w-[368px] h-[${baseHeight}px]`, scale: 184 / baseWidth }
+                  ? { container: "w-full max-w-[184px]", height: Math.round(184 * baseHeight / baseWidth), content: `w-[368px] h-[${baseHeight}px]`, scale: 184 / baseWidth }
                   : gridSize === "md"
-                    ? { container: "w-[276px]", height: Math.round(276 * baseHeight / baseWidth), content: `w-[368px] h-[${baseHeight}px]`, scale: 276 / baseWidth }
-                    : { container: "w-[200px] sm:w-[280px] lg:w-[368px]", height: isTcg ? 290 : 250, content: "w-full h-full", scale: 1 };
+                    ? { container: "w-full max-w-[276px]", height: Math.round(276 * baseHeight / baseWidth), content: `w-[368px] h-[${baseHeight}px]`, scale: 276 / baseWidth }
+                    : { container: "w-full max-w-[368px]", height: baseHeight, content: `w-[368px] h-[${baseHeight}px]`, scale: 1 };
                 const colors = getRarityColors(card.rarity);
 
                 return (
