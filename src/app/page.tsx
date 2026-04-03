@@ -175,7 +175,7 @@ export default function Home() {
           const stars = "⭐".repeat(Math.round(card.rating / 2)); // scale 0-10 → 0-5 stars
           const musicInfo = card.type === "music" && card.description ? ` - ${card.description}` : "";
           const listenerInfo = card.type === "music" && card.listeners ? ` | 🎧 ${formatListeners(card.listeners)} listens` : "";
-          const msg = `${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${musicInfo}${listenerInfo} | ${typeLabel} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+          const msg = `${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${musicInfo}${listenerInfo} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
           twitchSend(msg);
         }
       }
