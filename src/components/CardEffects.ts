@@ -17,6 +17,7 @@ interface CardEffectsProps {
   onJunkEffect: (idx: number) => void;
   onMusicPreview: (url: string) => void;
   onPokemonCry?: (url: string) => void;
+  username?: string;
 }
 
 const formatListeners = (num?: number): string => {
@@ -42,6 +43,7 @@ export const useCardEffects = ({
   onJunkEffect,
   onMusicPreview,
   onPokemonCry,
+  username,
 }: CardEffectsProps) => {
   const firedRef = useRef<Set<number>>(new Set());
   const twitchFiredRef = useRef<Set<number>>(new Set());
@@ -110,11 +112,19 @@ export const useCardEffects = ({
         extraInfo = ` #${String(card.year).padStart(4, "0")}`;
       } else if (card.type === "yugioh" || card.type === "mtg") {
         if (card.year) extraInfo = ` (Set ${card.year})`;
+      } else if (card.type === "boardgame") {
+        if (card.rank) extraInfo = ` (Rank #${card.rank})`;
       }
-      const msg = `${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
-      twitchSend(msg);
+      
+      const userPrefix = username ? `${username} found a ` : "";
+      const msg = `${userPrefix}${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+      
+      // Send message after 1s delay as requested
+      setTimeout(() => {
+        twitchSend(msg);
+      }, 1000);
     }
-  }, [isFlipped, isActive, cardIndex]);
+  }, [isFlipped, isActive, cardIndex, card, username, twitchStatus, twitchSend]);
 
   // Reset tracking when the hook is used for a new session (e.g. pack reset)
   const reset = () => {
