@@ -270,9 +270,11 @@ export const CardGrid = ({
                       <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative`}>
                         <div className={`w-full h-full border sm:border-2 ${colors.border} rounded-lg flex flex-col bg-black/50 backdrop-blur-sm relative overflow-hidden group`}>
                           {card.poster && (
-                            <div
-                              className="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300"
-                              style={{ backgroundImage: `url(${card.poster})` }}
+                            <img
+                              referrerPolicy="no-referrer"
+                              src={card.poster}
+                              alt={card.name}
+                              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300"
                             />
                           )}
 
@@ -304,10 +306,15 @@ export const CardGrid = ({
                             <div className="flex flex-col gap-1 items-end">
                             {card.type !== "yugioh" && (
                               <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 flex items-center gap-1 border border-white/10">
-                                {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : card.type === "music" ? <Headphones className="w-2.5 h-2.5 text-slate-400" /> : card.type === "anime" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-2.5 h-2.5 text-yellow-400" /> : card.type === "giphy" ? <Image className="w-2.5 h-2.5 text-cyan-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
+                                {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : card.type === "music" ? <Headphones className="w-2.5 h-2.5 text-slate-400" /> : card.type === "anime" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-2.5 h-2.5 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-2.5 h-2.5 text-amber-400" /> : card.type === "giphy" ? <Image className="w-2.5 h-2.5 text-cyan-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
                                 <span className="text-[8px] font-black uppercase text-slate-400">{card.type}</span>
                               </div>
                             )}
+                              {card.type === "boardgame" && card.rank && card.rank > 0 && (
+                                <div className="bg-amber-950/40 backdrop-blur border border-amber-500/20 rounded px-1.5 py-0.5 mt-0.5 flex items-center gap-1 self-end">
+                                  <span className="text-[7px] font-black text-amber-300 tracking-wider">RANK #{card.rank}</span>
+                                </div>
+                              )}
                               {!isCollectionView && newCardIds.has(card.id) && (
                                 <div className="bg-red-600 text-white text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">New!</div>
                               )}
@@ -359,7 +366,7 @@ export const CardGrid = ({
                                   className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-[8px] sm:text-[10px] lg:text-xs font-bold py-1 px-1.5 sm:px-2 rounded shadow"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "anime" ? "MAL" : "IMDb"}
+                                  {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "anime" ? "MAL" : card.type === "boardgame" ? "BGG" : "IMDb"}
                                 </a>
                               )}
                             </div>

@@ -16,7 +16,7 @@ const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; a
 };
 
 export const PackSelector = ({ onSelect }: { onSelect: (type: PackType) => void }) => {
-  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "boardgame" && t !== "random");
+  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "random");
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-8 font-sans overflow-y-auto">

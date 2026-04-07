@@ -128,9 +128,11 @@ export const CardReveal = ({
           <div className={`w-full h-full border-2 ${colors.border} rounded-lg flex flex-col bg-black/40 backdrop-blur-sm relative overflow-hidden`}>
             {/* Background poster */}
             {card.poster && (
-              <div
-                className={`absolute inset-0 bg-cover bg-center ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg') ? 'opacity-100 mix-blend-normal' : 'opacity-80 mix-blend-overlay'} transition-opacity duration-1000`}
-                style={{ backgroundImage: `url(${card.poster})`, opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg') ? 1 : 0.8) }}
+              <motion.img
+                referrerPolicy="no-referrer"
+                src={card.poster}
+                className={`absolute inset-0 w-full h-full object-cover ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg') ? 'opacity-100 mix-blend-normal' : 'opacity-80 mix-blend-overlay'} transition-opacity duration-1000`}
+                style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg') ? 1 : 0.8) }}
               />
             )}
 
@@ -195,6 +197,11 @@ export const CardReveal = ({
                     <span className="text-[10px] font-bold uppercase text-slate-300">{card.type}</span>
                   </div>
                 )}
+                {card.type === "boardgame" && card.rank && card.rank > 0 && (
+                  <div className="bg-amber-950/40 backdrop-blur border border-amber-500/20 rounded px-2 py-0.5 mt-0.5 flex items-center gap-1 self-end">
+                    <span className="text-[9px] font-black text-amber-300 tracking-wider">RANK #{card.rank}</span>
+                  </div>
+                )}
                 {card.type === "music" && card.listeners !== undefined && (
                   <div className="bg-green-950/40 backdrop-blur border border-green-500/20 rounded px-2 py-0.5 mt-0.5 flex items-center gap-1 self-end">
                     <Users className="w-2.5 h-2.5 text-green-400" />
@@ -247,7 +254,7 @@ export const CardReveal = ({
                     className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : "IMDb"}
+                    {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : "IMDb"}
                   </a>
                 )}
               </div>
