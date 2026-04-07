@@ -52,10 +52,11 @@ export const fetchRandomBoardGamePack = async (
   const PROXIED_URL = `${CORS_PROXY}${encodeURIComponent(BGG_API_URL)}`;
   
   const token = process.env.NEXT_PUBLIC_BGG_API_KEY;
+  const isValidToken = token && token !== "undefined" && token.length > 5;
 
   while (attempts < maxAttempts) {
     const headers: Record<string, string> = {};
-    if (token) {
+    if (isValidToken) {
         headers['Authorization'] = `Bearer ${token}`.trim();
     }
 
