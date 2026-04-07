@@ -34,6 +34,7 @@ jobs:
           NEXT_PUBLIC_RAWG_API_KEY: ${{ secrets.NEXT_PUBLIC_RAWG_API_KEY }}
           NEXT_PUBLIC_LASTFM_API_KEY: ${{ secrets.NEXT_PUBLIC_LASTFM_API_KEY }}
           NEXT_PUBLIC_GIPHY_API_KEY: ${{ secrets.NEXT_PUBLIC_GIPHY_API_KEY }}
+          NEXT_PUBLIC_BGG_API_KEY: ${{ secrets.NEXT_PUBLIC_BGG_API_KEY }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
