@@ -24,7 +24,7 @@ interface QueueItem {
   username?: string;
 }
 
-const DONE_WEBHOOK = "https://api.mixitupapp.com/api/webhook/acfad704-744a-41a9-af17-9704e1b2b3d1?secret=4869AD276B39F6170CC0E582F6D0A62DEACFE926DDF7A27899FC1611A84AE7C2";
+
 
 export default function OverlayPage() {
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -163,8 +163,6 @@ export default function OverlayPage() {
       resetEffects();
       controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
     } else if (!currentPack && queue.length === 0 && packState === "done") {
-      // Finished all packs! Notify MixItUp
-      fetch(DONE_WEBHOOK, { method: "POST" }).catch(() => {});
       setPackState("sealed"); // prevent infinite loop
     }
   }, [currentPack, queue, packState, controls, resetEffects]);
@@ -181,7 +179,7 @@ export default function OverlayPage() {
         return () => clearTimeout(t);
       }
       
-      const duration = activeCard?.type === "music" ? 9000 : 5000;
+      const duration = activeCard?.type === "music" ? 11000 : 6000;
       
       if (activeCardIndex < cards.length - 1) {
         const t = setTimeout(() => {
