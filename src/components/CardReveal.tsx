@@ -154,8 +154,8 @@ export const CardReveal = ({
             {/* Gradient overlays */}
             {card.type !== 'yugioh' && card.type !== 'mtg' && (
               <>
-                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/80 via-black/30 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/40 via-black/15 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 via-black/30 to-transparent" />
               </>
             )}
 

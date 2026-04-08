@@ -279,7 +279,7 @@ export const CardGrid = ({
                           )}
 
                           {card.type !== 'yugioh' && (
-                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/80 to-transparent" />
+                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/40 to-transparent" />
                           )}
                           <div className="relative z-10 flex justify-between items-start w-full p-2 sm:p-3">
                             <div className="flex flex-col gap-1 items-start">
@@ -326,7 +326,7 @@ export const CardGrid = ({
                             )}
                           </div>
 
-                          <div className="relative z-10 mt-auto p-2 sm:p-4 w-full flex flex-col items-center bg-gradient-to-t from-black/90 via-black/70 to-transparent">
+                          <div className="relative z-10 mt-auto p-2 sm:p-4 w-full flex flex-col items-center bg-gradient-to-t from-black/45 via-black/35 to-transparent">
                             {card.type !== "yugioh" && card.type !== "mtg" && (
                               <>
                                 <ScrollableTitle title={card.name} baseClass="text-xs sm:text-sm lg:text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
