@@ -84,29 +84,7 @@ export default function OverlayPage() {
     }
   }, [syncQueue]);
 
-  // ── Logic: Pick next from queue ───────────────────────────────────────────
-  useEffect(() => {
-    if (!currentPack && queue.length > 0) {
-      const next = queue[0];
-      setCurrentPack(next);
-      setQueue(prev => prev.slice(1));
-      localStorage.setItem("gacha_overlay_queue", JSON.stringify(queue.slice(1)));
-      
-      // Reset pack visuals
-      isOpenedRef.current = false;
-      setPackState("sealed");
-      setTearProgress(0);
-      setCards([]);
-      setActiveCardIndex(0);
-      setFlippedCards({});
-      playedRevealSounds.current.clear();
-      controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
-    } else if (!currentPack && queue.length === 0 && packState === "done") {
-      // Finished all packs! Notify MixItUp
-      fetch(DONE_WEBHOOK, { method: "POST" }).catch(() => {});
-      setPackState("sealed"); // prevent infinite loop
-    }
-  }, [currentPack, queue, packState, controls]);
+
 
   // ── Pack revealing logic ──────────────────────────────────────────────────
   const handleOpen = useCallback(async () => {
@@ -137,7 +115,7 @@ export default function OverlayPage() {
 
   // Use the CardEffects logic for the current card
   const activeCard = cards[activeCardIndex] ?? null;
-  useCardEffects({
+  const { reset: resetEffects } = useCardEffects({
     card: activeCard,
     cardIndex: activeCardIndex,
     isFlipped: !!flippedCards[activeCardIndex],
@@ -165,6 +143,31 @@ export default function OverlayPage() {
         audio.play().catch(() => {});
     }
   });
+
+  // ── Logic: Pick next from queue ───────────────────────────────────────────
+  useEffect(() => {
+    if (!currentPack && queue.length > 0) {
+      const next = queue[0];
+      setCurrentPack(next);
+      setQueue(prev => prev.slice(1));
+      localStorage.setItem("gacha_overlay_queue", JSON.stringify(queue.slice(1)));
+      
+      // Reset pack visuals
+      isOpenedRef.current = false;
+      setPackState("sealed");
+      setTearProgress(0);
+      setCards([]);
+      setActiveCardIndex(0);
+      setFlippedCards({});
+      playedRevealSounds.current.clear();
+      resetEffects();
+      controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
+    } else if (!currentPack && queue.length === 0 && packState === "done") {
+      // Finished all packs! Notify MixItUp
+      fetch(DONE_WEBHOOK, { method: "POST" }).catch(() => {});
+      setPackState("sealed"); // prevent infinite loop
+    }
+  }, [currentPack, queue, packState, controls, resetEffects]);
 
   // Automated transitions
   useEffect(() => {

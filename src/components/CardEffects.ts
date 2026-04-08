@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { CardData } from "../lib/tmdb";
 import { Rarity } from "../lib/cardUtils";
@@ -127,10 +127,10 @@ export const useCardEffects = ({
   }, [isFlipped, isActive, cardIndex, card, username, twitchStatus, twitchSend]);
 
   // Reset tracking when the hook is used for a new session (e.g. pack reset)
-  const reset = () => {
+  const reset = useCallback(() => {
     firedRef.current.clear();
     twitchFiredRef.current.clear();
-  };
+  }, []);
 
   return { reset };
 };
