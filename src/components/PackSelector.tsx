@@ -11,7 +11,7 @@ const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; a
   giphy: { label: "Giphy", icon: "🖼️", bg: "from-slate-900 to-cyan-950", accent: "from-cyan-400 to-blue-500", glow: "group-hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]" },
   yugioh: { label: "Yu-Gi-Oh!", icon: "🃏", bg: "from-slate-900 to-amber-950", accent: "from-amber-500 to-yellow-600", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
   mtg: { label: "MTG", icon: "🔮", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-indigo-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
-  boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30_rgba(245,158,11,0.4)]" },
+  boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
   random: { label: "Surprise!", icon: "🎲", bg: "from-slate-800 via-purple-900 to-slate-900", accent: "from-white/40 to-white/10", glow: "group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" }
 };
 

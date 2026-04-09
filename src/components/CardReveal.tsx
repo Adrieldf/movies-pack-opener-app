@@ -89,26 +89,94 @@ export const CardReveal = ({
               }} 
             />
           ) : (
-            <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center p-2 bg-slate-900">
-              {/* Film strip borders for others */}
-              <div className="absolute left-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-30">
-                {Array.from({ length: 24 }).map((_, i) => <div key={`l-${i}`} className="w-full h-2 bg-black rounded-sm"></div>)}
-              </div>
-              <div className="absolute right-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-30">
-                {Array.from({ length: 24 }).map((_, i) => <div key={`r-${i}`} className="w-full h-2 bg-black rounded-sm"></div>)}
-              </div>
+            <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-2 overflow-hidden bg-slate-950`}>
+              {/* Theme-specific Background & Patterns */}
+              {packType === "movies" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/40 to-slate-950" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
+                  <div className="absolute left-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-40">
+                    {Array.from({ length: 24 }).map((_, i) => <div key={`l-${i}`} className="w-full h-2 bg-black rounded-sm shadow-inner"></div>)}
+                  </div>
+                  <div className="absolute right-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-40">
+                    {Array.from({ length: 24 }).map((_, i) => <div key={`r-${i}`} className="w-full h-2 bg-black rounded-sm shadow-inner"></div>)}
+                  </div>
+                </>
+              )}
 
-              <div className="w-24 h-24 rounded-full border-2 border-slate-500/30 flex items-center justify-center p-2 mb-4 relative drop-shadow-xl">
-                <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/60 animate-[spin_20s_linear_infinite]"></div>
-                <div className="text-4xl filter grayscale brightness-150">
+              {packType === "games" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-950" />
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')] scale-150" />
+                  <div className="absolute top-4 left-4 w-12 h-12 border-2 border-blue-400/20 rounded-full" />
+                  <div className="absolute bottom-4 right-4 w-12 h-12 border-2 border-indigo-400/20 rotate-45" />
+                </>
+              )}
+
+              {packType === "music" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-b from-emerald-950 via-slate-950 to-black" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="absolute rounded-full border border-emerald-500" style={{ width: `${(i+1)*20}%`, height: `${(i+1)*20}%` }} />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {packType === "anime" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-rose-950 via-slate-950 to-pink-900/30" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/binding-dark.png')]" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 blur-[60px]" />
+                </>
+              )}
+
+              {packType === "pokemon" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-b from-red-900 via-slate-950 to-slate-900" />
+                  <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 bg-black/60" />
+                </>
+              )}
+
+              {packType === "boardgame" && (
+                <>
+                  <div className="absolute inset-0 bg-[#3d2b1f]" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')]" />
+                  <div className="absolute top-8 left-8 bottom-8 right-8 border-2 border-amber-900/30 rounded-lg" />
+                </>
+              )}
+
+              {packType === "giphy" && (
+                <>
+                   <div className="absolute inset-0 bg-gradient-to-bl from-cyan-900 via-blue-950 to-black" />
+                   <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/shattered.png')]" />
+                   <div className="absolute inset-0 flex flex-wrap gap-1 opacity-5">
+                      {Array.from({ length: 100 }).map((_, i) => <div key={i} className="w-4 h-4 bg-white"></div>)}
+                   </div>
+                </>
+              )}
+
+              {/* Central Icon Container */}
+              <div className={`relative w-32 h-32 flex items-center justify-center p-2 mb-6 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]'}`}>
+                {packType !== 'pokemon' && <div className={`absolute inset-0 rounded-full border-2 border-slate-500/20 backdrop-blur-sm bg-black/20`} />}
+                <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
+                
+                <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
                   {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : "🎬"}
                 </div>
               </div>
 
-              <div className="text-slate-300 font-black text-xl tracking-[0.2em] font-serif text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                 {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : "CINEMA"}
-                 <br />
-                 <span className="text-[10px] opacity-60 tracking-[0.4em]">COLLECTION</span>
+              {/* Label */}
+              <div className="relative z-10 text-center">
+                <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
+                   {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : "CINEMA"}
+                </div>
+                <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
+                   <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-slate-400" />
+                   <span className="text-[10px] font-black tracking-[0.4em] text-slate-300 uppercase">COLLECTION</span>
+                   <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-slate-400" />
+                </div>
               </div>
             </div>
           )}
@@ -125,7 +193,7 @@ export const CardReveal = ({
           className={`absolute inset-0 w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-1 shadow-2xl backface-hidden`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <div className={`w-full h-full border-2 ${colors.border} rounded-lg flex flex-col bg-black/40 backdrop-blur-sm relative overflow-hidden`}>
+          <div className={`w-full h-full border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/40 backdrop-blur-sm relative overflow-hidden`}>
             {/* Background poster */}
             {card.poster && (
               <motion.img
@@ -164,9 +232,9 @@ export const CardReveal = ({
               {/* Left: Rarity + platforms */}
               <div className="flex flex-col gap-1.5 items-start">
                 {card.type !== "yugioh" && card.type !== "mtg" && (
-                  <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
-                    <Sparkles className={`w-4 h-4 ${colors.icon}`} />
-                    <span className={`text-xs font-bold uppercase tracking-wider ${colors.text}`}>{card.rarity}</span>
+                  <div className={`${colors.tagBg} backdrop-blur-md rounded px-2.5 py-1 flex items-center gap-1.5 shadow-lg border border-white/10`}>
+                    <Sparkles className={`w-3.5 h-3.5 ${colors.icon}`} />
+                    <span className={`text-[11px] font-black uppercase tracking-[0.15em] ${colors.tagText}`}>{card.rarity}</span>
                   </div>
                 )}
                 {(card.type === "game" || card.type === "music" || card.type === "pokemon") && card.platforms && card.platforms.length > 0 && (
@@ -214,7 +282,7 @@ export const CardReveal = ({
             {/* Bottom: Title & Links */}
             <div className="relative z-10 mt-auto p-4 w-full flex flex-col items-center">
               {card.type !== "yugioh" && card.type !== "mtg" && <ScrollableTitle title={card.name} baseClass="text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />}
-              {(card.type === "music" || (card.type !== "yugioh" && card.type !== "pokemon" && card.type !== "giphy" && card.type !== "anime" && card.description)) && card.description && (
+              {(card.type === "music" || (card.type !== "yugioh" && card.type !== "pokemon" && card.type !== "giphy" && card.description)) && card.description && (
                 <div className="text-xs sm:text-sm font-bold text-white/70 drop-shadow-md text-center max-w-[90%] truncate mt-1">
                   {card.description}
                 </div>
@@ -224,40 +292,42 @@ export const CardReveal = ({
                    {card.year}
                 </div>
               )}
-              <div className="flex gap-2 w-full justify-center mt-2">
-                {card.trailer && (
-                  <a
-                    href={card.trailer}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${card.type === "music" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"} text-white text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors flex items-center gap-1`}
-                    onClick={(e) => {
-                      if (card.type === "music") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const audio = new Audio(card.trailer);
-                        audio.volume = 0.5;
-                        audio.play().catch(() => {});
-                      } else {
-                        e.stopPropagation();
-                      }
-                    }}
-                  >
-                    {card.type === "music" ? <><Music className="w-3 h-3" /> Preview</> : "Trailer"}
-                  </a>
-                )}
-                {card.imdb_link && card.type !== "yugioh" && card.type !== "mtg" && (
-                  <a
-                    href={card.imdb_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : "IMDb"}
-                  </a>
-                )}
-              </div>
+              {!isAutoMode && (
+                <div className="flex gap-2 w-full justify-center mt-2">
+                  {card.trailer && (
+                    <a
+                      href={card.trailer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${card.type === "music" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"} text-white text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors flex items-center gap-1`}
+                      onClick={(e) => {
+                        if (card.type === "music") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const audio = new Audio(card.trailer);
+                          audio.volume = 0.5;
+                          audio.play().catch(() => {});
+                        } else {
+                          e.stopPropagation();
+                        }
+                      }}
+                    >
+                      {card.type === "music" ? <><Music className="w-3 h-3" /> Preview</> : "Trailer"}
+                    </a>
+                  )}
+                  {card.imdb_link && card.type !== "yugioh" && card.type !== "mtg" && (
+                    <a
+                      href={card.imdb_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : "IMDb"}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Foil overlay */}

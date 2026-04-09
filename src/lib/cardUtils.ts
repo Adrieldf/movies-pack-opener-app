@@ -35,13 +35,69 @@ export const rarityOrder: Record<Rarity, number> = {
 };
 
 export const getRarityColors = (rarity: Rarity) => {
-  const colors: Record<Rarity, { bg: string; text: string; icon: string; border: string }> = {
-    Junk:      { bg: "from-[#4a5c2f] via-[#6b7c3a] to-[#3d4f25]", text: "text-lime-100",   icon: "text-lime-300",   border: "border-lime-900/50"   },
-    Common:    { bg: "from-slate-300 via-gray-200 to-slate-400",    text: "text-slate-800", icon: "text-slate-100",  border: "border-slate-100/50"  },
-    Uncommon:  { bg: "from-green-300 via-emerald-200 to-green-400", text: "text-green-900", icon: "text-green-100",  border: "border-green-100/50"  },
-    Rare:      { bg: "from-blue-300 via-cyan-200 to-blue-400",      text: "text-blue-900",  icon: "text-blue-100",   border: "border-blue-100/50"   },
-    Epic:      { bg: "from-purple-300 via-fuchsia-200 to-purple-400", text: "text-purple-900", icon: "text-purple-100", border: "border-purple-100/50" },
-    Legendary: { bg: "from-yellow-300 via-amber-200 to-orange-400", text: "text-amber-900", icon: "text-yellow-100", border: "border-yellow-100/50" },
+  const colors: Record<Rarity, { 
+    bg: string; 
+    text: string; 
+    icon: string; 
+    border: string;
+    tagBg: string;
+    tagText: string;
+    animate: string;
+  }> = {
+    Junk: { 
+      bg: "from-[#4a5c2f] via-[#6b7c3a] to-[#3d4f25]", 
+      text: "text-lime-100", 
+      icon: "text-lime-300", 
+      border: "border-lime-900/50",
+      tagBg: "bg-lime-900/80",
+      tagText: "text-lime-200",
+      animate: "animate-pulse-junk"
+    },
+    Common: { 
+      bg: "from-slate-300 via-gray-200 to-slate-400", 
+      text: "text-slate-800", 
+      icon: "text-slate-100", 
+      border: "border-slate-100/50",
+      tagBg: "bg-slate-700/80",
+      tagText: "text-white",
+      animate: "animate-pulse-common"
+    },
+    Uncommon: { 
+      bg: "from-green-300 via-emerald-200 to-green-400", 
+      text: "text-green-900", 
+      icon: "text-green-100", 
+      border: "border-green-100/50",
+      tagBg: "bg-green-700/80",
+      tagText: "text-green-50",
+      animate: "animate-pulse-uncommon"
+    },
+    Rare: { 
+      bg: "from-blue-300 via-cyan-200 to-blue-400", 
+      text: "text-blue-900", 
+      icon: "text-blue-100", 
+      border: "border-blue-100/50",
+      tagBg: "bg-blue-700/80",
+      tagText: "text-blue-50",
+      animate: "animate-pulse-rare"
+    },
+    Epic: { 
+      bg: "from-purple-300 via-fuchsia-200 to-purple-400", 
+      text: "text-purple-900", 
+      icon: "text-purple-100", 
+      border: "border-purple-100/50",
+      tagBg: "bg-purple-700/80",
+      tagText: "text-purple-50",
+      animate: "animate-pulse-epic"
+    },
+    Legendary: { 
+      bg: "from-yellow-300 via-amber-200 to-orange-400", 
+      text: "text-amber-900", 
+      icon: "text-yellow-100", 
+      border: "border-yellow-100/50",
+      tagBg: "bg-amber-600/90",
+      tagText: "text-white shadow-[0_1px_2px_rgba(0,0,0,0.5)]",
+      animate: "animate-pulse-legendary"
+    },
   };
   return colors[rarity] ?? colors.Common;
 };

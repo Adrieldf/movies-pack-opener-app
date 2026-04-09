@@ -13,50 +13,80 @@ const getRarityByFavorites = (favs: number): Rarity => {
 
 export const fetchRandomAnimePack = async (count: number = 5): Promise<CardData[]> => {
   try {
-    // We fetch from multiple different popularities to get a diverse pool
-    // Page 1-3 = God Tier (Legendary/Epic)
-    // Page 10-25 = Mid Tier (Epic/Rare)
-    // Page 40-100 = Lower Tier (Rare/Uncommon/Common)
-    const pages = [
-      Math.floor(Math.random() * 3) + 1,
-      Math.floor(Math.random() * 15) + 10,
-      Math.floor(Math.random() * 60) + 40
+    // 1. Fetch random pages of top anime to get a variety of series
+    const animePages = [
+      Math.floor(Math.random() * 5) + 1,   // Top tier
+      Math.floor(Math.random() * 15) + 6,  // Mid tier
     ];
 
-    const poolPromises = pages.map(p => 
-      fetch(`${JIKAN_BASE_URL}/top/characters?page=${p}`).then(r => r.ok ? r.json() : { data: [] })
+    const animePoolPromises = animePages.map(p => 
+      fetch(`${JIKAN_BASE_URL}/top/anime?page=${p}`).then(r => r.ok ? r.json() : { data: [] })
     );
     
-    const results = await Promise.all(poolPromises);
-    const pool = results.flatMap(r => r.data || []);
+    const animeResults = await Promise.all(animePoolPromises);
+    const animePool = animeResults.flatMap(r => r.data || []);
 
-    if (pool.length === 0) return [];
+    if (animePool.length === 0) return [];
 
-    // Shuffle and pick
-    for (let i = pool.length - 1; i > 0; i--) {
+    // Shuffle anime pool
+    for (let i = animePool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
+      [animePool[i], animePool[j]] = [animePool[j], animePool[i]];
     }
 
-    const selectedItems = pool.slice(0, Math.min(count, pool.length));
+    // 2. Pick unique anime and fetch their characters
+    const selectedAnime = animePool.slice(0, Math.min(count * 2, animePool.length));
+    const characterCards: CardData[] = [];
 
-    return selectedItems.map((char: any): CardData => {
-      const favorites = char.favorites || 0;
-      const rating = Math.min(10, Math.max(1, (Math.log10(favorites + 1) / 5) * 10));
+    // Jikan has a rate limit (3 req/sec), so we fetch with small delays
+    for (const anime of selectedAnime) {
+      if (characterCards.length >= count) break;
 
-      return {
-        id: `anime-${char.mal_id}`,
-        rarity: getRarityByFavorites(favorites),
-        name: char.name,
-        description: "", // Description removed per request
-        poster: char.images?.jpg?.image_url || "",
-        rating: Number(rating.toFixed(1)),
-        type: "anime",
-        imdb_link: char.url,
-      };
-    });
+      try {
+        // Fetch characters for this specific anime
+        const charRes = await fetch(`${JIKAN_BASE_URL}/anime/${anime.mal_id}/characters`);
+        if (!charRes.ok) continue;
+
+        const charData = await charRes.json();
+        const characters = charData.data || [];
+        
+        // Prefer "Main" characters first, then "Supporting"
+        const mainChars = characters.filter((c: any) => c.role === "Main");
+        const pool = mainChars.length > 0 ? mainChars : characters;
+        
+        if (pool.length > 0) {
+          const charEntry = pool[Math.floor(Math.random() * pool.length)];
+          const char = charEntry.character;
+          
+          // Use anime popularity/rating to influence card rating
+          const animeScore = anime.score || 7.0;
+          const favorites = anime.favorites || 0;
+          const rarity = getRarityByFavorites(favorites);
+
+          characterCards.push({
+            id: `anime-char-${char.mal_id}`,
+            rarity: rarity,
+            name: char.name,
+            description: anime.title, // This is the origin anime name
+            poster: char.images?.jpg?.image_url || anime.images?.jpg?.image_url || "",
+            rating: Number(animeScore.toFixed(1)),
+            type: "anime",
+            imdb_link: char.url,
+          });
+
+          // Small sleep to respect rate limit (3 requests per second)
+          if (characterCards.length < count) {
+            await new Promise(resolve => setTimeout(resolve, 350));
+          }
+        }
+      } catch (e) {
+        console.error(`Failed to fetch characters for anime ${anime.mal_id}`, e);
+      }
+    }
+
+    return characterCards;
   } catch (e) {
-    console.error(e);
+    console.error("Anime fetch failed:", e);
     return [];
   }
 };

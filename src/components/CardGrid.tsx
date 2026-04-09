@@ -268,7 +268,7 @@ export const CardGrid = ({
                       style={{ transform: dims.scale !== 1 ? `scale(${dims.scale})` : "none" }}
                     >
                       <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative`}>
-                        <div className={`w-full h-full border sm:border-2 ${colors.border} rounded-lg flex flex-col bg-black/50 backdrop-blur-sm relative overflow-hidden group`}>
+                        <div className={`w-full h-full border sm:border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/50 backdrop-blur-sm relative overflow-hidden group`}>
                           {card.poster && (
                             <img
                               referrerPolicy="no-referrer"
@@ -284,9 +284,9 @@ export const CardGrid = ({
                           <div className="relative z-10 flex justify-between items-start w-full p-2 sm:p-3">
                             <div className="flex flex-col gap-1 items-start">
                               {card.type !== "yugioh" && (
-                                <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1 flex items-center gap-0.5 sm:gap-1">
+                                <div className={`${colors.tagBg} backdrop-blur-md rounded px-1.5 py-0.5 sm:px-2 sm:py-1 flex items-center gap-1 sm:gap-1.5 shadow-lg border border-white/10`}>
                                   <Sparkles className={`w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 ${colors.icon}`} />
-                                  <span className={`text-[8px] sm:text-[10px] lg:text-xs font-bold uppercase tracking-wider ${colors.text}`}>{card.rarity}</span>
+                                  <span className={`text-[9px] sm:text-[10px] lg:text-xs font-black uppercase tracking-wider ${colors.tagText}`}>{card.rarity}</span>
                                 </div>
                               )}
                               {(card.type === "game" || card.type === "music" || card.type === "giphy" || card.type === "pokemon") && card.platforms && card.platforms.length > 0 && (
@@ -330,7 +330,7 @@ export const CardGrid = ({
                             {card.type !== "yugioh" && card.type !== "mtg" && (
                               <>
                                 <ScrollableTitle title={card.name} baseClass="text-xs sm:text-sm lg:text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
-                                {(card.type === "music" || (card.type !== "pokemon" && card.type !== "giphy" && card.type !== "anime" && card.description)) && card.description && (
+                                {(card.type === "music" || (card.type !== "pokemon" && card.type !== "giphy" && card.description)) && card.description && (
                                   <div className="text-[10px] sm:text-xs font-bold text-white/70 drop-shadow-md text-center max-w-[90%] truncate mt-0.5 sm:mt-1">{card.description}</div>
                                 )}
                                 {card.year && card.type !== "pokemon" && card.type !== "giphy" && <span className="text-[10px] sm:text-xs text-white/70 font-bold mb-1">{card.year}</span>}

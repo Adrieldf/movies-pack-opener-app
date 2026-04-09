@@ -14,56 +14,56 @@ const getRarityByRating = (rating10: number): Rarity => {
 const getRandomRating = (id: number): number => {
   const seededRandom = Math.abs(Math.sin(id * 10.51) * 10000);
   const rand0to1 = seededRandom - Math.floor(seededRandom);
-  return Number((2.0 + rand0to1 * 8.0).toFixed(1)); 
+  return Number((2.0 + rand0to1 * 8.0).toFixed(1));
 };
 
 /** Use Last.fm to get a real-world popularity score */
 const getRealMusicRating = async (artist: string, track: string, id: number): Promise<{ rating: number; listeners: number }> => {
-    if (!LASTFM_API_KEY) return { rating: getRandomRating(id), listeners: 0 };
+  if (!LASTFM_API_KEY) return { rating: getRandomRating(id), listeners: 0 };
 
-    try {
-        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&format=json`;
-        const res = await fetch(url);
-        if (!res.ok) return { rating: getRandomRating(id), listeners: 0 };
-        
-        const data = await res.json();
-        const listeners = parseInt(data.track?.listeners || "0", 10);
-        
-        if (listeners === 0) return { rating: getRandomRating(id), listeners: 0 };
+  try {
+    const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&format=json`;
+    const res = await fetch(url);
+    if (!res.ok) return { rating: getRandomRating(id), listeners: 0 };
 
-        /** 
-         * LOGARITHMIC SCALING 
-         */
-        const logScore = Math.log10(listeners);
-        let rating = (logScore / 7) * 10; 
-        
-        return { 
-          rating: Number(Math.min(10, Math.max(1, rating)).toFixed(1)), 
-          listeners 
-        };
-    } catch (e) {
-        return { rating: getRandomRating(id), listeners: 0 };
-    }
+    const data = await res.json();
+    const listeners = parseInt(data.track?.listeners || "0", 10);
+
+    if (listeners === 0) return { rating: getRandomRating(id), listeners: 0 };
+
+    /** 
+     * LOGARITHMIC SCALING 
+     */
+    const logScore = Math.log10(listeners);
+    let rating = (logScore / 7) * 10;
+
+    return {
+      rating: Number(Math.min(10, Math.max(1, rating)).toFixed(1)),
+      listeners
+    };
+  } catch (e) {
+    return { rating: getRandomRating(id), listeners: 0 };
+  }
 }
 
 export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[]> => {
   const terms = [
-    "hits", "top charts", "classic rock", "r&b", "90s house", "80s synth", 
-    "viral", "soundtrack", "top tracks", "pop 2024", "hip hop", "alternative",
+    "hits", "top charts", "classic rock", "r&b", "house", "synth",
+    "viral", "soundtrack", "top tracks", "pop", "hip hop", "alternative",
     "jazz", "blues", "country", "EDM", "indie", "metal", "classical", "k-pop",
-    "reggae", "punk", "disco", "funk", "grunge", "lo-fi", "chill", "workout",
+    "reggae", "punk", "disco", "funk", "grunge", "lo-fi", "chill",
     "acoustic", "ambient", "folk", "latin", "salsa", "heavy metal", "techno"
   ];
-  
+
   try {
     const urls = [];
     // At least 3 distinct genres per pack, or more if the pack is very large
-    const numGenres = Math.max(3, Math.ceil(count / 5)); 
+    const numGenres = Math.max(3, Math.ceil(count / 5));
     const shuffledTerms = [...terms].sort(() => 0.5 - Math.random());
     const selectedTerms = shuffledTerms.slice(0, numGenres);
 
-    for(const term of selectedTerms) {
-        urls.push(`https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=40`);
+    for (const term of selectedTerms) {
+      urls.push(`https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=40`);
     }
 
     const responses = await Promise.all(
