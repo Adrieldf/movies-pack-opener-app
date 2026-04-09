@@ -110,9 +110,9 @@ export const useCardEffects = ({
         const listens = card.listeners ? ` | 🎧 ${formatListeners(card.listeners)} listens` : "";
         extraInfo = ` ${artistPart}${listens}`;
       } else if (card.type === "anime") {
-        const series = card.description || "";
+        const desc = card.description || "";
         const year = card.year ? ` (${card.year})` : "";
-        extraInfo = series ? ` [From: ${series}]${year}` : year;
+        extraInfo = desc ? ` [${desc}]${year}` : year;
       } else if (card.type === "pokemon") {
         extraInfo = ` #${String(card.year).padStart(4, "0")}`;
       } else if (card.type === "disney") {

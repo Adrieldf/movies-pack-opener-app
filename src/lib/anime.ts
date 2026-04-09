@@ -67,7 +67,7 @@ export const fetchRandomAnimePack = async (count: number = 5): Promise<CardData[
             id: `anime-char-${char.mal_id}`,
             rarity: rarity,
             name: char.name,
-            description: anime.title, // This is the origin anime name
+            description: `${charEntry.role} character in ${anime.title}`, // Role + Anime Name
             poster: char.images?.jpg?.image_url || anime.images?.jpg?.image_url || "",
             rating: Number(animeScore.toFixed(1)),
             type: "anime",
