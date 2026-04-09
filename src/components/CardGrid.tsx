@@ -366,7 +366,7 @@ export const CardGrid = ({
                                   className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-[8px] sm:text-[10px] lg:text-xs font-bold py-1 px-1.5 sm:px-2 rounded shadow"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "anime" ? "MAL" : card.type === "boardgame" ? "BGG" : "IMDb"}
+                                  {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : "Info"}
                                 </a>
                               )}
                             </div>

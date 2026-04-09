@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "random";
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "random";
 
 const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; accent: string; glow: string }> = {
   movies: { label: "Cinema", icon: "🎬", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-pink-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
@@ -12,6 +12,7 @@ const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; a
   yugioh: { label: "Yu-Gi-Oh!", icon: "🃏", bg: "from-slate-900 to-amber-950", accent: "from-amber-500 to-yellow-600", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
   mtg: { label: "MTG", icon: "🔮", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-indigo-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
   boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
+  disney: { label: "Disney", icon: "🏰", bg: "from-slate-900 to-sky-950", accent: "from-blue-400 to-yellow-500", glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]" },
   random: { label: "Surprise!", icon: "🎲", bg: "from-slate-800 via-purple-900 to-slate-900", accent: "from-white/40 to-white/10", glow: "group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" }
 };
 

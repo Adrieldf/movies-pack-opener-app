@@ -12,6 +12,7 @@ import { fetchRandomBoardGamePack } from "../../lib/boardgames";
 import { fetchRandomGiphyPack } from "../../lib/giphy";
 import { fetchRandomYugiohPack } from "../../lib/yugioh";
 import { fetchRandomMtgPack } from "../../lib/mtg";
+import { fetchRandomDisneyPack } from "../../lib/disney";
 import { useTwitchChat } from "../../lib/useTwitchChat";
 import { PackVisual, PackType } from "../../components/PackVisual";
 import { CardReveal } from "../../components/CardReveal";
@@ -101,6 +102,7 @@ export default function OverlayPage() {
       : type === "giphy" ? await fetchRandomGiphyPack(count)
       : type === "yugioh" ? await fetchRandomYugiohPack(count)
       : type === "mtg" ? await fetchRandomMtgPack(count)
+      : type === "disney" ? await fetchRandomDisneyPack(count)
       : await fetchRandomPack(count);
 
     setCards(fetched);

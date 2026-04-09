@@ -14,6 +14,7 @@ import { fetchRandomBoardGamePack } from "../lib/boardgames";
 import { fetchRandomGiphyPack } from "../lib/giphy";
 import { fetchRandomYugiohPack } from "../lib/yugioh";
 import { fetchRandomMtgPack } from "../lib/mtg";
+import { fetchRandomDisneyPack } from "../lib/disney";
 import { sanitizeCards, Rarity } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
@@ -88,7 +89,7 @@ export default function Home() {
       if (!isNaN(n)) setPackSize(Math.max(1, Math.min(100, n)));
     }
     const pType = params.get("pack");
-    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg"];
+    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney"];
     if (pType === "random") {
       const chosen = validTypes[Math.floor(Math.random() * validTypes.length)];
       setPackType(chosen);
@@ -198,7 +199,9 @@ export default function Home() {
                       ? await fetchRandomYugiohPack(packSize)
                       : packType === "mtg"
                         ? await fetchRandomMtgPack(packSize)
-                        : await fetchRandomPack(packSize);
+                        : packType === "disney"
+                          ? await fetchRandomDisneyPack(packSize)
+                          : await fetchRandomPack(packSize);
 
     // Determine new cards
     let existingIdsArr: string[] = [];
@@ -345,7 +348,7 @@ export default function Home() {
       <PackSelector onSelect={(t) => {
         let finalType = t;
         if (t === "random") {
-          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg"];
+          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney"];
           finalType = validTypes[Math.floor(Math.random() * validTypes.length)];
         }
         setPackType(finalType);

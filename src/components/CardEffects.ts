@@ -94,11 +94,12 @@ export const useCardEffects = ({
         card.type === "giphy" ? "🖼️ GIF" :
         card.type === "yugioh" ? "🃏 Duelist" :
         card.type === "mtg" ? "🔮 MTG" :
+        card.type === "disney" ? "🏰 Disney" :
         "📺 TV Series";
         
       const stars = "⭐".repeat(Math.round(card.rating / 2));
       let extraInfo = "";
-      if (card.type === "movie" || card.type === "tv" || card.type === "anime") {
+      if (card.type === "movie" || card.type === "tv") {
         if (card.year) extraInfo = ` (${card.year})`;
       } else if (card.type === "game") {
         const platforms = card.platforms?.slice(0, 3).join(", ");
@@ -108,8 +109,15 @@ export const useCardEffects = ({
         const artistPart = artist ? `by ${artist}` : "";
         const listens = card.listeners ? ` | 🎧 ${formatListeners(card.listeners)} listens` : "";
         extraInfo = ` ${artistPart}${listens}`;
+      } else if (card.type === "anime") {
+        const series = card.description || "";
+        const year = card.year ? ` (${card.year})` : "";
+        extraInfo = series ? ` [From: ${series}]${year}` : year;
       } else if (card.type === "pokemon") {
         extraInfo = ` #${String(card.year).padStart(4, "0")}`;
+      } else if (card.type === "disney") {
+        const source = card.description || "";
+        extraInfo = source ? ` [From: ${source}]` : "";
       } else if (card.type === "yugioh" || card.type === "mtg") {
         if (card.year) extraInfo = ` (Set ${card.year})`;
       } else if (card.type === "boardgame") {
@@ -117,7 +125,10 @@ export const useCardEffects = ({
       }
       
       const userPrefix = username ? `${username} found a ` : "";
-      const msg = `${userPrefix}${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo} | ⭐ ${card.rating.toFixed(1)}/10 ${stars}`;
+      const showRating = card.type !== "yugioh" && card.type !== "mtg";
+      const ratingPart = showRating ? ` | ⭐ ${card.rating.toFixed(1)}/10 ${stars}` : "";
+      
+      const msg = `${userPrefix}${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo}${ratingPart}`;
       
       // Send message after 1s delay as requested
       setTimeout(() => {

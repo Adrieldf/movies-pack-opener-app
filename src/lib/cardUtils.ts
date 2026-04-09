@@ -95,7 +95,7 @@ export const getRarityColors = (rarity: Rarity) => {
       icon: "text-yellow-100", 
       border: "border-yellow-100/50",
       tagBg: "bg-amber-600/90",
-      tagText: "text-white shadow-[0_1px_2px_rgba(0,0,0,0.5)]",
+      tagText: "text-white",
       animate: "animate-pulse-legendary"
     },
   };

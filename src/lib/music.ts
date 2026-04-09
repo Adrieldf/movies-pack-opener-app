@@ -79,14 +79,29 @@ export const fetchRandomMusicPack = async (count: number = 5): Promise<CardData[
       [allSongs[i], allSongs[j]] = [allSongs[j], allSongs[i]];
     }
 
-    const uniqueAlbums = new Set();
+    const seenTracks = new Set<string>();
     const uniquePool: any[] = [];
 
     for (const item of allSongs) {
-      // Use collectionId for albums, fallback to collectionName, fallback to trackId if it's a true singleton
-      const albumKey = item.collectionId || item.collectionName || item.trackId;
-      if (!uniqueAlbums.has(albumKey)) {
-        uniqueAlbums.add(albumKey);
+      if (!item.trackName || !item.artistName) continue;
+      
+      // Filter out common compilation/greatest hits terms
+      const collectionName = (item.collectionName || "").toLowerCase();
+      const isCompilation = 
+        collectionName.includes("greatest hits") || 
+        collectionName.includes("best of") || 
+        collectionName.includes("the essential") ||
+        collectionName.includes("essential collection") ||
+        collectionName.includes("collection") ||
+        collectionName.includes("anthology");
+
+      if (isCompilation) continue;
+      
+      // Use a combination of artist and track name to prevent duplicates
+      const trackKey = `${item.artistName.trim()} - ${item.trackName.trim()}`.toLowerCase();
+      
+      if (!seenTracks.has(trackKey)) {
+        seenTracks.add(trackKey);
         uniquePool.push(item);
       }
     }
