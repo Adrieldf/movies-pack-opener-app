@@ -81,27 +81,32 @@ export const CardReveal = ({
         >
           {/* The Actual Card Back Image (TCG ONLY) */}
           {(packType === "yugioh" || packType === "mtg") ? (
-            <div 
-              className="absolute inset-0 bg-cover bg-center w-full h-full" 
-              style={{ 
+            <div
+              className="absolute inset-0 bg-cover bg-center w-full h-full"
+              style={{
                 backgroundImage: `url('${packType === "yugioh" ? "yugioh-back.png" : "mtg-back.png"}')`,
-                backfaceVisibility: "hidden" 
-              }} 
+                backfaceVisibility: "hidden"
+              }}
             />
           ) : (
             <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-2 overflow-hidden bg-slate-950`}>
               {/* Theme-specific Background & Patterns */}
-              {packType === "movies" && (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/40 to-slate-950" />
-                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
+              {(packType === "movies" || !["games", "music", "anime", "pokemon", "boardgame", "giphy", "yugioh", "mtg", "disney"].includes(packType)) && (
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-black" />
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
+
+                  {/* Slow rotating light leaks */}
+                  <div className="absolute -inset-[50%] opacity-20 bg-[radial-gradient(circle_at_50%_50%,_rgba(168,85,247,0.1)_0%,_transparent_60%)] animate-[spin_20s_linear_infinite]" />
+
+                  {/* Film strips on sides */}
                   <div className="absolute left-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-40">
                     {Array.from({ length: 24 }).map((_, i) => <div key={`l-${i}`} className="w-full h-2 bg-black rounded-sm shadow-inner"></div>)}
                   </div>
                   <div className="absolute right-1 top-0 bottom-0 w-3 flex flex-col py-1 space-y-1.5 opacity-40">
                     {Array.from({ length: 24 }).map((_, i) => <div key={`r-${i}`} className="w-full h-2 bg-black rounded-sm shadow-inner"></div>)}
                   </div>
-                </>
+                </div>
               )}
 
               {packType === "games" && (
@@ -118,7 +123,7 @@ export const CardReveal = ({
                   <div className="absolute inset-0 bg-gradient-to-b from-emerald-950 via-slate-950 to-black" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-10">
                     {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className="absolute rounded-full border border-emerald-500" style={{ width: `${(i+1)*20}%`, height: `${(i+1)*20}%` }} />
+                      <div key={i} className="absolute rounded-full border border-emerald-500" style={{ width: `${(i + 1) * 20}%`, height: `${(i + 1) * 20}%` }} />
                     ))}
                   </div>
                 </>
@@ -149,54 +154,77 @@ export const CardReveal = ({
 
               {packType === "giphy" && (
                 <>
-                   <div className="absolute inset-0 bg-gradient-to-bl from-cyan-900 via-blue-950 to-black" />
-                   <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/shattered.png')]" />
-                   <div className="absolute inset-0 flex flex-wrap gap-1 opacity-5">
-                      {Array.from({ length: 100 }).map((_, i) => <div key={i} className="w-4 h-4 bg-white"></div>)}
-                   </div>
+                  <div className="absolute inset-0 bg-gradient-to-bl from-cyan-900 via-blue-950 to-black" />
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/shattered.png')]" />
+                  <div className="absolute inset-0 flex flex-wrap gap-1 opacity-5">
+                    {Array.from({ length: 100 }).map((_, i) => <div key={i} className="w-4 h-4 bg-white"></div>)}
+                  </div>
                 </>
               )}
 
               {packType === "disney" && (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-sky-950 to-indigo-900" />
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_0%,_#fde047_1px,_transparent_1px)] bg-[length:20px_20px]"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-yellow-500/20 blur-sm"></div>
-                </>
+                <div className="absolute inset-0 overflow-hidden bg-slate-950">
+                  {/* Night Sky Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-950 to-black" />
+
+                  {/* Remote Stars */}
+                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(white_1px,transparent_1px)] bg-[length:32px_32px]" />
+
+                  {/* Castle Silhouette (Background layer) */}
+                  <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-[130px] filter brightness-0 opacity-40 select-none">
+                    🏰
+                  </div>
+
+                  {/* Volumetric Light Beams (Foreground layer - shining in front of castle) */}
+                  <div className="absolute inset-0 z-10 pointer-events-none mix-blend-screen overflow-hidden text-sky-200">
+                    <div className="absolute bottom-[-10%] left-[10%] w-40 h-[150%] bg-gradient-to-t from-blue-400/20 via-sky-300/10 to-transparent -rotate-[25deg] blur-2xl animate-pulse" />
+                    <div className="absolute bottom-[-10%] right-[15%] w-32 h-[130%] bg-gradient-to-t from-indigo-400/15 via-blue-300/5 to-transparent rotate-[20deg] blur-xl" />
+                    <div className="absolute bottom-[-10%] left-[40%] w-56 h-[180%] bg-gradient-to-t from-white/30 via-sky-200/10 to-transparent -rotate-[2deg] blur-[50px] animate-[pulse_6s_ease-in-out_infinite]" />
+                  </div>
+
+
+                </div>
               )}
 
-              {/* Central Icon Container */}
-              <div className={`relative w-32 h-32 flex items-center justify-center p-2 mb-6 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]'}`}>
-                {packType !== 'pokemon' && <div className={`absolute inset-0 rounded-full border-2 border-slate-500/20 backdrop-blur-sm bg-black/20`} />}
-                <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
-                
-                <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
-                  {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : "🎬"}
-                </div>
-              </div>
-
-              {/* Label */}
-              <div className="relative z-10 text-center">
-                <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
-                   <span className="text-white/60 font-black tracking-[0.2em]">
-                    {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : "CINEMA"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
-                   <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-slate-400" />
-                   <span className="text-[10px] font-black tracking-[0.4em] text-slate-300 uppercase">COLLECTION</span>
-                   <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-slate-400" />
-                </div>
-              </div>
             </div>
           )}
 
-          {packState === "revealing" && !isFlipped && (
-            <div className="absolute bottom-6 left-0 right-0 text-center text-[10px] font-black tracking-[0.2em] text-slate-400/80 animate-pulse uppercase">
-              {isAutoMode ? "Auto-Revealing..." : "Tap to Flip"}
-            </div>
+          {/* Universal Holographic Shimmer (for all non-Pokemon packs) */}
+          {packType !== "pokemon" && (
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-10 animate-holo bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.5)_50%,transparent_75%)] bg-[length:250%_250%]" />
           )}
+
+          {/* Central Icon Container */}
+          <div className={`relative w-32 h-32 flex items-center justify-center p-2 mb-6 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]'}`}>
+            {packType !== 'pokemon' && <div className={`absolute inset-0 rounded-full border-2 border-slate-500/20 backdrop-blur-sm bg-black/20`} />}
+            <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
+
+            <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
+              {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : "🎬"}
+            </div>
+          </div>
+
+          {/* Label */}
+          <div className="relative z-10 text-center">
+            <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
+              <span className="text-white/60 font-black tracking-[0.2em]">
+                {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : "CINEMA"}
+              </span>
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
+              <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-slate-400" />
+              <span className="text-[10px] font-black tracking-[0.4em] text-slate-300 uppercase">COLLECTION</span>
+              <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-slate-400" />
+            </div>
+          </div>
         </div>
+        ){"}"}
+
+        {packState === "revealing" && !isFlipped && (
+          <div className="absolute bottom-6 left-0 right-0 text-center text-[10px] font-black tracking-[0.2em] text-slate-400/80 animate-pulse uppercase">
+            {isAutoMode ? "Auto-Revealing..." : "Tap to Flip"}
+          </div>
+        )}
 
         {/* ── Card Front ── */}
         <div
@@ -228,6 +256,7 @@ export const CardReveal = ({
                 />
               </div>
             )}
+
 
             {/* Gradient overlays */}
             {card.type !== 'yugioh' && card.type !== 'mtg' && (
@@ -299,7 +328,7 @@ export const CardReveal = ({
               )}
               {card.year && card.type !== "yugioh" && card.type !== "mtg" && card.type !== "pokemon" && card.type !== "giphy" && (
                 <div className="text-xs font-bold text-white/60 mb-2 drop-shadow-md text-center">
-                   {card.year}
+                  {card.year}
                 </div>
               )}
               {!isAutoMode && (
@@ -316,7 +345,7 @@ export const CardReveal = ({
                           e.stopPropagation();
                           const audio = new Audio(card.trailer);
                           audio.volume = 0.5;
-                          audio.play().catch(() => {});
+                          audio.play().catch(() => { });
                         } else {
                           e.stopPropagation();
                         }

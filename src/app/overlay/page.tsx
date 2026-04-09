@@ -181,7 +181,7 @@ export default function OverlayPage() {
         return () => clearTimeout(t);
       }
       
-      const duration = activeCard?.type === "music" ? 11000 : 6000;
+      const duration = activeCard?.type === "music" ? 12000 : 7000;
       
       if (activeCardIndex < cards.length - 1) {
         const t = setTimeout(() => {
