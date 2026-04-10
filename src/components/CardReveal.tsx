@@ -190,41 +190,44 @@ export const CardReveal = ({
           )}
 
           {/* Universal Holographic Shimmer (for all non-Pokemon packs) */}
-          {packType !== "pokemon" && (
+          {packType !== "pokemon" && packType !== "yugioh" && packType !== "mtg" && (
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-10 animate-holo bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.5)_50%,transparent_75%)] bg-[length:250%_250%]" />
           )}
 
-          {/* Central Icon Container */}
-          <div className={`relative w-32 h-32 flex items-center justify-center p-2 mb-6 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]'}`}>
-            {packType !== 'pokemon' && <div className={`absolute inset-0 rounded-full border-2 border-slate-500/20 backdrop-blur-sm bg-black/20`} />}
-            <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
+          {packType !== "yugioh" && packType !== "mtg" && (
+            <>
+              {/* Central Icon Container */}
+              <div className={`relative w-32 h-32 flex items-center justify-center p-2 mb-6 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]'}`}>
+                {packType !== 'pokemon' && <div className={`absolute inset-0 rounded-full border-2 border-slate-500/20 backdrop-blur-sm bg-black/20`} />}
+                <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
 
-            <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
-              {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : "🎬"}
-            </div>
-          </div>
+                <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
+                  {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : "🎬"}
+                </div>
+              </div>
 
-          {/* Label */}
-          <div className="relative z-10 text-center">
-            <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
-              <span className="text-white/60 font-black tracking-[0.2em]">
-                {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : "CINEMA"}
-              </span>
+              {/* Label */}
+              <div className="relative z-10 text-center">
+                <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
+                  <span className="text-white/60 font-black tracking-[0.2em]">
+                    {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : "CINEMA"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
+                  <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-slate-400" />
+                  <span className="text-[10px] font-black tracking-[0.4em] text-slate-300 uppercase">COLLECTION</span>
+                  <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-slate-400" />
+                </div>
+              </div>
+            </>
+          )}
+
+          {packState === "revealing" && !isFlipped && (
+            <div className="absolute bottom-6 left-0 right-0 text-center text-[10px] font-black tracking-[0.2em] text-slate-400/80 animate-pulse uppercase">
+              {isAutoMode ? "Auto-Revealing..." : "Tap to Flip"}
             </div>
-            <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
-              <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-slate-400" />
-              <span className="text-[10px] font-black tracking-[0.4em] text-slate-300 uppercase">COLLECTION</span>
-              <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-slate-400" />
-            </div>
-          </div>
+          )}
         </div>
-        ){"}"}
-
-        {packState === "revealing" && !isFlipped && (
-          <div className="absolute bottom-6 left-0 right-0 text-center text-[10px] font-black tracking-[0.2em] text-slate-400/80 animate-pulse uppercase">
-            {isAutoMode ? "Auto-Revealing..." : "Tap to Flip"}
-          </div>
-        )}
 
         {/* ── Card Front ── */}
         <div
