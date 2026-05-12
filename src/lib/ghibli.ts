@@ -51,6 +51,7 @@ export async function fetchRandomGhibliPack(size: number = 5): Promise<CardData[
         rating,
         description,
         platforms,
+        year: item.release_date ? parseInt(item.release_date, 10) : undefined,
       } as CardData;
     });
   } catch (err) {

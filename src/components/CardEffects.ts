@@ -105,7 +105,7 @@ export const useCardEffects = ({
         
       const stars = "⭐".repeat(Math.round(card.rating / 2));
       let extraInfo = "";
-      if (card.type === "movie" || card.type === "tv") {
+      if (card.type === "movie" || card.type === "tv" || card.type === "ghibli") {
         if (card.year) extraInfo = ` (${card.year})`;
       } else if (card.type === "game") {
         const platforms = card.platforms?.slice(0, 3).join(", ");
@@ -128,9 +128,6 @@ export const useCardEffects = ({
         if (card.year) extraInfo = ` (Set ${card.year})`;
       } else if (card.type === "boardgame") {
         if (card.rank) extraInfo = ` (Rank #${card.rank})`;
-      } else if (card.type === "ghibli") {
-        const typeInfo = card.platforms?.[0] || "";
-        if (typeInfo) extraInfo = ` [${typeInfo}]`;
       } else if (card.type === "dragonball") {
         const kiInfo = card.platforms?.find(p => p.startsWith("KI:"));
         if (kiInfo) extraInfo = ` [${kiInfo}]`;
