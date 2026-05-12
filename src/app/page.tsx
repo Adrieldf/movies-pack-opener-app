@@ -15,6 +15,12 @@ import { fetchRandomGiphyPack } from "../lib/giphy";
 import { fetchRandomYugiohPack } from "../lib/yugioh";
 import { fetchRandomMtgPack } from "../lib/mtg";
 import { fetchRandomDisneyPack } from "../lib/disney";
+import { fetchRandomDigimonPack } from "../lib/digimon";
+import { fetchRandomLorcanaPack } from "../lib/lorcana";
+import { fetchRandomCountriesPack } from "../lib/countries";
+import { fetchRandomPokemonTcgPack } from "../lib/pokemontcg";
+import { fetchRandomGhibliPack } from "../lib/ghibli";
+import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { sanitizeCards, Rarity } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
@@ -89,7 +95,7 @@ export default function Home() {
       if (!isNaN(n)) setPackSize(Math.max(1, Math.min(100, n)));
     }
     const pType = params.get("pack");
-    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney"];
+    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney", "digimon", "lorcana", "countries", "pokemontcg", "ghibli", "dragonball"];
     if (pType === "random") {
       const chosen = validTypes[Math.floor(Math.random() * validTypes.length)];
       setPackType(chosen);
@@ -201,7 +207,19 @@ export default function Home() {
                         ? await fetchRandomMtgPack(packSize)
                         : packType === "disney"
                           ? await fetchRandomDisneyPack(packSize)
-                          : await fetchRandomPack(packSize);
+                          : packType === "digimon"
+                            ? await fetchRandomDigimonPack(packSize)
+                            : packType === "lorcana"
+                              ? await fetchRandomLorcanaPack(packSize)
+                              : packType === "countries"
+                                ? await fetchRandomCountriesPack(packSize)
+                                : packType === "pokemontcg"
+                                  ? await fetchRandomPokemonTcgPack(packSize)
+                                  : packType === "ghibli"
+                                    ? await fetchRandomGhibliPack(packSize)
+                                    : packType === "dragonball"
+                                      ? await fetchRandomDragonBallPack(packSize)
+                                      : await fetchRandomPack(packSize);
 
     // Determine new cards
     let existingIdsArr: string[] = [];
@@ -348,7 +366,7 @@ export default function Home() {
       <PackSelector onSelect={(t) => {
         let finalType = t;
         if (t === "random") {
-          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney"];
+          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney", "digimon"];
           finalType = validTypes[Math.floor(Math.random() * validTypes.length)];
         }
         setPackType(finalType);

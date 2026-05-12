@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Film, Tv, Gamepad2, Headphones, Music, Image, ChevronDown, LayoutGrid } from "lucide-react";
+import { X, Sparkles, Film, Tv, Gamepad2, Headphones, Music, Image, ChevronDown, LayoutGrid, Globe } from "lucide-react";
 import { CardData } from "../lib/tmdb";
 import {
   getRarityColors,
@@ -174,6 +174,7 @@ export const CardGrid = ({
                         { value: "pokemon", label: "Pokémon", icon: <Sparkles className="w-4 h-4 text-yellow-400" /> },
                         { value: "yugioh", label: "Yu-Gi-Oh!", icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
                         { value: "giphy", label: "GIFs", icon: <Image className="w-4 h-4 text-cyan-400" /> },
+                        { value: "digimon", label: "Digimon", icon: <Sparkles className="w-4 h-4 text-orange-400" /> },
                       ]}
                     />
                   </div>
@@ -234,9 +235,9 @@ export const CardGrid = ({
                 : getSortedCards(cards, sortBy).map(c => ({ card: c, count: 1 }))
               ).map((item, idx) => {
                 const { card, count } = item;
-                const isTcg = card.type === "yugioh" || card.type === "mtg";
+                const isTcg = card.type === "yugioh" || card.type === "mtg" || card.type === "lorcana" || card.type === "pokemontcg";
                 const baseWidth = 368;
-                const baseHeight = isTcg ? 536 : 461;
+                const baseHeight = card.type === "country" ? 260 : isTcg ? 536 : 461;
                 
                 const dims = gridSize === "sm"
                   ? { container: "w-full max-w-[184px]", height: Math.round(184 * baseHeight / baseWidth), content: `w-[368px] h-[${baseHeight}px]`, scale: 184 / baseWidth }
@@ -268,22 +269,22 @@ export const CardGrid = ({
                       style={{ transform: dims.scale !== 1 ? `scale(${dims.scale})` : "none" }}
                     >
                       <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative`}>
-                        <div className={`w-full h-full border sm:border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/50 backdrop-blur-sm relative overflow-hidden group`}>
+                        <div className={`w-full h-full border sm:border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden group`}>
                           {card.poster && (
                             <img
                               referrerPolicy="no-referrer"
                               src={card.poster}
                               alt={card.name}
-                              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300"
+                              className={`absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
                             />
                           )}
 
-                          {card.type !== 'yugioh' && (
-                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/40 to-transparent" />
+                          {card.type !== 'yugioh' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && (
+                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/20 to-transparent" />
                           )}
                           <div className="relative z-10 flex justify-between items-start w-full p-2 sm:p-3">
                             <div className="flex flex-col gap-1 items-start">
-                              {card.type !== "yugioh" && (
+                              {card.type !== "yugioh" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                                 <div className={`${colors.tagBg} backdrop-blur-md rounded px-1.5 py-0.5 sm:px-2 sm:py-1 flex items-center gap-1 sm:gap-1.5 shadow-lg border border-white/10`}>
                                   <Sparkles className={`w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 ${colors.icon}`} />
                                   <span className={`text-[9px] sm:text-[10px] lg:text-xs font-black uppercase tracking-wider ${colors.tagText}`}>{card.rarity}</span>
@@ -293,7 +294,7 @@ export const CardGrid = ({
                                 <div className="flex flex-col gap-1 items-start pl-0.5">
                                   {card.platforms.map((p, pi) => {
                                     const typeKey = p.toLowerCase();
-                                    const typeClass = card.type === "pokemon" ? (POKEMON_TYPE_COLORS?.[typeKey] || "bg-slate-700 border-slate-500 text-white") : (card.type === "music" ? "bg-green-900/50 border-green-400/30 text-green-50" : card.type === "giphy" ? "bg-cyan-900/50 border-cyan-400/30 text-cyan-50" : "bg-blue-900/50 border-cyan-400/30 text-cyan-50");
+                                    const typeClass = card.type === "pokemon" ? (POKEMON_TYPE_COLORS?.[typeKey] || "bg-slate-700 border-slate-500 text-white") : (card.type === "music" ? "bg-green-900/50 border-green-400/30 text-green-50" : card.type === "giphy" ? "bg-cyan-900/50 border-cyan-400/30 text-cyan-50" : card.type === "ghibli" ? "bg-sky-900/50 border-green-400/30 text-green-50" : card.type === "dragonball" ? "bg-orange-900/50 border-orange-400/30 text-orange-50 shadow-[0_0_8px_rgba(249,115,22,0.3)]" : "bg-blue-900/50 border-cyan-400/30 text-cyan-50");
                                     return (
                                       <div key={pi} className={`${typeClass} backdrop-blur-md border text-[7px] sm:text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded shadow-sm`}>
                                         {p}
@@ -304,9 +305,9 @@ export const CardGrid = ({
                               )}
                             </div>
                             <div className="flex flex-col gap-1 items-end">
-                            {card.type !== "yugioh" && (
+                            {card.type !== "yugioh" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                               <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 flex items-center gap-1 border border-white/10">
-                                {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : card.type === "music" ? <Headphones className="w-2.5 h-2.5 text-slate-400" /> : card.type === "anime" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-2.5 h-2.5 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-2.5 h-2.5 text-amber-400" /> : card.type === "giphy" ? <Image className="w-2.5 h-2.5 text-cyan-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
+                                {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : card.type === "music" ? <Headphones className="w-2.5 h-2.5 text-slate-400" /> : card.type === "anime" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-2.5 h-2.5 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-2.5 h-2.5 text-amber-400" /> : card.type === "giphy" ? <Image className="w-2.5 h-2.5 text-cyan-400" /> : card.type === "digimon" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "country" ? <Globe className="w-2.5 h-2.5 text-emerald-400" /> : card.type === "ghibli" ? <Sparkles className="w-2.5 h-2.5 text-sky-400" /> : card.type === "dragonball" ? <Sparkles className="w-2.5 h-2.5 text-red-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
                                 <span className="text-[8px] font-black uppercase text-slate-400">{card.type}</span>
                               </div>
                             )}
@@ -319,18 +320,18 @@ export const CardGrid = ({
                                 <div className="bg-red-600 text-white text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">New!</div>
                               )}
                             </div>
-                            {card.type !== 'yugioh' && (
+                            {card.type !== 'yugioh' && card.type !== 'digimon' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && card.type !== 'ghibli' && card.type !== 'dragonball' && (
                               <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1">
                                 <span className="text-yellow-400 font-bold text-[10px] sm:text-xs lg:text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
                               </div>
                             )}
                           </div>
 
-                          <div className="relative z-10 mt-auto p-2 sm:p-4 w-full flex flex-col items-center bg-gradient-to-t from-black/45 via-black/35 to-transparent">
-                            {card.type !== "yugioh" && card.type !== "mtg" && (
+                          <div className="relative z-10 mt-auto p-2 sm:p-4 w-full flex flex-col items-center bg-gradient-to-t from-black/30 via-black/10 to-transparent">
+                            {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                               <>
                                 <ScrollableTitle title={card.name} baseClass="text-xs sm:text-sm lg:text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />
-                                {(card.type === "music" || (card.type !== "pokemon" && card.type !== "giphy" && card.description)) && card.description && (
+                                {(card.type === "music" || card.type === "digimon" || (card.type !== "pokemon" && card.type !== "giphy" && card.description)) && card.description && (
                                   <div className="text-[10px] sm:text-xs font-bold text-white/70 drop-shadow-md text-center max-w-[90%] truncate mt-0.5 sm:mt-1">{card.description}</div>
                                 )}
                                 {card.year && card.type !== "pokemon" && card.type !== "giphy" && <span className="text-[10px] sm:text-xs text-white/70 font-bold mb-1">{card.year}</span>}
@@ -366,7 +367,7 @@ export const CardGrid = ({
                                   className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-[8px] sm:text-[10px] lg:text-xs font-bold py-1 px-1.5 sm:px-2 rounded shadow"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : "Info"}
+                                  {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : card.type === "digimon" ? "Wiki" : "Info"}
                                 </a>
                               )}
                             </div>

@@ -95,6 +95,12 @@ export const useCardEffects = ({
         card.type === "yugioh" ? "🃏 Duelist" :
         card.type === "mtg" ? "🔮 MTG" :
         card.type === "disney" ? "🏰 Disney" :
+        card.type === "digimon" ? "🦖 Digimon" :
+        card.type === "lorcana" ? "✒️ Lorcana" :
+        card.type === "country" ? "🌍 World" :
+        card.type === "pokemontcg" ? "⚡ PTCG" :
+        card.type === "ghibli" ? "🍃 Ghibli" :
+        card.type === "dragonball" ? "🐉 Dragon Ball" :
         "📺 TV Series";
         
       const stars = "⭐".repeat(Math.round(card.rating / 2));
@@ -118,15 +124,21 @@ export const useCardEffects = ({
       } else if (card.type === "disney") {
         const source = card.description || "";
         extraInfo = source ? ` [From: ${source}]` : "";
-      } else if (card.type === "yugioh" || card.type === "mtg") {
+      } else if (["yugioh", "mtg", "lorcana", "pokemontcg"].includes(card.type)) {
         if (card.year) extraInfo = ` (Set ${card.year})`;
       } else if (card.type === "boardgame") {
         if (card.rank) extraInfo = ` (Rank #${card.rank})`;
+      } else if (card.type === "ghibli") {
+        const typeInfo = card.platforms?.[0] || "";
+        if (typeInfo) extraInfo = ` [${typeInfo}]`;
+      } else if (card.type === "dragonball") {
+        const kiInfo = card.platforms?.find(p => p.startsWith("KI:"));
+        if (kiInfo) extraInfo = ` [${kiInfo}]`;
       }
       
       const userPrefix = username ? `${username} found a ` : "";
-      const showRating = card.type !== "yugioh" && card.type !== "mtg";
-      const ratingPart = showRating ? ` | ⭐ ${card.rating.toFixed(1)}/10 ${stars}` : "";
+      const showRating = !["yugioh", "mtg", "digimon", "lorcana", "pokemontcg", "ghibli", "dragonball"].includes(card.type);
+      const ratingPart = showRating && card.rating > 0 ? ` | ⭐ ${card.rating.toFixed(1)}/10 ${stars}` : "";
       
       const msg = `${userPrefix}${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo}${ratingPart}`;
       

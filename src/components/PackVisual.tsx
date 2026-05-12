@@ -5,7 +5,7 @@ import { motion, useAnimation } from "framer-motion";
 type AnimationControls = ReturnType<typeof useAnimation>;
 import { RefreshCcw } from "lucide-react";
 
-export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "random";
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "digimon" | "lorcana" | "countries" | "pokemontcg" | "ghibli" | "dragonball" | "random";
 
 interface PackVisualProps {
   packType: PackType;
@@ -53,12 +53,12 @@ export const PackVisual = ({
 
   const topFoilContent = (
     <div className="w-full h-full flex flex-col pointer-events-none">
-      <div className={`w-full h-4 ${packType === 'games' ? 'bg-gradient-to-b from-blue-400 to-blue-600' : packType === 'music' ? 'bg-gradient-to-b from-emerald-400 to-green-600' : packType === 'anime' ? 'bg-gradient-to-b from-pink-400 to-rose-600' : packType === 'pokemon' ? 'bg-gradient-to-b from-yellow-400 to-yellow-600' : packType === 'boardgame' ? 'bg-gradient-to-b from-amber-400 to-amber-600' : packType === 'giphy' ? 'bg-gradient-to-b from-cyan-400 to-blue-600' : packType === 'yugioh' ? 'bg-gradient-to-b from-amber-400 to-amber-600' : packType === 'mtg' ? 'bg-gradient-to-b from-purple-500 to-indigo-900 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : packType === 'disney' ? 'bg-gradient-to-b from-sky-400 to-blue-600' : 'bg-gradient-to-b from-slate-500 to-slate-600'} rounded-t-lg overflow-hidden flex shrink-0`}>
+      <div className={`w-full h-4 ${packType === 'games' ? 'bg-gradient-to-b from-blue-400 to-blue-600' : packType === 'music' ? 'bg-gradient-to-b from-emerald-400 to-green-600' : packType === 'anime' ? 'bg-gradient-to-b from-pink-400 to-rose-600' : packType === 'pokemon' ? 'bg-gradient-to-b from-yellow-400 to-yellow-600' : packType === 'boardgame' ? 'bg-gradient-to-b from-amber-400 to-amber-600' : packType === 'giphy' ? 'bg-gradient-to-b from-cyan-400 to-blue-600' : packType === 'yugioh' ? 'bg-gradient-to-b from-amber-400 to-amber-600' : packType === 'mtg' ? 'bg-gradient-to-b from-purple-500 to-indigo-900 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : packType === 'disney' ? 'bg-gradient-to-b from-sky-400 to-blue-600' : packType === 'digimon' ? 'bg-gradient-to-b from-orange-400 to-orange-600' : packType === 'lorcana' ? 'bg-gradient-to-b from-yellow-500 to-yellow-700' : packType === 'countries' ? 'bg-gradient-to-b from-green-400 to-emerald-600' : packType === 'pokemontcg' ? 'bg-gradient-to-b from-blue-400 to-yellow-500' : packType === 'ghibli' ? 'bg-gradient-to-b from-sky-400 to-green-400' : packType === 'dragonball' ? 'bg-gradient-to-b from-orange-500 to-red-600' : 'bg-gradient-to-b from-slate-500 to-slate-600'} rounded-t-lg overflow-hidden flex shrink-0`}>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={`crimp-${i}`} className={`flex-1 border-r ${packType === 'games' ? 'border-blue-300/30' : packType === 'music' ? 'border-green-300/30' : packType === 'anime' ? 'border-pink-300/30' : packType === 'pokemon' ? 'border-yellow-300/30' : packType === 'boardgame' ? 'border-amber-300/30' : packType === 'yugioh' ? 'border-amber-300/30' : packType === 'mtg' ? 'border-purple-400/20' : packType === 'disney' ? 'border-sky-300/30' : 'border-slate-700/30'}`}></div>
+          <div key={`crimp-${i}`} className={`flex-1 border-r ${packType === 'games' ? 'border-blue-300/30' : packType === 'music' ? 'border-green-300/30' : packType === 'anime' ? 'border-pink-300/30' : packType === 'pokemon' ? 'border-yellow-300/30' : packType === 'boardgame' ? 'border-amber-300/30' : packType === 'yugioh' ? 'border-amber-300/30' : packType === 'mtg' ? 'border-purple-400/20' : packType === 'disney' ? 'border-sky-300/30' : packType === 'digimon' ? 'border-orange-300/30' : packType === 'lorcana' ? 'border-yellow-300/30' : packType === 'countries' ? 'border-green-300/30' : packType === 'pokemontcg' ? 'border-yellow-300/30' : packType === 'ghibli' ? 'border-sky-200/30' : packType === 'dragonball' ? 'border-orange-300/30' : 'border-slate-700/30'}`}></div>
         ))}
       </div>
-      <div className={`w-full flex-1 ${packType === 'games' ? 'bg-gradient-to-b from-blue-700 via-indigo-900 to-blue-900 border-blue-400/30' : packType === 'music' ? 'bg-gradient-to-b from-green-600 via-emerald-800 to-green-950 border-green-400/30' : packType === 'anime' ? 'bg-gradient-to-b from-pink-700 via-rose-900 to-pink-950 border-pink-400/30' : packType === 'pokemon' ? 'bg-gradient-to-b from-yellow-700 via-red-900 to-yellow-950 border-yellow-400/30' : packType === 'boardgame' ? 'bg-gradient-to-b from-amber-700 via-orange-900 to-amber-950 border-amber-400/30' : packType === 'giphy' ? 'bg-gradient-to-b from-cyan-700 via-blue-900 to-cyan-950 border-cyan-400/30' : packType === 'yugioh' ? 'bg-gradient-to-b from-amber-700 via-orange-900 to-amber-950 border-amber-400/30' : packType === 'mtg' ? 'bg-gradient-to-b from-slate-900 via-purple-950 to-black border-purple-500/30' : packType === 'disney' ? 'bg-gradient-to-b from-blue-600 via-indigo-900 to-slate-950 border-blue-400/40 shadow-[inset_0_0_40px_rgba(59,130,246,0.2)]' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700/50'} relative overflow-hidden border-b shadow-inner`}>
+      <div className={`w-full flex-1 ${packType === 'games' ? 'bg-gradient-to-b from-blue-700 via-indigo-900 to-blue-900 border-blue-400/30' : packType === 'music' ? 'bg-gradient-to-b from-green-600 via-emerald-800 to-green-950 border-green-400/30' : packType === 'anime' ? 'bg-gradient-to-b from-pink-700 via-rose-900 to-pink-950 border-pink-400/30' : packType === 'pokemon' ? 'bg-gradient-to-b from-yellow-700 via-red-900 to-yellow-950 border-yellow-400/30' : packType === 'boardgame' ? 'bg-gradient-to-b from-amber-700 via-orange-900 to-amber-950 border-amber-400/30' : packType === 'giphy' ? 'bg-gradient-to-b from-cyan-700 via-blue-900 to-cyan-950 border-cyan-400/30' : packType === 'yugioh' ? 'bg-gradient-to-b from-amber-700 via-orange-900 to-amber-950 border-amber-400/30' : packType === 'mtg' ? 'bg-gradient-to-b from-slate-900 via-purple-950 to-black border-purple-500/30' : packType === 'disney' ? 'bg-gradient-to-b from-blue-600 via-indigo-900 to-slate-950 border-blue-400/40 shadow-[inset_0_0_40px_rgba(59,130,246,0.2)]' : packType === 'digimon' ? 'bg-gradient-to-b from-orange-700 via-yellow-900 to-orange-950 border-orange-400/30' : packType === 'lorcana' ? 'bg-gradient-to-b from-yellow-700 via-amber-800 to-yellow-950 border-yellow-400/30' : packType === 'countries' ? 'bg-gradient-to-b from-emerald-700 via-teal-900 to-emerald-950 border-emerald-400/30' : packType === 'pokemontcg' ? 'bg-gradient-to-b from-blue-700 via-blue-900 to-yellow-900 border-yellow-400/30' : packType === 'ghibli' ? 'bg-gradient-to-b from-sky-600 via-green-700 to-green-950 border-sky-400/30 shadow-[inset_0_0_40px_rgba(52,211,153,0.2)]' : packType === 'dragonball' ? 'bg-gradient-to-b from-orange-600 via-red-700 to-red-950 border-orange-400/30 shadow-[inset_0_0_40px_rgba(239,68,68,0.2)]' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700/50'} relative overflow-hidden border-b shadow-inner`}>
         <div className={`absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] ${packType === 'games' || packType === 'music' ? 'opacity-20 hue-rotate-180' : 'opacity-10'} mix-blend-overlay`}></div>
         {packType === 'games' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(56,189,248,0.4),_transparent)]"></div>}
         {packType === 'music' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(52,211,153,0.5),_transparent)]"></div>}
@@ -69,6 +69,12 @@ export const PackVisual = ({
         {packType === 'yugioh' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(245,158,11,0.5),_transparent)]"></div>}
         {packType === 'mtg' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(168,85,247,0.5),_transparent)]"></div>}
         {packType === 'disney' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(253,224,71,0.4),_transparent)]"></div>}
+        {packType === 'digimon' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(249,115,22,0.4),_transparent)]"></div>}
+        {packType === 'lorcana' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(250,204,21,0.6),_transparent)]"></div>}
+        {packType === 'countries' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(16,185,129,0.5),_transparent)]"></div>}
+        {packType === 'pokemontcg' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(59,130,246,0.5),_transparent)]"></div>}
+        {packType === 'ghibli' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_white,_transparent_70%)] opacity-20"></div>}
+        {packType === 'dragonball' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_rgba(251,191,36,0.6),_transparent)] opacity-40"></div>}
         <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 flex items-center justify-center px-4">
           {isLoading && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-xl">
@@ -84,7 +90,7 @@ export const PackVisual = ({
             </div>
           )}
         </div>
-        <div className={`absolute bottom-0 left-0 right-0 h-[2px] border-b-2 border-dashed ${packType === 'games' ? 'border-blue-400/40' : packType === 'music' ? 'border-green-400/40' : packType === 'anime' ? 'border-pink-400/40' : packType === 'pokemon' ? 'border-yellow-400/40' : packType === 'yugioh' ? 'border-amber-400/40' : packType === 'mtg' ? 'border-purple-400/40' : packType === 'disney' ? 'border-yellow-400/40' : 'border-white/20'} truncate`}></div>
+        <div className={`absolute bottom-0 left-0 right-0 h-[2px] border-b-2 border-dashed ${packType === 'games' ? 'border-blue-400/40' : packType === 'music' ? 'border-green-400/40' : packType === 'anime' ? 'border-pink-400/40' : packType === 'pokemon' ? 'border-yellow-400/40' : packType === 'yugioh' ? 'border-amber-400/40' : packType === 'mtg' ? 'border-purple-400/40' : packType === 'disney' ? 'border-yellow-400/40' : packType === 'digimon' ? 'border-orange-400/40' : packType === 'lorcana' ? 'border-yellow-400/40' : packType === 'countries' ? 'border-emerald-400/40' : packType === 'pokemontcg' ? 'border-yellow-400/40' : packType === 'ghibli' ? 'border-sky-400/40' : packType === 'dragonball' ? 'border-yellow-400/40' : 'border-white/20'} truncate`}></div>
       </div>
     </div>
   );
@@ -123,7 +129,7 @@ export const PackVisual = ({
         </motion.div>
 
         {/* BOTTOM MAIN BODY */}
-        <div className={`h-3/4 w-full ${packType === 'games' ? 'bg-gradient-to-b from-blue-900 via-indigo-950 to-black' : packType === 'anime' ? 'bg-gradient-to-b from-pink-900 via-rose-950 to-black' : packType === 'pokemon' ? 'bg-gradient-to-b from-yellow-900 via-red-950 to-black' : packType === 'boardgame' ? 'bg-gradient-to-b from-amber-900 via-orange-950 to-black' : packType === 'giphy' ? 'bg-gradient-to-b from-cyan-900 via-blue-950 to-black' : packType === 'yugioh' ? 'bg-gradient-to-b from-amber-800 via-orange-950 to-black' : packType === 'mtg' ? 'bg-gradient-to-b from-slate-900 via-purple-950 to-black' : packType === 'disney' ? 'bg-gradient-to-b from-blue-900 via-slate-900 to-black' : 'bg-gradient-to-b from-slate-800 to-black'} relative rounded-b-lg overflow-hidden shadow-2xl border-t ${packType === 'games' ? 'border-blue-400/50' : packType === 'anime' ? 'border-pink-400/50' : packType === 'pokemon' ? 'border-yellow-400/50' : packType === 'boardgame' ? 'border-amber-400/50' : packType === 'giphy' ? 'border-cyan-400/50' : packType === 'yugioh' ? 'border-amber-500/50' : packType === 'mtg' ? 'border-purple-500/30' : packType === 'disney' ? 'border-blue-500/40 shadow-[inset_0_20px_40px_rgba(59,130,246,0.1)]' : 'border-slate-700'}`}>
+        <div className={`h-3/4 w-full ${packType === 'games' ? 'bg-gradient-to-b from-blue-900 via-indigo-950 to-black' : packType === 'anime' ? 'bg-gradient-to-b from-pink-900 via-rose-950 to-black' : packType === 'pokemon' ? 'bg-gradient-to-b from-yellow-900 via-red-950 to-black' : packType === 'boardgame' ? 'bg-gradient-to-b from-amber-900 via-orange-950 to-black' : packType === 'giphy' ? 'bg-gradient-to-b from-cyan-900 via-blue-950 to-black' : packType === 'yugioh' ? 'bg-gradient-to-b from-amber-800 via-orange-950 to-black' : packType === 'mtg' ? 'bg-gradient-to-b from-slate-900 via-purple-950 to-black' : packType === 'disney' ? 'bg-gradient-to-b from-blue-900 via-slate-900 to-black' : packType === 'digimon' ? 'bg-gradient-to-b from-orange-900 via-amber-950 to-black' : packType === 'lorcana' ? 'bg-gradient-to-b from-yellow-800 via-amber-950 to-black' : packType === 'countries' ? 'bg-gradient-to-b from-emerald-900 via-teal-950 to-black' : packType === 'pokemontcg' ? 'bg-gradient-to-b from-yellow-900 via-blue-950 to-black' : packType === 'ghibli' ? 'bg-gradient-to-b from-green-900 via-sky-950 to-black' : packType === 'dragonball' ? 'bg-gradient-to-b from-red-900 via-orange-950 to-black' : 'bg-gradient-to-b from-slate-800 to-black'} relative rounded-b-lg overflow-hidden shadow-2xl border-t ${packType === 'games' ? 'border-blue-400/50' : packType === 'anime' ? 'border-pink-400/50' : packType === 'pokemon' ? 'border-yellow-400/50' : packType === 'boardgame' ? 'border-amber-400/50' : packType === 'giphy' ? 'border-cyan-400/50' : packType === 'yugioh' ? 'border-amber-500/50' : packType === 'mtg' ? 'border-purple-500/30' : packType === 'disney' ? 'border-blue-500/40 shadow-[inset_0_20px_40px_rgba(59,130,246,0.1)]' : packType === 'digimon' ? 'border-orange-400/50' : packType === 'lorcana' ? 'border-yellow-400/50' : packType === 'countries' ? 'border-emerald-400/50' : packType === 'pokemontcg' ? 'border-blue-500/50' : packType === 'ghibli' ? 'border-sky-400/50' : packType === 'dragonball' ? 'border-orange-400/50' : 'border-slate-700'}`}>
           <div className={`absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] ${packType === 'games' ? 'opacity-20 hue-rotate-180' : 'opacity-10'} mix-blend-overlay`}></div>
           {packType === 'games' && <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,_rgba(56,189,248,0.2),_transparent)]"></div>}
           {packType === 'disney' && <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_50%,_white_1px,_transparent_1px)] bg-[length:40px_40px]"></div>}
@@ -316,6 +322,59 @@ export const PackVisual = ({
                   })}
                 </div>
               </div>
+            ) : packType === "digimon" ? (
+              <div className="relative flex items-center justify-center">
+                <div className="w-24 h-24 bg-orange-200 rounded-full shadow-[0_15px_30px_rgba(0,0,0,0.8)] relative border-4 border-orange-500 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 border-4 border-orange-400 rounded-full m-1"></div>
+                  <div className="w-16 h-12 bg-emerald-900/80 rounded-md border-2 border-slate-700 shadow-inner flex items-center justify-center">
+                    <span className="text-xl filter drop-shadow-[0_0_5px_rgba(52,211,153,0.8)]">🦖</span>
+                  </div>
+                  <div className="mt-1 flex gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-inner"></div>
+                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-inner"></div>
+                  </div>
+                </div>
+                <div className="absolute w-32 h-32 rounded-full border border-orange-400/20 animate-ping"></div>
+              </div>
+            ) : packType === "lorcana" ? (
+              <div className="relative flex flex-col items-center justify-center">
+                <div className="w-24 h-32 bg-gradient-to-b from-yellow-300 via-yellow-500 to-amber-600 rounded-lg shadow-[0_0_30px_rgba(250,204,21,0.6)] relative border-[3px] border-amber-200 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay"></div>
+                  <div className="absolute inset-1 border border-amber-300/60 rounded"></div>
+                  <span className="text-4xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] z-10">✒️</span>
+                  <div className="absolute bottom-2 text-[8px] font-black text-amber-950 tracking-[0.2em] uppercase opacity-60 z-10">INK</div>
+                </div>
+              </div>
+            ) : packType === "countries" ? (
+              <div className="relative flex flex-col items-center justify-center">
+                <div className="w-24 h-32 bg-gradient-to-b from-emerald-500 to-teal-700 rounded-lg shadow-[0_0_30px_rgba(16,185,129,0.5)] relative border-2 border-emerald-300 flex flex-col items-center justify-center">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+                  <span className="text-4xl filter drop-shadow-[0_0_10px_rgba(16,185,129,0.8)] z-10">🌍</span>
+                </div>
+                <div className="absolute w-32 h-32 rounded-full border border-emerald-400/20 animate-[spin_4s_linear_infinite] border-t-emerald-400"></div>
+              </div>
+            ) : packType === "pokemontcg" ? (
+              <div className="relative flex flex-col items-center justify-center">
+                <div className="w-24 h-32 bg-gradient-to-b from-blue-500 to-yellow-600 rounded-lg shadow-[0_0_30px_rgba(59,130,246,0.5)] relative border-2 border-yellow-300 flex flex-col items-center justify-center">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30 mix-blend-overlay"></div>
+                  <span className="text-4xl filter drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] z-10">⚡</span>
+                </div>
+              </div>
+            ) : packType === "ghibli" ? (
+              <div className="relative flex flex-col items-center justify-center">
+                <div className="w-28 h-28 bg-white/10 rounded-full shadow-[0_0_30px_rgba(52,211,153,0.3)] relative border-2 border-sky-300 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-sky-400 to-green-300 mix-blend-overlay"></div>
+                  <span className="text-5xl filter drop-shadow-[0_0_15px_rgba(255,255,255,1)] z-10">🍃</span>
+                </div>
+                <div className="absolute w-32 h-32 rounded-full border border-sky-300/30 border-t-white animate-[spin_8s_linear_infinite]"></div>
+              </div>
+            ) : packType === "dragonball" ? (
+              <div className="relative flex flex-col items-center justify-center">
+                <div className="w-24 h-24 bg-orange-500 rounded-full shadow-[0_0_40px_rgba(249,115,22,0.6)] relative border-4 border-yellow-400 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30 mix-blend-overlay"></div>
+                  <span className="text-5xl filter drop-shadow-[0_0_10px_rgba(255,255,0,0.8)] z-10 text-red-600 font-bold">Z</span>
+                </div>
+              </div>
             ) : (
               <div className="w-32 h-28 bg-slate-900 rounded-md shadow-2xl relative flex flex-col overflow-hidden rotate-[-4deg] border border-slate-700 drop-shadow-xl">
                 <div className="h-7 w-full relative overflow-hidden border-b-2 border-slate-800 z-10 shrink-0">
@@ -360,13 +419,25 @@ export const PackVisual = ({
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-fuchsia-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)] uppercase tracking-widest">MTG PACK</span>
             ) : packType === "disney" ? (
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-yellow-400 drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]">DISNEY PACK</span>
+            ) : packType === "digimon" ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-yellow-200 to-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">DIGIMON PACK</span>
+            ) : packType === "lorcana" ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-500 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">LORCANA PACK</span>
+            ) : packType === "countries" ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-green-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">WORLD PACK</span>
+            ) : packType === "pokemontcg" ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-yellow-200 to-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">PTCG PACK</span>
+            ) : packType === "ghibli" ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-sky-100 to-green-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] tracking-widest font-serif">GHIBLI PACK</span>
+            ) : packType === "dragonball" ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-200 to-red-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)] font-black tracking-widest italic">Z WARRIORS</span>
             ) : "Cinema Pack"}
           </div>
 
           {/* Bottom crimp strip */}
-          <div className={`absolute bottom-0 left-0 right-0 h-4 ${packType === 'games' ? 'bg-gradient-to-t from-blue-700 to-blue-500' : packType === 'music' ? 'bg-gradient-to-t from-green-800 to-green-600' : packType === 'anime' ? 'bg-gradient-to-t from-pink-800 to-pink-600' : packType === 'pokemon' ? 'bg-gradient-to-t from-red-800 to-yellow-600' : packType === 'boardgame' ? 'bg-gradient-to-t from-amber-800 to-amber-600' : packType === 'giphy' ? 'bg-gradient-to-t from-cyan-800 to-cyan-600' : packType === 'yugioh' ? 'bg-gradient-to-t from-amber-800 to-amber-600' : packType === 'mtg' ? 'bg-gradient-to-t from-purple-950 to-purple-800' : packType === 'disney' ? 'bg-gradient-to-t from-indigo-900 to-blue-600' : 'bg-gradient-to-t from-slate-600 to-slate-500'} rounded-b-lg overflow-hidden flex`}>
+          <div className={`absolute bottom-0 left-0 right-0 h-4 ${packType === 'games' ? 'bg-gradient-to-t from-blue-700 to-blue-500' : packType === 'music' ? 'bg-gradient-to-t from-green-800 to-green-600' : packType === 'anime' ? 'bg-gradient-to-t from-pink-800 to-pink-600' : packType === 'pokemon' ? 'bg-gradient-to-t from-red-800 to-yellow-600' : packType === 'boardgame' ? 'bg-gradient-to-t from-amber-800 to-amber-600' : packType === 'giphy' ? 'bg-gradient-to-t from-cyan-800 to-cyan-600' : packType === 'yugioh' ? 'bg-gradient-to-t from-amber-800 to-amber-600' : packType === 'mtg' ? 'bg-gradient-to-t from-purple-950 to-purple-800' : packType === 'disney' ? 'bg-gradient-to-t from-indigo-900 to-blue-600' : packType === 'digimon' ? 'bg-gradient-to-t from-orange-800 to-orange-600' : packType === 'lorcana' ? 'bg-gradient-to-t from-yellow-700 to-yellow-500' : packType === 'countries' ? 'bg-gradient-to-t from-emerald-800 to-teal-600' : packType === 'pokemontcg' ? 'bg-gradient-to-t from-blue-800 to-yellow-600' : packType === 'ghibli' ? 'bg-gradient-to-t from-green-700 to-sky-600' : packType === 'dragonball' ? 'bg-gradient-to-t from-red-800 to-orange-600' : 'bg-gradient-to-t from-slate-600 to-slate-500'} rounded-b-lg overflow-hidden flex`}>
             {Array.from({ length: 20 }).map((_, i) => (
-              <div key={`crimp-b-${i}`} className={`flex-1 border-r ${packType === 'games' ? 'border-blue-400/30' : packType === 'music' ? 'border-green-400/30' : packType === 'anime' ? 'border-pink-400/30' : packType === 'pokemon' ? 'border-yellow-400/30' : packType === 'boardgame' ? 'border-amber-400/30' : packType === 'giphy' ? 'border-cyan-400/30' : packType === 'yugioh' ? 'border-amber-400/30' : packType === 'mtg' ? 'border-purple-500/20' : packType === 'disney' ? 'border-blue-400/30' : 'border-slate-700/30'}`}></div>
+              <div key={`crimp-b-${i}`} className={`flex-1 border-r ${packType === 'games' ? 'border-blue-400/30' : packType === 'music' ? 'border-green-400/30' : packType === 'anime' ? 'border-pink-400/30' : packType === 'pokemon' ? 'border-yellow-400/30' : packType === 'boardgame' ? 'border-amber-400/30' : packType === 'giphy' ? 'border-cyan-400/30' : packType === 'yugioh' ? 'border-amber-400/30' : packType === 'mtg' ? 'border-purple-500/20' : packType === 'disney' ? 'border-blue-400/30' : packType === 'digimon' ? 'border-orange-400/30' : packType === 'lorcana' ? 'border-yellow-400/30' : packType === 'countries' ? 'border-emerald-400/30' : packType === 'pokemontcg' ? 'border-yellow-400/30' : packType === 'ghibli' ? 'border-sky-300/30' : packType === 'dragonball' ? 'border-yellow-400/30' : 'border-slate-700/30'}`}></div>
             ))}
           </div>
         </div>

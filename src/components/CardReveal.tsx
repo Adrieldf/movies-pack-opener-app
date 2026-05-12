@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Film, Tv, Gamepad2, Headphones, Users, Music, Image } from "lucide-react";
+import { Sparkles, Film, Tv, Gamepad2, Headphones, Users, Music, Image, Globe } from "lucide-react";
 import { CardData } from "../lib/tmdb";
 import { getRarityColors, formatListeners, POKEMON_TYPE_COLORS } from "../lib/cardUtils";
 import { ScrollableTitle } from "./ScrollableTitle";
@@ -64,7 +64,7 @@ export const CardReveal = ({
       exit={{ y: -50, opacity: 0, scale: 0.9 }}
       transition={{ type: "spring", bounce: 0.4, duration: 0.6 }}
       onClick={onClick}
-      className={`absolute ${isAutoMode ? "pointer-events-none" : "cursor-pointer"} perspective-1000 w-[368px] ${(packType === 'yugioh' || packType === 'mtg') ? 'h-[536px]' : 'h-[461px]'}`}
+      className={`absolute ${isAutoMode ? "pointer-events-none" : "cursor-pointer"} perspective-1000 w-[368px] ${packType === 'countries' ? 'h-[260px]' : (packType === 'yugioh' || packType === 'mtg' || packType === 'lorcana' || packType === 'pokemontcg') ? 'h-[536px]' : 'h-[461px]'}`}
       style={{ zIndex }}
     >
       <motion.div
@@ -80,18 +80,18 @@ export const CardReveal = ({
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
           {/* The Actual Card Back Image (TCG ONLY) */}
-          {(packType === "yugioh" || packType === "mtg") ? (
+          {(packType === "yugioh" || packType === "mtg" || packType === "lorcana" || packType === "pokemontcg") ? (
             <div
               className="absolute inset-0 bg-cover bg-center w-full h-full"
               style={{
-                backgroundImage: `url('${packType === "yugioh" ? "yugioh-back.png" : "mtg-back.png"}')`,
+                backgroundImage: `url('${packType === "yugioh" ? "yugioh-back.png" : packType === "mtg" ? "mtg-back.png" : packType === "lorcana" ? "lorcana-back.png" : "pokemontcg-back.png"}')`,
                 backfaceVisibility: "hidden"
               }}
             />
           ) : (
             <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-2 overflow-hidden bg-slate-950`}>
               {/* Theme-specific Background & Patterns */}
-              {(packType === "movies" || !["games", "music", "anime", "pokemon", "boardgame", "giphy", "yugioh", "mtg", "disney"].includes(packType)) && (
+              {(packType === "movies" || !["games", "music", "anime", "pokemon", "boardgame", "giphy", "yugioh", "mtg", "disney", "digimon", "lorcana", "countries", "pokemontcg", "ghibli", "dragonball"].includes(packType)) && (
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-black" />
                   <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
@@ -186,15 +186,55 @@ export const CardReveal = ({
                 </div>
               )}
 
+              {packType === "digimon" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-orange-950 via-slate-950 to-amber-900/30" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                     <span className="text-8xl opacity-10 filter drop-shadow-[0_0_20px_rgba(249,115,22,1)]">🦖</span>
+                  </div>
+                </>
+              )}
+
+              {packType === "countries" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950 via-teal-950 to-green-900/30" />
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                     <span className="text-8xl opacity-10 filter drop-shadow-[0_0_20px_rgba(16,185,129,1)]">🌍</span>
+                  </div>
+                </>
+              )}
+
+              {packType === "ghibli" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-sky-950 via-green-950 to-sky-900/30" />
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                     <span className="text-8xl opacity-10 filter drop-shadow-[0_0_20px_rgba(52,211,153,1)]">🍃</span>
+                  </div>
+                </>
+              )}
+
+              {packType === "dragonball" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-orange-950 via-red-950 to-yellow-900/30" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                     <span className="text-8xl opacity-10 filter drop-shadow-[0_0_30px_rgba(249,115,22,1)] font-bold italic text-red-600">Z</span>
+                  </div>
+                </>
+              )}
+
             </div>
           )}
 
           {/* Universal Holographic Shimmer (for all non-Pokemon packs) */}
-          {packType !== "pokemon" && packType !== "yugioh" && packType !== "mtg" && (
+          {packType !== "pokemon" && packType !== "yugioh" && packType !== "mtg" && packType !== "lorcana" && packType !== "pokemontcg" && (
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-10 animate-holo bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.5)_50%,transparent_75%)] bg-[length:250%_250%]" />
           )}
 
-          {packType !== "yugioh" && packType !== "mtg" && (
+          {packType !== "yugioh" && packType !== "mtg" && packType !== "lorcana" && packType !== "pokemontcg" && (
             <>
               {/* Central Icon Container */}
               <div className={`relative w-32 h-32 flex items-center justify-center p-2 mb-6 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]'}`}>
@@ -202,7 +242,7 @@ export const CardReveal = ({
                 <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
 
                 <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
-                  {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : "🎬"}
+                  {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : packType === "digimon" ? "🦖" : packType === "countries" ? "🌍" : packType === "ghibli" ? "🍃" : packType === "dragonball" ? "🐉" : "🎬"}
                 </div>
               </div>
 
@@ -210,7 +250,7 @@ export const CardReveal = ({
               <div className="relative z-10 text-center">
                 <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
                   <span className="text-white/60 font-black tracking-[0.2em]">
-                    {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : "CINEMA"}
+                    {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : packType === "digimon" ? "DIGIMON" : packType === "countries" ? "WORLD" : packType === "ghibli" ? "STUDIO GHIBLI" : packType === "dragonball" ? "Z WARRIORS" : "CINEMA"}
                   </span>
                 </div>
                 <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
@@ -234,14 +274,14 @@ export const CardReveal = ({
           className={`absolute inset-0 w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-1 shadow-2xl backface-hidden`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <div className={`w-full h-full border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/40 backdrop-blur-sm relative overflow-hidden`}>
+          <div className={`w-full h-full border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden`}>
             {/* Background poster */}
             {card.poster && (
               <motion.img
                 referrerPolicy="no-referrer"
                 src={card.poster}
-                className={`absolute inset-0 w-full h-full object-cover ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg') ? 'opacity-100 mix-blend-normal' : 'opacity-80 mix-blend-overlay'} transition-opacity duration-1000`}
-                style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg') ? 1 : 0.8) }}
+                className={`absolute inset-0 w-full h-full ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 'opacity-100 mix-blend-normal' : 'opacity-90 mix-blend-normal'} transition-opacity duration-1000 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
+                style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 1 : 0.9) }}
               />
             )}
 
@@ -262,10 +302,10 @@ export const CardReveal = ({
 
 
             {/* Gradient overlays */}
-            {card.type !== 'yugioh' && card.type !== 'mtg' && (
+            {card.type !== 'yugioh' && card.type !== 'mtg' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && (
               <>
-                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/40 via-black/15 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 via-black/30 to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/20 via-black/5 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
               </>
             )}
 
@@ -273,7 +313,7 @@ export const CardReveal = ({
             <div className="relative z-10 flex justify-between items-start w-full p-3">
               {/* Left: Rarity + platforms */}
               <div className="flex flex-col gap-1.5 items-start">
-                {card.type !== "yugioh" && card.type !== "mtg" && (
+                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                   <div className={`${colors.tagBg} backdrop-blur-md rounded px-2.5 py-1 flex items-center gap-1.5 shadow-lg border border-white/10`}>
                     <Sparkles className={`w-3.5 h-3.5 ${colors.icon}`} />
                     <span className={`text-[11px] font-black uppercase tracking-[0.15em] ${colors.tagText}`}>{card.rarity}</span>
@@ -283,7 +323,7 @@ export const CardReveal = ({
                   <div className="flex flex-col gap-1 items-start pl-1">
                     {card.platforms.map((p, pi) => {
                       const typeKey = p.toLowerCase();
-                      const typeClass = card.type === "pokemon" ? (POKEMON_TYPE_COLORS[typeKey] || "bg-slate-700 border-slate-500 text-white") : card.type === "yugioh" ? "bg-amber-900/60 border-amber-500/40 text-amber-100 shadow-[0_0_8px_rgba(245,158,11,0.3)]" : (card.type === "music" ? "bg-green-900/50 border-green-400/40 text-green-100 shadow-[0_0_8px_rgba(74,222,128,0.2)]" : "bg-blue-900/50 border-cyan-400/40 text-cyan-100 shadow-[0_0_8px_rgba(34,211,238,0.2)]");
+                      const typeClass = card.type === "pokemon" ? (POKEMON_TYPE_COLORS[typeKey] || "bg-slate-700 border-slate-500 text-white") : card.type === "yugioh" ? "bg-amber-900/60 border-amber-500/40 text-amber-100 shadow-[0_0_8px_rgba(245,158,11,0.3)]" : (card.type === "music" ? "bg-green-900/50 border-green-400/40 text-green-100 shadow-[0_0_8px_rgba(74,222,128,0.2)]" : card.type === "digimon" ? "bg-orange-900/50 border-orange-400/40 text-orange-100 shadow-[0_0_8px_rgba(249,115,22,0.2)]" : card.type === "ghibli" ? "bg-sky-900/50 border-green-400/40 text-green-100 shadow-[0_0_8px_rgba(56,189,248,0.2)]" : card.type === "dragonball" ? "bg-orange-900/50 border-orange-400/40 text-orange-100 shadow-[0_0_8px_rgba(249,115,22,0.2)]" : "bg-blue-900/50 border-cyan-400/40 text-cyan-100 shadow-[0_0_8px_rgba(34,211,238,0.2)]");
                       return (
                         <div key={pi} className={`${typeClass} backdrop-blur-md border text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded`}>
                           {p}
@@ -296,14 +336,14 @@ export const CardReveal = ({
 
               {/* Right: Rating + type tag */}
               <div className="flex flex-col items-end gap-1">
-                {card.type !== "yugioh" && card.type !== "mtg" && (
+                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "digimon" && card.type !== "lorcana" && card.type !== "pokemontcg" && card.type !== "ghibli" && card.type !== "dragonball" && (
                   <div className="bg-black/50 backdrop-blur rounded px-2 py-1">
                     <span className="text-yellow-400 font-bold text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
                   </div>
                 )}
-                {card.type !== "yugioh" && card.type !== "mtg" && (
+                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                   <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
-                    {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : card.type === "game" ? <Gamepad2 className="w-3 h-3 text-slate-300" /> : card.type === "music" ? <Headphones className="w-3 h-3 text-slate-300" /> : card.type === "anime" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-3 h-3 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-3 h-3 text-amber-400" /> : card.type === "giphy" ? <Image className="w-3 h-3 text-cyan-400" /> : <Tv className="w-3 h-3 text-slate-300" />}
+                    {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : card.type === "game" ? <Gamepad2 className="w-3 h-3 text-slate-300" /> : card.type === "music" ? <Headphones className="w-3 h-3 text-slate-300" /> : card.type === "anime" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-3 h-3 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-3 h-3 text-amber-400" /> : card.type === "giphy" ? <Image className="w-3 h-3 text-cyan-400" /> : card.type === "digimon" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "country" ? <Globe className="w-3 h-3 text-emerald-400" /> : card.type === "ghibli" ? <Sparkles className="w-3 h-3 text-sky-400" /> : card.type === "dragonball" ? <Sparkles className="w-3 h-3 text-red-400" /> : <Tv className="w-3 h-3 text-slate-300" />}
                     <span className="text-[10px] font-bold uppercase text-slate-300">{card.type}</span>
                   </div>
                 )}
@@ -323,13 +363,13 @@ export const CardReveal = ({
 
             {/* Bottom: Title & Links */}
             <div className="relative z-10 mt-auto p-4 w-full flex flex-col items-center">
-              {card.type !== "yugioh" && card.type !== "mtg" && <ScrollableTitle title={card.name} baseClass="text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />}
-              {(card.type === "music" || (card.type !== "yugioh" && card.type !== "pokemon" && card.type !== "giphy" && card.description)) && card.description && (
+              {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && <ScrollableTitle title={card.name} baseClass="text-lg font-black text-white uppercase tracking-tight drop-shadow-md leading-tight" />}
+              {(card.type === "music" || card.type === "digimon" || (card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && card.type !== "pokemon" && card.type !== "giphy" && card.description)) && card.description && (
                 <div className="text-xs sm:text-sm font-bold text-white/70 drop-shadow-md text-center max-w-[90%] truncate mt-1">
                   {card.description}
                 </div>
               )}
-              {card.year && card.type !== "yugioh" && card.type !== "mtg" && card.type !== "pokemon" && card.type !== "giphy" && (
+              {card.year && card.type !== "yugioh" && card.type !== "mtg" && card.type !== "pokemontcg" && card.type !== "pokemon" && card.type !== "giphy" && (
                 <div className="text-xs font-bold text-white/60 mb-2 drop-shadow-md text-center">
                   {card.year}
                 </div>
@@ -357,7 +397,7 @@ export const CardReveal = ({
                       {card.type === "music" ? <><Music className="w-3 h-3" /> Preview</> : "Trailer"}
                     </a>
                   )}
-                  {card.imdb_link && card.type !== "yugioh" && card.type !== "mtg" && (
+                  {card.imdb_link && card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && (
                     <a
                       href={card.imdb_link}
                       target="_blank"
@@ -365,7 +405,7 @@ export const CardReveal = ({
                       className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : "Info"}
+                      {card.type === "game" ? "RAWG" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : card.type === "digimon" ? "Wiki" : "Info"}
                     </a>
                   )}
                 </div>

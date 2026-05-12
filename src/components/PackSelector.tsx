@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "random";
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "digimon" | "lorcana" | "countries" | "pokemontcg" | "ghibli" | "dragonball" | "random";
 
 const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; accent: string; glow: string }> = {
   movies: { label: "Cinema", icon: "🎬", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-pink-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
@@ -13,6 +13,12 @@ const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; a
   mtg: { label: "MTG", icon: "🔮", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-indigo-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
   boardgame: { label: "Boards", icon: "🎲", bg: "from-slate-900 to-amber-950", accent: "from-amber-400 to-orange-500", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]" },
   disney: { label: "Disney", icon: "🏰", bg: "from-slate-900 to-sky-950", accent: "from-blue-400 to-yellow-500", glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]" },
+  digimon: { label: "Digimon", icon: "🦖", bg: "from-slate-900 to-orange-950", accent: "from-orange-400 to-yellow-500", glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.4)]" },
+  lorcana: { label: "Lorcana", icon: "✒️", bg: "from-slate-900 to-blue-950", accent: "from-blue-400 to-yellow-500", glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]" },
+  countries: { label: "World", icon: "🌍", bg: "from-slate-900 to-green-950", accent: "from-green-400 to-emerald-500", glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]" },
+  pokemontcg: { label: "PTCG", icon: "⚡", bg: "from-blue-950 to-yellow-950", accent: "from-yellow-400 to-blue-500", glow: "group-hover:shadow-[0_0_30px_rgba(250,204,21,0.4)]" },
+  ghibli: { label: "Ghibli", icon: "🍃", bg: "from-sky-900 to-green-900", accent: "from-sky-300 to-green-400", glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.4)]" },
+  dragonball: { label: "DragonBall", icon: "🐉", bg: "from-orange-900 to-red-950", accent: "from-yellow-400 to-orange-500", glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.4)]" },
   random: { label: "Surprise!", icon: "🎲", bg: "from-slate-800 via-purple-900 to-slate-900", accent: "from-white/40 to-white/10", glow: "group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" }
 };
 

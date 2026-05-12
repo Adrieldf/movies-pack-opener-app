@@ -10,7 +10,7 @@ export interface CardData {
   trailer?: string;
   imdb_link?: string;
   year?: number;
-  type: "movie" | "tv" | "game" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney";
+  type: "movie" | "tv" | "game" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "digimon" | "lorcana" | "country" | "pokemontcg" | "ghibli" | "dragonball";
   platforms?: string[];
   listeners?: number;
   cryUrl?: string;
