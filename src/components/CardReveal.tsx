@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Film, Tv, Gamepad2, Headphones, Users, Music, Image, Globe } from "lucide-react";
+import { Sparkles, Film, Tv, Gamepad2, Headphones, Users, Music, Image, Globe, Heart } from "lucide-react";
 import { CardData } from "../lib/tmdb";
 import { getRarityColors, formatListeners, POKEMON_TYPE_COLORS } from "../lib/cardUtils";
 import { ScrollableTitle } from "./ScrollableTitle";
@@ -225,6 +225,13 @@ export const CardReveal = ({
                   </div>
                 </>
               )}
+              {packType === "ero" && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-fuchsia-950 via-rose-950 to-pink-900/30" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/binding-dark.png')]" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/5 blur-[60px]" />
+                </>
+              )}
 
             </div>
           )}
@@ -242,7 +249,7 @@ export const CardReveal = ({
                 <div className="absolute inset-2 rounded-full border border-dashed border-slate-400/40 animate-[spin_30s_linear_infinite]"></div>
 
                 <div className={`text-5xl filter brightness-125 ${packType === 'pokemon' ? '' : 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'}`}>
-                  {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : packType === "digimon" ? "🦖" : packType === "countries" ? "🌍" : packType === "ghibli" ? "🍃" : packType === "dragonball" ? "🐉" : "🎬"}
+                  {packType === "games" ? "🎮" : packType === "music" ? "🎧" : packType === "anime" ? "🌸" : packType === "pokemon" ? "⚡" : packType === "boardgame" ? "🎲" : packType === "giphy" ? "🖼️" : packType === "disney" ? "🏰" : packType === "digimon" ? "🦖" : packType === "countries" ? "🌍" : packType === "ghibli" ? "🍃" : packType === "dragonball" ? "🐉" : packType === "ero" ? "💋" : "🎬"}
                 </div>
               </div>
 
@@ -250,7 +257,7 @@ export const CardReveal = ({
               <div className="relative z-10 text-center">
                 <div className="text-slate-300 font-extrabold text-2xl tracking-[0.25em] font-serif drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase">
                   <span className="text-white/60 font-black tracking-[0.2em]">
-                    {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : packType === "digimon" ? "DIGIMON" : packType === "countries" ? "WORLD" : packType === "ghibli" ? "STUDIO GHIBLI" : packType === "dragonball" ? "Z WARRIORS" : "CINEMA"}
+                    {packType === "games" ? "GAMING" : packType === "music" ? "VINYL" : packType === "anime" ? "ANIME" : packType === "pokemon" ? "POKÉMON" : packType === "boardgame" ? "BOARD" : packType === "giphy" ? "GIF" : packType === "disney" ? "DISNEY" : packType === "digimon" ? "DIGIMON" : packType === "countries" ? "WORLD" : packType === "ghibli" ? "STUDIO GHIBLI" : packType === "dragonball" ? "Z WARRIORS" : packType === "ero" ? "ERO" : "CINEMA"}
                   </span>
                 </div>
                 <div className="flex items-center justify-center gap-3 mt-1.5 opacity-60">
@@ -343,7 +350,7 @@ export const CardReveal = ({
                 )}
                 {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                   <div className="bg-black/50 backdrop-blur rounded px-2 py-1 flex items-center gap-1">
-                    {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : card.type === "game" ? <Gamepad2 className="w-3 h-3 text-slate-300" /> : card.type === "music" ? <Headphones className="w-3 h-3 text-slate-300" /> : card.type === "anime" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-3 h-3 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-3 h-3 text-amber-400" /> : card.type === "giphy" ? <Image className="w-3 h-3 text-cyan-400" /> : card.type === "digimon" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "country" ? <Globe className="w-3 h-3 text-emerald-400" /> : card.type === "ghibli" ? <Sparkles className="w-3 h-3 text-sky-400" /> : card.type === "dragonball" ? <Sparkles className="w-3 h-3 text-red-400" /> : <Tv className="w-3 h-3 text-slate-300" />}
+                    {card.type === "movie" ? <Film className="w-3 h-3 text-slate-300" /> : card.type === "game" ? <Gamepad2 className="w-3 h-3 text-slate-300" /> : card.type === "music" ? <Headphones className="w-3 h-3 text-slate-300" /> : card.type === "anime" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-3 h-3 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-3 h-3 text-amber-400" /> : card.type === "giphy" ? <Image className="w-3 h-3 text-cyan-400" /> : card.type === "digimon" ? <Sparkles className="w-3 h-3 text-orange-400" /> : card.type === "country" ? <Globe className="w-3 h-3 text-emerald-400" /> : card.type === "ghibli" ? <Sparkles className="w-3 h-3 text-sky-400" /> : card.type === "dragonball" ? <Sparkles className="w-3 h-3 text-red-400" /> : card.type === "ero" ? <Heart className="w-3 h-3 text-fuchsia-400 fill-fuchsia-400" /> : <Tv className="w-3 h-3 text-slate-300" />}
                     <span className="text-[10px] font-bold uppercase text-slate-300">{card.type}</span>
                   </div>
                 )}

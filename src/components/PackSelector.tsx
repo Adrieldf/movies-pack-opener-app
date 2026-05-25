@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "digimon" | "lorcana" | "countries" | "pokemontcg" | "ghibli" | "dragonball" | "random";
+export type PackType = "movies" | "games" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "disney" | "digimon" | "lorcana" | "countries" | "pokemontcg" | "ghibli" | "dragonball" | "ero" | "random";
 
 const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; accent: string; glow: string }> = {
   movies: { label: "Cinema", icon: "🎬", bg: "from-slate-900 to-purple-950", accent: "from-purple-400 to-pink-500", glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]" },
@@ -19,11 +19,12 @@ const PACK_CONFIG: Record<PackType, { label: string; icon: string; bg: string; a
   pokemontcg: { label: "PTCG", icon: "⚡", bg: "from-blue-950 to-yellow-950", accent: "from-yellow-400 to-blue-500", glow: "group-hover:shadow-[0_0_30px_rgba(250,204,21,0.4)]" },
   ghibli: { label: "Ghibli", icon: "🍃", bg: "from-sky-900 to-green-900", accent: "from-sky-300 to-green-400", glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.4)]" },
   dragonball: { label: "DragonBall", icon: "🐉", bg: "from-orange-900 to-red-950", accent: "from-yellow-400 to-orange-500", glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.4)]" },
+  ero: { label: "Ero", icon: "💋", bg: "from-slate-900 to-fuchsia-950", accent: "from-fuchsia-400 to-rose-500", glow: "group-hover:shadow-[0_0_30px_rgba(236,72,153,0.4)]" },
   random: { label: "Surprise!", icon: "🎲", bg: "from-slate-800 via-purple-900 to-slate-900", accent: "from-white/40 to-white/10", glow: "group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" }
 };
 
 export const PackSelector = ({ onSelect }: { onSelect: (type: PackType) => void }) => {
-  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "random");
+  const packs = (Object.keys(PACK_CONFIG) as PackType[]).filter(t => t !== "random" && t !== "ero");
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-8 font-sans overflow-y-auto">

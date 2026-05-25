@@ -2,7 +2,7 @@ import { CardData } from "./tmdb";
 
 export type Rarity = "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 export type SortOption = "name_asc" | "name_desc" | "rarity_high" | "rarity_low" | "year_new" | "year_old" | "rating_high" | "rating_low";
-export type TypeFilter = "all" | "movie" | "tv" | "game" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "digimon" | "lorcana" | "country" | "pokemontcg" | "ghibli" | "dragonball";
+export type TypeFilter = "all" | "movie" | "tv" | "game" | "music" | "anime" | "pokemon" | "boardgame" | "giphy" | "yugioh" | "mtg" | "digimon" | "lorcana" | "country" | "pokemontcg" | "ghibli" | "dragonball" | "ero";
 
 export const POKEMON_TYPE_COLORS: Record<string, string> = {
   fire: "bg-red-600/80 border-red-400 text-white shadow-[0_0_8px_rgba(220,38,38,0.4)]",

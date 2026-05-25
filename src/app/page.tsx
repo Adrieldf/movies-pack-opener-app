@@ -21,6 +21,7 @@ import { fetchRandomCountriesPack } from "../lib/countries";
 import { fetchRandomPokemonTcgPack } from "../lib/pokemontcg";
 import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
+import { fetchRandomEroPack } from "../lib/ero";
 import { sanitizeCards, Rarity } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
@@ -99,6 +100,8 @@ export default function Home() {
     if (pType === "random") {
       const chosen = validTypes[Math.floor(Math.random() * validTypes.length)];
       setPackType(chosen);
+    } else if (pType === "ero") {
+      setPackType("ero");
     } else if (pType && (validTypes.includes(pType as PackType) || pType === "musics")) {
       setPackType((pType === "musics" ? "music" : pType) as PackType);
     }
@@ -217,9 +220,11 @@ export default function Home() {
                                   ? await fetchRandomPokemonTcgPack(packSize)
                                   : packType === "ghibli"
                                     ? await fetchRandomGhibliPack(packSize)
-                                    : packType === "dragonball"
-                                      ? await fetchRandomDragonBallPack(packSize)
-                                      : await fetchRandomPack(packSize);
+                                      : packType === "dragonball"
+                                        ? await fetchRandomDragonBallPack(packSize)
+                                        : packType === "ero"
+                                          ? await fetchRandomEroPack(packSize)
+                                          : await fetchRandomPack(packSize);
 
     // Determine new cards
     let existingIdsArr: string[] = [];
