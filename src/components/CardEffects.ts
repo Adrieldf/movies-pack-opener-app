@@ -79,7 +79,7 @@ export const useCardEffects = ({
     }
 
     // Twitch chat
-    if (twitchStatus === "connected" && !twitchFiredRef.current.has(cardIndex)) {
+    if (twitchStatus === "connected" && card.type !== "ero" && !twitchFiredRef.current.has(cardIndex)) {
       twitchFiredRef.current.add(cardIndex);
       const rarityEmoji: Record<Rarity, string> = {
         Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
