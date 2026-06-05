@@ -13,6 +13,13 @@ import { fetchRandomGiphyPack } from "../../lib/giphy";
 import { fetchRandomYugiohPack } from "../../lib/yugioh";
 import { fetchRandomMtgPack } from "../../lib/mtg";
 import { fetchRandomDisneyPack } from "../../lib/disney";
+import { fetchRandomDigimonPack } from "../../lib/digimon";
+import { fetchRandomLorcanaPack } from "../../lib/lorcana";
+import { fetchRandomCountriesPack } from "../../lib/countries";
+import { fetchRandomPokemonTcgPack } from "../../lib/pokemontcg";
+import { fetchRandomGhibliPack } from "../../lib/ghibli";
+import { fetchRandomDragonBallPack } from "../../lib/dragonball";
+import { fetchRandomEroPack } from "../../lib/ero";
 import { useTwitchChat } from "../../lib/useTwitchChat";
 import { PackVisual, PackType } from "../../components/PackVisual";
 import { CardReveal } from "../../components/CardReveal";
@@ -103,6 +110,13 @@ export default function OverlayPage() {
       : type === "yugioh" ? await fetchRandomYugiohPack(count)
       : type === "mtg" ? await fetchRandomMtgPack(count)
       : type === "disney" ? await fetchRandomDisneyPack(count)
+      : type === "digimon" ? await fetchRandomDigimonPack(count)
+      : type === "lorcana" ? await fetchRandomLorcanaPack(count)
+      : type === "countries" ? await fetchRandomCountriesPack(count)
+      : type === "pokemontcg" ? await fetchRandomPokemonTcgPack(count)
+      : type === "ghibli" ? await fetchRandomGhibliPack(count)
+      : type === "dragonball" ? await fetchRandomDragonBallPack(count)
+      : type === "ero" ? await fetchRandomEroPack(count)
       : await fetchRandomPack(count);
 
     setCards(fetched);
