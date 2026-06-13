@@ -1,14 +1,15 @@
 import { CardData, Rarity } from "./tmdb";
 
-const REST_COUNTRIES_API = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital,cca3";
+const REST_COUNTRIES_API = "https://cdn.jsdelivr.net/gh/mledoze/countries@master/dist/countries.json";
 
 interface RestCountry {
   name: { common: string; official: string };
-  flags: { png: string; svg: string; alt?: string };
+  flags?: { png: string; svg: string; alt?: string };
   population: number;
   region: string;
   capital: string[];
   cca3: string;
+  cca2: string;
 }
 
 let cachedCountries: RestCountry[] | null = null;
@@ -69,13 +70,13 @@ export async function fetchRandomCountriesPack(size: number = 5): Promise<CardDa
   return selected.map((c) => {
     return {
       id: `country-${c.cca3}`,
-      name: c.name.common,
-      poster: c.flags.png || c.flags.svg || "",
+      name: c.name?.common || "Unknown Country",
+      poster: c.cca2 ? `https://flagcdn.com/w320/${c.cca2.toLowerCase()}.png` : "",
       type: "country",
-      rarity: getRarityByPopulation(c.population),
-      rating: Number(getRatingByPopulation(c.population).toFixed(1)),
-      description: `Capital: ${c.capital?.[0] || "N/A"}\nRegion: ${c.region}\nPopulation: ${c.population.toLocaleString()}`,
-      platforms: [c.region], // Use platforms array to store region tag
+      rarity: getRarityByPopulation(c.population || 0),
+      rating: Number(getRatingByPopulation(c.population || 0).toFixed(1)),
+      description: `Capital: ${c.capital?.[0] || "N/A"}\nRegion: ${c.region || "N/A"}\nPopulation: ${(c.population || 0).toLocaleString()}`,
+      platforms: [c.region || "N/A"], // Use platforms array to store region tag
     } as CardData;
   });
 }
