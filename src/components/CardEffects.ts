@@ -134,7 +134,7 @@ export const useCardEffects = ({
       }
       
       const userPrefix = username ? `${username} found a ` : "";
-      const showRating = !["yugioh", "mtg", "digimon", "lorcana", "pokemontcg", "ghibli", "dragonball"].includes(card.type);
+      const showRating = !["yugioh", "mtg", "digimon", "lorcana", "pokemontcg", "ghibli", "dragonball", "country"].includes(card.type);
       const ratingPart = showRating && card.rating > 0 ? ` | ⭐ ${card.rating.toFixed(1)}/10 ${stars}` : "";
       
       const msg = `${userPrefix}${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo}${ratingPart}`;

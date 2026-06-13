@@ -320,7 +320,7 @@ export const CardReveal = ({
             <div className="relative z-10 flex justify-between items-start w-full p-3">
               {/* Left: Rarity + platforms */}
               <div className="flex flex-col gap-1.5 items-start">
-                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
+                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "lorcana" && card.type !== "pokemontcg" && card.type !== "country" && (
                   <div className={`${colors.tagBg} backdrop-blur-md rounded px-2.5 py-1 flex items-center gap-1.5 shadow-lg border border-white/10`}>
                     <Sparkles className={`w-3.5 h-3.5 ${colors.icon}`} />
                     <span className={`text-[11px] font-black uppercase tracking-[0.15em] ${colors.tagText}`}>{card.rarity}</span>
@@ -343,7 +343,7 @@ export const CardReveal = ({
 
               {/* Right: Rating + type tag */}
               <div className="flex flex-col items-end gap-1">
-                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "digimon" && card.type !== "lorcana" && card.type !== "pokemontcg" && card.type !== "ghibli" && card.type !== "dragonball" && (
+                {card.type !== "yugioh" && card.type !== "mtg" && card.type !== "digimon" && card.type !== "lorcana" && card.type !== "pokemontcg" && card.type !== "ghibli" && card.type !== "dragonball" && card.type !== "country" && (
                   <div className="bg-black/50 backdrop-blur rounded px-2 py-1">
                     <span className="text-yellow-400 font-bold text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
                   </div>
