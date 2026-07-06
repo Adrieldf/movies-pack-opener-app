@@ -65,6 +65,26 @@ export default function OverlayPage() {
   }, []);
 
   useEffect(() => {
+    // Make body and html background transparent for overlay mode
+    const originalBodyBg = document.body.style.background;
+    const originalBodyBgColor = document.body.style.backgroundColor;
+    const originalHtmlBg = document.documentElement.style.background;
+    const originalHtmlBgColor = document.documentElement.style.backgroundColor;
+
+    document.body.style.background = "transparent";
+    document.body.style.backgroundColor = "transparent";
+    document.documentElement.style.background = "transparent";
+    document.documentElement.style.backgroundColor = "transparent";
+
+    return () => {
+      document.body.style.background = originalBodyBg;
+      document.body.style.backgroundColor = originalBodyBgColor;
+      document.documentElement.style.background = originalHtmlBg;
+      document.documentElement.style.backgroundColor = originalHtmlBgColor;
+    };
+  }, []);
+
+  useEffect(() => {
     syncQueue();
     window.addEventListener("storage", syncQueue);
     return () => window.removeEventListener("storage", syncQueue);
