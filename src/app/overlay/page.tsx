@@ -236,8 +236,17 @@ export default function OverlayPage() {
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col items-center justify-center overflow-hidden font-sans text-white">
+      <style>{`
+        html, body {
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+      `}</style>
+
       {/* Background glow for the stream overlay */}
-      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-purple-500/10 to-transparent pointer-events-none" />
+      {currentPack && (
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-purple-500/10 to-transparent pointer-events-none" />
+      )}
 
       <main className="relative z-10 w-full max-w-md mx-auto p-6 h-[100dvh] flex flex-col items-center justify-center">
         
