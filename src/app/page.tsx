@@ -22,6 +22,7 @@ import { fetchRandomPokemonTcgPack } from "../lib/pokemontcg";
 import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { fetchRandomEroPack } from "../lib/ero";
+import { getRickRollPack } from "../lib/rickroll";
 import { sanitizeCards, Rarity } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
@@ -192,39 +193,48 @@ export default function Home() {
     isOpenedRef.current = true;
     setIsLoading(true);
 
-    const fetchedCards = packType === "games"
-      ? await fetchRandomGamePack(packSize)
-      : packType === "music"
-        ? await fetchRandomMusicPack(packSize)
-        : packType === "anime"
-          ? await fetchRandomAnimePack(packSize)
-          : packType === "pokemon"
-            ? await fetchRandomPokemonPack(packSize)
-            : packType === "boardgame"
-              ? await fetchRandomBoardGamePack(packSize)
-              : packType === "giphy"
-                ? await fetchRandomGiphyPack(packSize)
-                    : packType === "yugioh"
-                      ? await fetchRandomYugiohPack(packSize)
-                      : packType === "mtg"
-                        ? await fetchRandomMtgPack(packSize)
-                        : packType === "disney"
-                          ? await fetchRandomDisneyPack(packSize)
-                          : packType === "digimon"
-                            ? await fetchRandomDigimonPack(packSize)
-                            : packType === "lorcana"
-                              ? await fetchRandomLorcanaPack(packSize)
-                              : packType === "countries"
-                                ? await fetchRandomCountriesPack(packSize)
-                                : packType === "pokemontcg"
-                                  ? await fetchRandomPokemonTcgPack(packSize)
-                                  : packType === "ghibli"
-                                    ? await fetchRandomGhibliPack(packSize)
-                                      : packType === "dragonball"
-                                        ? await fetchRandomDragonBallPack(packSize)
-                                        : packType === "ero"
-                                          ? await fetchRandomEroPack(packSize)
-                                          : await fetchRandomPack(packSize);
+    let fetchedCards: CardData[] = [];
+    try {
+      fetchedCards = packType === "games"
+        ? await fetchRandomGamePack(packSize)
+        : packType === "music"
+          ? await fetchRandomMusicPack(packSize)
+          : packType === "anime"
+            ? await fetchRandomAnimePack(packSize)
+            : packType === "pokemon"
+              ? await fetchRandomPokemonPack(packSize)
+              : packType === "boardgame"
+                ? await fetchRandomBoardGamePack(packSize)
+                : packType === "giphy"
+                  ? await fetchRandomGiphyPack(packSize)
+                      : packType === "yugioh"
+                        ? await fetchRandomYugiohPack(packSize)
+                        : packType === "mtg"
+                          ? await fetchRandomMtgPack(packSize)
+                          : packType === "disney"
+                            ? await fetchRandomDisneyPack(packSize)
+                            : packType === "digimon"
+                              ? await fetchRandomDigimonPack(packSize)
+                              : packType === "lorcana"
+                                ? await fetchRandomLorcanaPack(packSize)
+                                : packType === "countries"
+                                  ? await fetchRandomCountriesPack(packSize)
+                                  : packType === "pokemontcg"
+                                    ? await fetchRandomPokemonTcgPack(packSize)
+                                    : packType === "ghibli"
+                                      ? await fetchRandomGhibliPack(packSize)
+                                        : packType === "dragonball"
+                                          ? await fetchRandomDragonBallPack(packSize)
+                                          : packType === "ero"
+                                            ? await fetchRandomEroPack(packSize)
+                                            : await fetchRandomPack(packSize);
+    } catch (err) {
+      console.error("Error opening pack, defaulting to Rick Roll card:", err);
+    }
+
+    if (!fetchedCards || fetchedCards.length === 0) {
+      fetchedCards = getRickRollPack();
+    }
 
     // Determine new cards
     let existingIdsArr: string[] = [];
@@ -324,7 +334,7 @@ export default function Home() {
         return () => clearTimeout(t);
       }
       if (activeCardIndex === cards.length - 1) return; // last card stays
-      const duration = cards[activeCardIndex]?.type === "music" ? 9000 : 6000;
+      const duration = cards[activeCardIndex]?.id === "rick-roll-fallback" ? 7000 : cards[activeCardIndex]?.type === "music" ? 9000 : 6000;
       const fadeT = setTimeout(fadeOutPreviewAudio, duration - 1000);
       const t = setTimeout(handleNextCard, duration);
       return () => { clearTimeout(fadeT); clearTimeout(t); };

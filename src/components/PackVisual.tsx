@@ -192,7 +192,7 @@ export const PackVisual = ({
                 </div>
                 <div className="flex-1 m-2 mt-4 bg-gradient-to-br from-cyan-600 via-blue-500 to-emerald-500 rounded border border-white/40 flex flex-col items-center justify-center relative overflow-hidden shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)]">
                   <div className="absolute top-0 left-0 right-0 h-4 bg-white/10 skew-y-[-10deg] -translate-y-2"></div>
-                  <span className="text-[9px] font-black text-white tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] mt-1">RAWG</span>
+                  <span className="text-[9px] font-black text-white tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] mt-1">GAMES</span>
                   <div className="text-3xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] mb-2 mt-1">👾</div>
                   <div className="absolute bottom-1 right-1 text-[7px] text-white/80 font-mono font-bold">V-SYNC</div>
                 </div>
