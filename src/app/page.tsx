@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Volume2, Home as HomeIcon } from "lucide-react";
+import { Sparkles, RefreshCcw, ChevronRight, LayoutGrid, X, Volume2, VolumeX, Home as HomeIcon } from "lucide-react";
 import { useTwitchChat, TwitchConfig } from "../lib/useTwitchChat";
 import { useGameAudio, SoundType } from "../lib/useGameAudio";
 import { CardData, fetchRandomPack } from "../lib/tmdb";
@@ -30,7 +30,6 @@ import { PackVisual } from "../components/PackVisual";
 import { CardReveal } from "../components/CardReveal";
 import { CardGrid } from "../components/CardGrid";
 import { useCardEffects } from "../components/CardEffects";
-import { SoundModal } from "../components/modals/SoundModal";
 import { TwitchModal } from "../components/modals/TwitchModal";
 import { ClearModal } from "../components/modals/ClearModal";
 import { SortOption, TypeFilter } from "../lib/cardUtils";
@@ -64,12 +63,10 @@ export default function Home() {
   // ── UI state ──────────────────────────────────────────────────────────────
   const [isAutoMode, setIsAutoMode] = useState(false);
   const [packSize, setPackSize] = useState(5);
-  const [showSoundModal, setShowSoundModal] = useState(false);
   const [showTwitchModal, setShowTwitchModal] = useState(false);
-  const [uploadTarget, setUploadTarget] = useState<SoundType | null>(null);
 
   // ── Audio ─────────────────────────────────────────────────────────────────
-  const { isMuted, setIsMuted, playSound, customSounds, setCustomSound, resetSound, previewSound } = useGameAudio();
+  const { isMuted, setIsMuted, playSound } = useGameAudio();
   const currentPreviewAudio = useRef<HTMLAudioElement | null>(null);
 
   // ── Twitch ────────────────────────────────────────────────────────────────
@@ -167,14 +164,7 @@ export default function Home() {
     }, 100);
   }, []);
 
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !uploadTarget) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setCustomSound(uploadTarget, ev.target?.result as string);
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  }, [uploadTarget, setCustomSound]);
+
 
   // ── Trailer auto-show ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -435,12 +425,14 @@ export default function Home() {
 
             <div className="flex items-center gap-1">
               <button
-                id="sound-settings-btn"
-                onClick={() => setShowSoundModal(true)}
-                className="bg-white/5 hover:bg-white/10 text-white/80 hover:text-white p-2 rounded-xl transition-all"
-                title="Sounds"
+                id="sound-toggle-btn"
+                onClick={() => setIsMuted((prev) => !prev)}
+                className={`bg-white/5 hover:bg-white/10 p-2 rounded-xl transition-all ${
+                  isMuted ? "text-red-400" : "text-white/80 hover:text-white"
+                }`}
+                title={isMuted ? "Unmute Sound" : "Mute Sound"}
               >
-                <Volume2 className="w-5 h-5" />
+                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </button>
 
               <button
@@ -654,15 +646,7 @@ export default function Home() {
       />
 
       {/* ── Modals ── */}
-      <SoundModal
-        isOpen={showSoundModal}
-        onClose={() => setShowSoundModal(false)}
-        customSounds={customSounds}
-        onPreview={previewSound}
-        onReset={resetSound}
-        onUpload={(type) => setUploadTarget(type)}
-        onFileChange={handleFileUpload}
-      />
+
 
       <TwitchModal
         isOpen={showTwitchModal}

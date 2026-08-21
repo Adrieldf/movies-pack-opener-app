@@ -1,256 +1,261 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 export type SoundType =
   | "tear" | "flip" | "sparkle" | "swoosh"
   | "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
-export const SOUND_LABELS: Record<SoundType, string> = {
-  tear: "Pack Tear",
-  flip: "Card Flip",
-  swoosh: "Swoosh",
-  sparkle: "Sparkle",
-  Junk: "Junk Reveal",
-  Common: "Common Reveal",
-  Uncommon: "Uncommon Reveal",
-  Rare: "Rare Reveal",
-  Epic: "Epic Reveal",
-  Legendary: "Legendary Reveal",
-};
+// Singleton AudioContext to prevent resource exhaustion and browser audio thread lag
+let sharedAudioCtx: AudioContext | null = null;
 
-export const SOUND_ACCENT: Record<SoundType, string> = {
-  tear: "bg-slate-400",
-  flip: "bg-slate-400",
-  swoosh: "bg-slate-400",
-  sparkle: "bg-yellow-300",
-  Junk: "bg-lime-600",
-  Common: "bg-slate-400",
-  Uncommon: "bg-green-400",
-  Rare: "bg-blue-400",
-  Epic: "bg-purple-400",
-  Legendary: "bg-yellow-400",
-};
-
-// Sound URLs using reliable royalty-free audio files with Web Audio synth fallback
-export const DEFAULT_SOUND_URLS: Record<SoundType, string> = {
-  tear:      "https://raw.githubusercontent.com/sound-effects/audio/main/tear.mp3",
-  flip:      "https://raw.githubusercontent.com/sound-effects/audio/main/flip.mp3",
-  swoosh:    "https://raw.githubusercontent.com/sound-effects/audio/main/swoosh.mp3",
-  sparkle:   "https://raw.githubusercontent.com/sound-effects/audio/main/sparkle.mp3",
-  Junk:      "https://raw.githubusercontent.com/sound-effects/audio/main/thud.mp3",
-  Common:    "https://raw.githubusercontent.com/sound-effects/audio/main/chime.mp3",
-  Uncommon:  "https://raw.githubusercontent.com/sound-effects/audio/main/chime2.mp3",
-  Rare:      "https://raw.githubusercontent.com/sound-effects/audio/main/rare.mp3",
-  Epic:      "https://raw.githubusercontent.com/sound-effects/audio/main/epic.mp3",
-  Legendary: "https://raw.githubusercontent.com/sound-effects/audio/main/legendary.mp3",
-};
-
-const SOUND_VOLUMES: Record<SoundType, number> = {
-  tear: 0.08, flip: 0.08, swoosh: 0.08, sparkle: 0.4,
-  Junk: 0.08, Common: 0.08, Uncommon: 0.08, Rare: 0.12, Epic: 0.15, Legendary: 0.4,
-};
-
-const SOUND_DURATIONS: Record<SoundType, number> = {
-  tear: 500, flip: 500, swoosh: 500, sparkle: 3000,
-  Junk: 500, Common: 500, Uncommon: 500, Rare: 500, Epic: 500, Legendary: 3000,
-};
-
-const STORAGE_PREFIX = "custom_sound_";
-
-function playSynthSound(type: SoundType) {
-  if (typeof window === "undefined") return;
+function getSharedAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return null;
+    if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+      sharedAudioCtx = new AudioCtx();
+    }
+    if (sharedAudioCtx.state === "suspended") {
+      sharedAudioCtx.resume().catch(() => {});
+    }
+    return sharedAudioCtx;
+  } catch {
+    return null;
+  }
+}
+
+export function playSynthSound(type: SoundType) {
+  const ctx = getSharedAudioContext();
+  if (!ctx) return;
+
+  try {
     const now = ctx.currentTime;
 
     if (type === "tear") {
+      // Pack tear: crisp paper/foil friction noise burst
+      const bufferSize = Math.floor(ctx.sampleRate * 0.15);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.4));
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(1400, now);
+      filter.frequency.linearRampToValueAtTime(300, now + 0.15);
+      filter.Q.setValueAtTime(2, now);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      noise.start(now);
+      noise.onended = () => {
+        noise.disconnect();
+        filter.disconnect();
+        gain.disconnect();
+      };
+    } else if (type === "flip") {
+      // Card flip: quick subtle flick pop
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(400, now);
-      osc.frequency.exponentialRampToValueAtTime(100, now + 0.25);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(700, now);
+      osc.frequency.exponentialRampToValueAtTime(250, now + 0.08);
+      gain.gain.setValueAtTime(0.16, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    } else if (type === "swoosh") {
+      // Swoosh: smooth air glide
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.16);
       gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.18);
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    } else if (type === "sparkle") {
+      // Sparkle: shimmering bell cascade
+      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + i * 0.05;
+        const dur = 0.35;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.1, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
+      });
+    } else if (type === "Junk") {
+      // Junk: dull low-frequency thud
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.22);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.22);
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    } else if (type === "Common") {
+      // Common: clean single-tone glass chime
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(523.25, now); // C5
+      gain.gain.setValueAtTime(0.14, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + 0.25);
-    } else if (type === "flip") {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(800, now);
-      osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.1);
-    } else if (type === "swoosh") {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(200, now);
-      osc.frequency.exponentialRampToValueAtTime(600, now + 0.2);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.2);
-    } else if (type === "sparkle" || type === "Legendary") {
-      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    } else if (type === "Uncommon") {
+      // Uncommon: bright ascending 2-tone chime
+      const notes = [523.25, 659.25]; // C5 -> E5
       notes.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+        const start = now + i * 0.08;
+        const dur = 0.28;
         osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, now + i * 0.08);
-        gain.gain.setValueAtTime(0.15, now + i * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.14, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now + i * 0.08);
-        osc.stop(now + i * 0.08 + 0.4);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
       });
-    } else if (type === "Epic" || type === "Rare") {
-      const notes = [440, 554.37, 659.25];
+    } else if (type === "Rare") {
+      // Rare: energetic ascending triad chime
+      const notes = [523.25, 659.25, 783.99]; // C5 -> E5 -> G5
       notes.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+        const start = now + i * 0.07;
+        const dur = 0.35;
         osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, now + i * 0.1);
-        gain.gain.setValueAtTime(0.12, now + i * 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.15, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now + i * 0.1);
-        osc.stop(now + i * 0.1 + 0.3);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
       });
-    } else {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      const freq = type === "Junk" ? 160 : type === "Common" ? 360 : 460;
-      osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.2);
+    } else if (type === "Epic") {
+      // Epic: rich multi-voice fantasy chord
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 -> E5 -> G5 -> C6
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + i * 0.07;
+        const dur = 0.45;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.16, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
+      });
+    } else if (type === "Legendary") {
+      // Legendary: grand victory fanfare with golden sparkle tail
+      const fanfare = [
+        { freq: 523.25, delay: 0.00, dur: 0.3 }, // C5
+        { freq: 659.25, delay: 0.08, dur: 0.3 }, // E5
+        { freq: 783.99, delay: 0.16, dur: 0.3 }, // G5
+        { freq: 1046.5, delay: 0.24, dur: 0.6 }, // C6
+        { freq: 1318.5, delay: 0.32, dur: 0.6 }, // E6
+        { freq: 1567.9, delay: 0.40, dur: 0.8 }, // G6
+      ];
+      fanfare.forEach(({ freq, delay, dur }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + delay;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.18, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
+      });
     }
-  } catch (err) {
+  } catch {
     // Ignore synth audio errors gracefully
   }
 }
 
-function loadCustomSounds(): Partial<Record<SoundType, string>> {
-  const result: Partial<Record<SoundType, string>> = {};
-  for (const key of Object.keys(DEFAULT_SOUND_URLS) as SoundType[]) {
-    const stored = localStorage.getItem(STORAGE_PREFIX + key);
-    if (stored) result[key] = stored;
-  }
-  return result;
-}
-
 export function useGameAudio() {
   const [isMuted, setIsMuted] = useState(false);
-  const [customSounds, setCustomSounds] = useState<Partial<Record<SoundType, string>>>({});
-
-  // Loaded dynamically to avoid Next.js SSR issues (Howler accesses `window` at module level)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const HowlRef = useRef<any>(null);
-  // Cache: key = `${type}::${url}` → Howl instance
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const howlCache = useRef<Map<string, any>>(new Map());
-
-  useEffect(() => {
-    setCustomSounds(loadCustomSounds());
-    import("howler").then((mod) => { HowlRef.current = mod.Howl; });
-  }, []);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getHowl = useCallback((type: SoundType): any | null => {
-    const Howl = HowlRef.current;
-    if (!Howl) return null;
-    const url = customSounds[type] ?? DEFAULT_SOUND_URLS[type];
-    const key = `${type}::${url}`;
-    if (!howlCache.current.has(key)) {
-      for (const [k, h] of howlCache.current.entries()) {
-        if (k.startsWith(`${type}::`)) { h.unload(); howlCache.current.delete(k); }
-      }
-      const h = new Howl({
-        src: [url],
-        volume: SOUND_VOLUMES[type],
-        preload: true,
-        onloaderror: () => {
-          // If network audio fails to load, fallback to synth audio seamlessly
-          howlCache.current.set(key, { play: () => playSynthSound(type), fade: () => {} });
-        },
-      });
-      howlCache.current.set(key, h);
-    }
-    return howlCache.current.get(key);
-  }, [customSounds]);
 
   const playSound = useCallback((type: SoundType) => {
     if (isMuted) return;
-    const vol = SOUND_VOLUMES[type];
-    const h = getHowl(type);
-    if (h) {
-      try {
-        const id = h.play();
-        if (typeof id === "number") {
-          setTimeout(() => h.fade(vol, 0, 400, id), SOUND_DURATIONS[type]);
-        }
-      } catch {
-        playSynthSound(type);
-      }
-    } else {
-      // Howler not loaded yet or unavailable — fallback to web audio synth
-      playSynthSound(type);
-    }
-  }, [isMuted, getHowl]);
+    playSynthSound(type);
+  }, [isMuted]);
 
-  const setCustomSound = useCallback((type: SoundType, dataUrl: string) => {
-    localStorage.setItem(STORAGE_PREFIX + type, dataUrl);
-    setCustomSounds((prev) => ({ ...prev, [type]: dataUrl }));
-    for (const [k, h] of howlCache.current.entries()) {
-      if (k.startsWith(`${type}::`)) { h.unload(); howlCache.current.delete(k); }
-    }
-  }, []);
-
-  const resetSound = useCallback((type: SoundType) => {
-    localStorage.removeItem(STORAGE_PREFIX + type);
-    setCustomSounds((prev) => { const n = { ...prev }; delete n[type]; return n; });
-    for (const [k, h] of howlCache.current.entries()) {
-      if (k.startsWith(`${type}::`)) { h.unload(); howlCache.current.delete(k); }
-    }
-  }, []);
-
-  const previewSound = useCallback((type: SoundType) => {
-    const url = customSounds[type] ?? DEFAULT_SOUND_URLS[type];
-    const vol = Math.min(SOUND_VOLUMES[type] * 2.5, 1);
-    const Howl = HowlRef.current;
-    if (Howl) {
-      const h = new Howl({
-        src: [url],
-        volume: vol,
-        onloaderror: () => playSynthSound(type),
-      });
-      const id = h.play();
-      if (typeof id === "number") {
-        setTimeout(() => { h.fade(vol, 0, 300, id); setTimeout(() => h.unload(), 350); }, 1800);
-      }
-    } else {
-      playSynthSound(type);
-    }
-  }, [customSounds]);
-
-  useEffect(() => { return () => { howlCache.current.forEach((h) => h.unload?.()); }; }, []);
-
-  return { isMuted, setIsMuted, playSound, customSounds, setCustomSound, resetSound, previewSound };
+  return { isMuted, setIsMuted, playSound };
 }
+
+
 
