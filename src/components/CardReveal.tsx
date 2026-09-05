@@ -7,7 +7,7 @@ import { getRarityColors, formatListeners, POKEMON_TYPE_COLORS } from "../lib/ca
 import { ScrollableTitle } from "./ScrollableTitle";
 import { JunkEffect } from "./JunkEffect";
 import { PackType } from "./PackVisual";
-
+import { getAssetUrl } from "../lib/assets";
 
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
 
@@ -84,7 +84,7 @@ export const CardReveal = ({
             <div
               className="absolute inset-0 bg-cover bg-center w-full h-full"
               style={{
-                backgroundImage: `url('${packType === "yugioh" ? "yugioh-back.png" : packType === "mtg" ? "mtg-back.png" : packType === "lorcana" ? "lorcana-back.png" : "pokemontcg-back.png"}')`,
+                backgroundImage: `url('${getAssetUrl(packType === "yugioh" ? "/yugioh-back.png" : packType === "mtg" ? "/mtg-back.png" : packType === "lorcana" ? "/lorcana-back.png" : "/pokemontcg-back.png")}')`,
                 backfaceVisibility: "hidden"
               }}
             />
@@ -283,14 +283,18 @@ export const CardReveal = ({
         >
           <div className={`w-full h-full border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden`}>
             {/* Background poster */}
-            {card.poster && (
-              <motion.img
-                referrerPolicy="no-referrer"
-                src={card.poster}
-                className={`absolute inset-0 w-full h-full ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 'opacity-100 mix-blend-normal' : 'opacity-90 mix-blend-normal'} transition-opacity duration-1000 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
-                style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 1 : 0.9) }}
-              />
-            )}
+            <motion.img
+              referrerPolicy="no-referrer"
+              src={getAssetUrl(card.poster || "/rickroll.gif")}
+              onError={(e) => {
+                const fallback = getAssetUrl("/rickroll.gif");
+                if (e.currentTarget.src !== fallback) {
+                  e.currentTarget.src = fallback;
+                }
+              }}
+              className={`absolute inset-0 w-full h-full ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 'opacity-100 mix-blend-normal' : 'opacity-90 mix-blend-normal'} transition-opacity duration-1000 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
+              style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 1 : 0.9) }}
+            />
 
             {/* YouTube trailer overlay */}
             {showTrailerIdx === idx && youtubeId && (

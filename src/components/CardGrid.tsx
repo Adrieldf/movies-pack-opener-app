@@ -13,6 +13,7 @@ import {
   TypeFilter,
   POKEMON_TYPE_COLORS,
 } from "../lib/cardUtils";
+import { getAssetUrl } from "../lib/assets";
 import { ScrollableTitle } from "./ScrollableTitle";
 import { useState } from "react";
 
@@ -270,14 +271,18 @@ export const CardGrid = ({
                     >
                       <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative`}>
                         <div className={`w-full h-full border sm:border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden group`}>
-                          {card.poster && (
-                            <img
-                              referrerPolicy="no-referrer"
-                              src={card.poster}
-                              alt={card.name}
-                              className={`absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
-                            />
-                          )}
+                          <img
+                            referrerPolicy="no-referrer"
+                            src={getAssetUrl(card.poster || "/rickroll.gif")}
+                            onError={(e) => {
+                              const fallback = getAssetUrl("/rickroll.gif");
+                              if (e.currentTarget.src !== fallback) {
+                                e.currentTarget.src = fallback;
+                              }
+                            }}
+                            alt={card.name}
+                            className={`absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
+                          />
 
                           {card.type !== 'yugioh' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && (
                             <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/20 to-transparent" />
