@@ -23,7 +23,7 @@ import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { fetchRandomEroPack } from "../lib/ero";
 import { getRickRollPack } from "../lib/rickroll";
-import { sanitizeCards, Rarity } from "../lib/cardUtils";
+import { sanitizeCards, Rarity, applyFoilChance } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
 import { PackVisual } from "../components/PackVisual";
@@ -225,6 +225,9 @@ export default function Home() {
     if (!fetchedCards || fetchedCards.length === 0) {
       fetchedCards = getRickRollPack();
     }
+
+    // Apply 0.5% chance for a card to be holographic foil
+    fetchedCards = applyFoilChance(fetchedCards);
 
     // Determine new cards
     let existingIdsArr: string[] = [];

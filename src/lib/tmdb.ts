@@ -15,6 +15,7 @@ export interface CardData {
   listeners?: number;
   cryUrl?: string;
   rank?: number;
+  isFoil?: boolean;
 }
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";

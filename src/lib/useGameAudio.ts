@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 export type SoundType =
-  | "tear" | "flip" | "sparkle" | "swoosh"
+  | "tear" | "flip" | "sparkle" | "swoosh" | "foil"
   | "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
 // Singleton AudioContext to prevent resource exhaustion and browser audio thread lag
@@ -107,6 +107,28 @@ export function playSynthSound(type: SoundType) {
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, start);
         gain.gain.setValueAtTime(0.1, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
+      });
+    } else if (type === "foil") {
+      // Foil: magical shimmering high-frequency ascending prismatic chimes
+      const foilNotes = [659.25, 830.61, 987.77, 1318.51, 1661.22, 1975.53, 2637.02];
+      foilNotes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + i * 0.045;
+        const dur = 0.55;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.05, start + dur);
+        gain.gain.setValueAtTime(0.12, start);
         gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);

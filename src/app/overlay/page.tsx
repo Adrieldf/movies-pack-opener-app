@@ -22,6 +22,7 @@ import { fetchRandomDragonBallPack } from "../../lib/dragonball";
 import { fetchRandomEroPack } from "../../lib/ero";
 import { getRickRollPack } from "../../lib/rickroll";
 import { useTwitchChat } from "../../lib/useTwitchChat";
+import { applyFoilChance } from "../../lib/cardUtils";
 import { PackVisual, PackType } from "../../components/PackVisual";
 import { CardReveal } from "../../components/CardReveal";
 import { useCardEffects } from "../../components/CardEffects";
@@ -148,6 +149,9 @@ export default function OverlayPage() {
     if (!fetched || fetched.length === 0) {
       fetched = getRickRollPack();
     }
+
+    // Apply 0.5% chance for a card to be holographic foil
+    fetched = applyFoilChance(fetched);
 
     setCards(fetched);
     setIsLoading(false);

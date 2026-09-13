@@ -13,7 +13,7 @@ interface CardEffectsProps {
   isMuted: boolean;
   twitchStatus: TwitchStatus;
   twitchSend: (msg: string) => void;
-  onPlaySound: (rarity: Rarity | "tear" | "flip" | "swoosh" | "sparkle") => void;
+  onPlaySound: (rarity: Rarity | "tear" | "flip" | "swoosh" | "sparkle" | "foil") => void;
   onJunkEffect: (idx: number) => void;
   onMusicPreview: (url: string) => void;
   onPokemonCry?: (url: string) => void;
@@ -53,8 +53,16 @@ export const useCardEffects = ({
     if (firedRef.current.has(cardIndex)) return;
     firedRef.current.add(cardIndex);
 
-    // Play rarity sound
-    onPlaySound(card.rarity);
+    // Play rarity sound or special foil chime
+    if (card.isFoil) {
+      onPlaySound("foil");
+      // Delayed secondary rarity cue if high rarity
+      if (card.rarity === "Legendary" || card.rarity === "Epic") {
+        setTimeout(() => onPlaySound(card.rarity), 250);
+      }
+    } else {
+      onPlaySound(card.rarity);
+    }
 
     // Auto-play music preview
     if (card.type === "music" && card.trailer && !isMuted) {
@@ -66,7 +74,16 @@ export const useCardEffects = ({
       onPokemonCry(card.cryUrl);
     }
 
-    // Visual effects
+    // Visual effects (confetti / junk)
+    if (card.isFoil) {
+      confetti({
+        particleCount: 160,
+        spread: 80,
+        origin: { y: 0.55 },
+        colors: ["#EC4899", "#A855F7", "#3B82F6", "#FACC15", "#34D399", "#FFFFFF"],
+      });
+    }
+
     if (card.rarity === "Legendary") {
       confetti({ particleCount: 250, spread: 70, angle: 60, origin: { x: 0.2, y: 0.6 }, colors: ["#FBBF24", "#F59E0B", "#D97706", "#FFFBEB"] });
       setTimeout(() => {
@@ -84,6 +101,7 @@ export const useCardEffects = ({
       const rarityEmoji: Record<Rarity, string> = {
         Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
       };
+      const foilTag = card.isFoil ? "✨ [FOIL] ✨ " : "";
       const typeLabel = 
         card.type === "movie" ? "🎬 Movie" : 
         card.type === "game" ? "🎮 Game" : 
@@ -137,7 +155,7 @@ export const useCardEffects = ({
       const showRating = !["yugioh", "mtg", "digimon", "lorcana", "pokemontcg", "ghibli", "dragonball", "country"].includes(card.type);
       const ratingPart = showRating && card.rating > 0 ? ` | ⭐ ${card.rating.toFixed(1)}/10 ${stars}` : "";
       
-      const msg = `${userPrefix}${typeLabel} | ${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo}${ratingPart}`;
+      const msg = `${userPrefix}${typeLabel} | ${foilTag}${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo}${ratingPart}`;
       
       // Send message after 1s delay as requested
       setTimeout(() => {

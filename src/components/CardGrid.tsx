@@ -15,6 +15,7 @@ import {
 } from "../lib/cardUtils";
 import { getAssetUrl } from "../lib/assets";
 import { ScrollableTitle } from "./ScrollableTitle";
+import { FoilOverlay } from "./FoilOverlay";
 import { useState } from "react";
 
 const Dropdown = ({ 
@@ -269,8 +270,8 @@ export const CardGrid = ({
                       className={`${dims.content} origin-top-left`}
                       style={{ transform: dims.scale !== 1 ? `scale(${dims.scale})` : "none" }}
                     >
-                      <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative`}>
-                        <div className={`w-full h-full border sm:border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden group`}>
+                      <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative ${card.isFoil ? 'ring-2 ring-amber-300/80 shadow-[0_0_25px_rgba(236,72,153,0.5),0_0_40px_rgba(59,130,246,0.35)] animate-foil-border' : ''}`}>
+                        <div className={`w-full h-full border sm:border-2 ${card.isFoil ? 'border-amber-300/60' : colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden group`}>
                           <img
                             referrerPolicy="no-referrer"
                             src={getAssetUrl(card.poster || "/rickroll.gif")}
@@ -378,7 +379,11 @@ export const CardGrid = ({
                             </div>
                           </div>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
+                        {card.isFoil ? (
+                          <FoilOverlay compact={gridSize === "sm"} />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none" />
+                        )}
                       </div>
                     </div>
                   </motion.div>

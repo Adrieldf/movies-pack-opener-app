@@ -109,21 +109,47 @@ export const formatListeners = (num?: number): string => {
   return num.toString();
 };
 
+export const FOIL_CHANCE = 0.005; // 0.5% chance (1 in 200)
+
+export const applyFoilChance = (cards: CardData[]): CardData[] => {
+  if (!cards || cards.length === 0) return [];
+  
+  // Quick override for testing via URL query param: ?foil=true
+  const forceFoil = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("foil") === "true";
+
+  // If cards already have foil designated, preserve them
+  if (cards.some(c => c.isFoil)) return cards;
+
+  const hasFoilCard = forceFoil || Math.random() < FOIL_CHANCE;
+  if (!hasFoilCard) {
+    return cards.map(c => ({ ...c, isFoil: false }));
+  }
+
+  // Pick one random card to become foil
+  const foilIndex = Math.floor(Math.random() * cards.length);
+  return cards.map((c, i) => ({
+    ...c,
+    isFoil: i === foilIndex,
+  }));
+};
+
 export const sanitizeCards = (cards: CardData[]): CardData[] =>
   cards.map(card => ({
     ...card,
     rating: card.rating ?? 0,
     name: card.name ?? "Unknown",
     rarity: card.rarity ?? "Common",
+    isFoil: Boolean(card.isFoil),
   }));
 
 export const getGroupedCollection = (cardList: CardData[]): { card: CardData; count: number }[] => {
   const groups: Map<string, { card: CardData; count: number }> = new Map();
   cardList.forEach(card => {
-    if (groups.has(card.id)) {
-      groups.get(card.id)!.count++;
+    const key = `${card.id}${card.isFoil ? "-foil" : ""}`;
+    if (groups.has(key)) {
+      groups.get(key)!.count++;
     } else {
-      groups.set(card.id, { card, count: 1 });
+      groups.set(key, { card, count: 1 });
     }
   });
   return Array.from(groups.values());

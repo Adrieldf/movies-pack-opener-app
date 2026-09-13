@@ -8,6 +8,7 @@ import { ScrollableTitle } from "./ScrollableTitle";
 import { JunkEffect } from "./JunkEffect";
 import { PackType } from "./PackVisual";
 import { getAssetUrl } from "../lib/assets";
+import { FoilOverlay } from "./FoilOverlay";
 
 type PackState = "sealed" | "tearing" | "opened" | "revealing" | "done";
 
@@ -278,10 +279,14 @@ export const CardReveal = ({
 
         {/* ── Card Front ── */}
         <div
-          className={`absolute inset-0 w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-1 shadow-2xl backface-hidden`}
+          className={`absolute inset-0 w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-1 shadow-2xl backface-hidden ${
+            card.isFoil
+              ? "ring-2 ring-amber-300/80 shadow-[0_0_35px_rgba(236,72,153,0.5),0_0_55px_rgba(59,130,246,0.35)] animate-foil-border"
+              : ""
+          }`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <div className={`w-full h-full border-2 ${colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden`}>
+          <div className={`w-full h-full border-2 ${card.isFoil ? "border-amber-300/60" : colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden`}>
             {/* Background poster */}
             <motion.img
               referrerPolicy="no-referrer"
@@ -424,7 +429,11 @@ export const CardReveal = ({
             </div>
 
             {/* Foil overlay */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none"></div>
+            {card.isFoil ? (
+              <FoilOverlay />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-50 mix-blend-overlay rounded-xl pointer-events-none" />
+            )}
 
             {/* NEW! wax seal */}
             {isNew && (
