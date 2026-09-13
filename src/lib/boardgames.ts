@@ -46,10 +46,7 @@ export const fetchRandomBoardGamePack = async (
   let attempts = 0;
   const maxAttempts = 5;
   
-  // Static project setup using a public CORS proxy
-  const CORS_PROXY = "https://corsproxy.io/?";
   const BGG_API_URL = `https://boardgamegeek.com/xmlapi2/thing?id=${ids}&stats=1`;
-  const PROXIED_URL = `${CORS_PROXY}${encodeURIComponent(BGG_API_URL)}`;
   
   const token = process.env.NEXT_PUBLIC_BGG_API_KEY;
   const isValidToken = token && token !== "undefined" && token.length > 5;
@@ -57,11 +54,11 @@ export const fetchRandomBoardGamePack = async (
   while (attempts < maxAttempts) {
     const headers: Record<string, string> = {};
     if (isValidToken) {
-        headers['Authorization'] = `Bearer ${token}`.trim();
+      headers["Authorization"] = `Bearer ${token}`.trim();
     }
 
     try {
-        res = await fetch(PROXIED_URL, { headers });
+      res = await fetch(BGG_API_URL, { headers });
         
         if (res.status === 202) {
           console.log(`[BGG] Processing request (202 Accepted). Retrying attempt ${attempts + 1}...`);
@@ -71,7 +68,7 @@ export const fetchRandomBoardGamePack = async (
         }
 
         if (!res.ok) {
-          throw new Error(`Public CORS proxy failed with status ${res.status}`);
+          throw new Error(`BGG request failed with status ${res.status}`);
         }
 
         const text = await res.text();
@@ -106,7 +103,7 @@ export const fetchRandomBoardGamePack = async (
           const yearNode = item.querySelector("yearpublished");
           const year = yearNode ? parseInt(yearNode.getAttribute("value") || "0", 10) : 0;
           
-          const imageNode = item.querySelector("image");
+          const imageNode = item.querySelector("image") || item.querySelector("thumbnail");
           const poster = imageNode ? imageNode.textContent || "" : "";
           
           // Extract categories and mechanics
