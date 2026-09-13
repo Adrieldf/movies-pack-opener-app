@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 export type SoundType =
-  | "tear" | "flip" | "sparkle" | "swoosh" | "foil"
+  | "tear" | "flip" | "sparkle" | "swoosh" | "foil" | "godpack"
   | "Junk" | "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
 // Singleton AudioContext to prevent resource exhaustion and browser audio thread lag
@@ -129,6 +129,54 @@ export function playSynthSound(type: SoundType) {
         osc.frequency.setValueAtTime(freq, start);
         osc.frequency.exponentialRampToValueAtTime(freq * 1.05, start + dur);
         gain.gain.setValueAtTime(0.12, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+        osc.onended = () => {
+          osc.disconnect();
+          gain.disconnect();
+        };
+      });
+    } else if (type === "godpack") {
+      // Godpack: epic radiant golden chords + ascending sparkling prismatic chimes
+      const chords = [
+        [523.25, 659.25, 783.99, 1046.50], // C major
+        [659.25, 830.61, 987.77, 1318.51], // E major
+        [783.99, 987.77, 1174.66, 1567.98], // G major
+        [1046.50, 1318.51, 1567.98, 2093.00] // High C radiant
+      ];
+      chords.forEach((chord, step) => {
+        const stepTime = now + step * 0.13;
+        chord.forEach(freq => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const dur = 0.85;
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, stepTime);
+          gain.gain.setValueAtTime(0.08, stepTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, stepTime + dur);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(stepTime);
+          osc.stop(stepTime + dur);
+          osc.onended = () => {
+            osc.disconnect();
+            gain.disconnect();
+          };
+        });
+      });
+      // Glittering chime harmonics
+      const shimmerNotes = [1318.51, 1567.98, 1975.53, 2637.02, 3135.96];
+      shimmerNotes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + 0.4 + i * 0.055;
+        const dur = 0.65;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.09, start);
         gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);

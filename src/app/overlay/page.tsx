@@ -22,10 +22,11 @@ import { fetchRandomDragonBallPack } from "../../lib/dragonball";
 import { fetchRandomEroPack } from "../../lib/ero";
 import { getRickRollPack } from "../../lib/rickroll";
 import { useTwitchChat } from "../../lib/useTwitchChat";
-import { applyFoilChance } from "../../lib/cardUtils";
+import { applyFoilChance, isGodPack } from "../../lib/cardUtils";
 import { PackVisual, PackType } from "../../components/PackVisual";
 import { CardReveal } from "../../components/CardReveal";
 import { useCardEffects } from "../../components/CardEffects";
+import { Sparkles } from "lucide-react";
 
 interface QueueItem {
   id: string;
@@ -150,7 +151,7 @@ export default function OverlayPage() {
       fetched = getRickRollPack();
     }
 
-    // Apply 0.5% chance for a card to be holographic foil
+    // Apply 0.05% chance for GODPACK (all foil) or 0.5% chance for single foil
     fetched = applyFoilChance(fetched);
 
     setCards(fetched);
@@ -158,8 +159,13 @@ export default function OverlayPage() {
     setPackState("opened");
     setTearProgress(100);
     controls.start({ y: -150, x: 100, opacity: 0, rotate: 25, transition: { duration: 0.6, ease: "easeOut" } });
-    setTimeout(() => setPackState("revealing"), 800);
-  }, [currentPack, controls]);
+    setTimeout(() => {
+      setPackState("revealing");
+      if (isGodPack(fetched)) {
+        playSound("godpack");
+      }
+    }, 800);
+  }, [currentPack, controls, playSound]);
 
   const { status: twitchStatus, sendMessage: twitchSend } = useTwitchChat();
 
@@ -174,9 +180,10 @@ export default function OverlayPage() {
     twitchStatus,
     twitchSend,
     username: currentPack?.username,
+    isGodPack: isGodPack(cards),
     onPlaySound: (rarity) => {
-      if (!playedRevealSounds.current.has(activeCardIndex)) {
-        playedRevealSounds.current.add(activeCardIndex);
+      if (rarity === "godpack" || !playedRevealSounds.current.has(activeCardIndex)) {
+        if (rarity !== "godpack") playedRevealSounds.current.add(activeCardIndex);
         playSound(rarity as SoundType);
       }
     },
@@ -282,6 +289,24 @@ export default function OverlayPage() {
         </AnimatePresence>
 
         <div className="flex-1 w-full relative flex items-center justify-center select-none pt-16">
+          {/* God Pack Announcement Banner */}
+          <AnimatePresence>
+            {packState === "revealing" && isGodPack(cards) && (
+              <motion.div
+                initial={{ y: -25, opacity: 0, scale: 0.9 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                className="absolute top-2 z-30 flex items-center gap-2 px-5 py-1.5 rounded-full border border-amber-300/90 bg-gradient-to-r from-amber-500/25 via-yellow-400/25 to-amber-500/25 backdrop-blur-xl shadow-[0_0_35px_rgba(251,191,36,0.6),0_0_15px_rgba(236,72,153,0.4)] animate-foil-border"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300 animate-spin" style={{ animationDuration: "5s" }} />
+                <span className="font-black text-xs tracking-[0.2em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-100 to-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                  👑 GOD PACK 👑 • ALL FOIL CARDS
+                </span>
+                <Sparkles className="w-4 h-4 text-amber-300 animate-spin" style={{ animationDuration: "5s" }} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <AnimatePresence>
             {packState === "revealing" && cards[activeCardIndex] && (
                 <CardReveal

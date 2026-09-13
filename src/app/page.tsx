@@ -23,7 +23,7 @@ import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { fetchRandomEroPack } from "../lib/ero";
 import { getRickRollPack } from "../lib/rickroll";
-import { sanitizeCards, Rarity, applyFoilChance } from "../lib/cardUtils";
+import { sanitizeCards, Rarity, applyFoilChance, isGodPack } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
 import { PackVisual } from "../components/PackVisual";
@@ -126,9 +126,10 @@ export default function Home() {
     isMuted,
     twitchStatus,
     twitchSend,
+    isGodPack: isGodPack(cards),
     onPlaySound: (rarity) => {
-      if (!playedRevealSounds.current.has(activeCardIndex)) {
-        playedRevealSounds.current.add(activeCardIndex);
+      if (rarity === "godpack" || !playedRevealSounds.current.has(activeCardIndex)) {
+        if (rarity !== "godpack") playedRevealSounds.current.add(activeCardIndex);
         playSound(rarity as SoundType);
       }
     },
@@ -226,7 +227,7 @@ export default function Home() {
       fetchedCards = getRickRollPack();
     }
 
-    // Apply 0.5% chance for a card to be holographic foil
+    // Apply 0.05% chance for GODPACK (all foil) or 0.5% chance for single foil
     fetchedCards = applyFoilChance(fetchedCards);
 
     // Determine new cards
@@ -254,8 +255,13 @@ export default function Home() {
     setPackState("opened");
     setTearProgress(100);
     controls.start({ y: -150, x: 100, opacity: 0, rotate: 25, transition: { duration: 0.6, ease: "easeOut" } });
-    setTimeout(() => setPackState("revealing"), 800);
-  }, [controls, packSize, packType]);
+    setTimeout(() => {
+      setPackState("revealing");
+      if (isGodPack(fetchedCards)) {
+        playSound("godpack");
+      }
+    }, 800);
+  }, [controls, packSize, packType, playSound]);
 
   // ── Tear gesture ──────────────────────────────────────────────────────────
   const updateTear = (clientX: number, rect: DOMRect) => {
@@ -490,6 +496,24 @@ export default function Home() {
 
         {/* ── Main area ── */}
         <div className="flex-1 w-full relative flex items-center justify-center select-none pt-16">
+
+          {/* God Pack Announcement Banner */}
+          <AnimatePresence>
+            {(packState === "revealing" || packState === "done") && isGodPack(cards) && (
+              <motion.div
+                initial={{ y: -25, opacity: 0, scale: 0.9 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                className="absolute top-2 sm:top-4 z-30 flex items-center gap-2 px-4 py-1.5 sm:px-6 sm:py-2 rounded-full border border-amber-300/90 bg-gradient-to-r from-amber-500/25 via-yellow-400/25 to-amber-500/25 backdrop-blur-xl shadow-[0_0_35px_rgba(251,191,36,0.6),0_0_15px_rgba(236,72,153,0.4)] animate-foil-border"
+              >
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 animate-spin" style={{ animationDuration: "5s" }} />
+                <span className="font-black text-xs sm:text-sm tracking-[0.2em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-100 to-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                  👑 GOD PACK 👑 • ALL FOIL CARDS
+                </span>
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 animate-spin" style={{ animationDuration: "5s" }} />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Cards */}
           <AnimatePresence>

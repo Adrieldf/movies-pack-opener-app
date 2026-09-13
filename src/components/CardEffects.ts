@@ -13,11 +13,12 @@ interface CardEffectsProps {
   isMuted: boolean;
   twitchStatus: TwitchStatus;
   twitchSend: (msg: string) => void;
-  onPlaySound: (rarity: Rarity | "tear" | "flip" | "swoosh" | "sparkle" | "foil") => void;
+  onPlaySound: (rarity: Rarity | "tear" | "flip" | "swoosh" | "sparkle" | "foil" | "godpack") => void;
   onJunkEffect: (idx: number) => void;
   onMusicPreview: (url: string) => void;
   onPokemonCry?: (url: string) => void;
   username?: string;
+  isGodPack?: boolean;
 }
 
 const formatListeners = (num?: number): string => {
@@ -44,6 +45,7 @@ export const useCardEffects = ({
   onMusicPreview,
   onPokemonCry,
   username,
+  isGodPack,
 }: CardEffectsProps) => {
   const firedRef = useRef<Set<number>>(new Set());
   const twitchFiredRef = useRef<Set<number>>(new Set());
@@ -53,8 +55,14 @@ export const useCardEffects = ({
     if (firedRef.current.has(cardIndex)) return;
     firedRef.current.add(cardIndex);
 
-    // Play rarity sound or special foil chime
-    if (card.isFoil) {
+    // Play godpack fanfare on first card of a godpack, or foil chime, or rarity sound
+    if (isGodPack && cardIndex === 0) {
+      onPlaySound("godpack");
+      setTimeout(() => onPlaySound("foil"), 400);
+      if (card.rarity === "Legendary" || card.rarity === "Epic") {
+        setTimeout(() => onPlaySound(card.rarity), 800);
+      }
+    } else if (card.isFoil) {
       onPlaySound("foil");
       // Delayed secondary rarity cue if high rarity
       if (card.rarity === "Legendary" || card.rarity === "Epic") {
@@ -75,7 +83,23 @@ export const useCardEffects = ({
     }
 
     // Visual effects (confetti / junk)
-    if (card.isFoil) {
+    if (isGodPack && cardIndex === 0) {
+      // Epic burst for opening a Godpack!
+      confetti({
+        particleCount: 250,
+        spread: 100,
+        origin: { y: 0.5 },
+        colors: ["#FFD700", "#FFA500", "#FF69B4", "#00FFFF", "#9370DB", "#FFFFFF"],
+      });
+      setTimeout(() => {
+        confetti({
+          particleCount: 180,
+          spread: 120,
+          origin: { y: 0.55 },
+          colors: ["#FFD700", "#F59E0B", "#EC4899", "#3B82F6"],
+        });
+      }, 300);
+    } else if (card.isFoil) {
       confetti({
         particleCount: 160,
         spread: 80,
@@ -98,10 +122,16 @@ export const useCardEffects = ({
     // Twitch chat
     if (twitchStatus === "connected" && card.type !== "ero" && !twitchFiredRef.current.has(cardIndex)) {
       twitchFiredRef.current.add(cardIndex);
+
+      if (isGodPack && cardIndex === 0) {
+        const godMsg = `✨👑🔥 [GODPACK DETECTED] 🔥👑✨ Every single card in this pack is HOLOGRAPHIC FOIL!`;
+        twitchSend(godMsg);
+      }
+
       const rarityEmoji: Record<Rarity, string> = {
         Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
       };
-      const foilTag = card.isFoil ? "✨ [FOIL] ✨ " : "";
+      const foilTag = isGodPack ? "✨👑 [GODPACK FOIL] 👑✨ " : card.isFoil ? "✨ [FOIL] ✨ " : "";
       const typeLabel = 
         card.type === "movie" ? "🎬 Movie" : 
         card.type === "game" ? "🎮 Game" : 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Film, Tv, Gamepad2, Headphones, Users, Music, Image, Globe, Heart } from "lucide-react";
 import { CardData } from "../lib/tmdb";
@@ -41,6 +42,7 @@ export const CardReveal = ({
   onClick,
   onJunkDone,
 }: CardRevealProps) => {
+  const [imageError, setImageError] = useState(false);
   let youtubeId: string | null = null;
   if (card.trailer) {
     const parts = card.trailer.split("v=");
@@ -288,18 +290,37 @@ export const CardReveal = ({
         >
           <div className={`w-full h-full border-2 ${card.isFoil ? "border-amber-300/60" : colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden`}>
             {/* Background poster */}
-            <motion.img
-              referrerPolicy="no-referrer"
-              src={getAssetUrl(card.poster || "/rickroll.gif")}
-              onError={(e) => {
-                const fallback = getAssetUrl("/rickroll.gif");
-                if (e.currentTarget.src !== fallback) {
-                  e.currentTarget.src = fallback;
-                }
-              }}
-              className={`absolute inset-0 w-full h-full ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 'opacity-100 mix-blend-normal' : 'opacity-90 mix-blend-normal'} transition-opacity duration-1000 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
-              style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 1 : 0.9) }}
-            />
+            {card.poster && !imageError ? (
+              <motion.img
+                referrerPolicy="no-referrer"
+                src={getAssetUrl(card.poster)}
+                onError={() => setImageError(true)}
+                className={`absolute inset-0 w-full h-full ${(card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 'opacity-100 mix-blend-normal' : 'opacity-90 mix-blend-normal'} transition-opacity duration-1000 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
+                style={{ opacity: showTrailerIdx === idx && youtubeId ? 0 : ((card.type === 'giphy' || card.type === 'yugioh' || card.type === 'mtg' || card.type === 'lorcana' || card.type === 'pokemontcg') ? 1 : 0.9) }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-slate-900/95 via-neutral-950/90 to-slate-900/95">
+                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 shadow-inner">
+                  {card.type === "movie" || card.type === "tv" || card.type === "ghibli" ? (
+                    <Film className="w-8 h-8 text-white/40" />
+                  ) : card.type === "game" || card.type === "boardgame" ? (
+                    <Gamepad2 className="w-8 h-8 text-white/40" />
+                  ) : card.type === "music" ? (
+                    <Music className="w-8 h-8 text-white/40" />
+                  ) : card.type === "country" ? (
+                    <Globe className="w-8 h-8 text-white/40" />
+                  ) : (
+                    <Sparkles className="w-8 h-8 text-white/40" />
+                  )}
+                </div>
+                <span className="text-sm font-bold text-white/80 line-clamp-2 px-2">
+                  {card.name}
+                </span>
+                <span className="text-[10px] text-white/35 uppercase tracking-widest mt-1.5 font-medium">
+                  Image Unavailable
+                </span>
+              </div>
+            )}
 
             {/* YouTube trailer overlay */}
             {showTrailerIdx === idx && youtubeId && (

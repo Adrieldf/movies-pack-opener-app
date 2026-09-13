@@ -12,6 +12,7 @@ import {
   SortOption,
   TypeFilter,
   POKEMON_TYPE_COLORS,
+  isGodPack,
 } from "../lib/cardUtils";
 import { getAssetUrl } from "../lib/assets";
 import { ScrollableTitle } from "./ScrollableTitle";
@@ -129,9 +130,18 @@ export const CardGrid = ({
           </button>
 
           <div className="w-full max-w-5xl flex flex-col items-center pb-24 mt-8 sm:mt-0">
-            <h2 className="text-3xl font-bold mt-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-4 sm:mb-8">
-              {isCollectionView ? "My Collection" : "Pack Review"}
-            </h2>
+            <div className="flex flex-col items-center gap-2 mt-6 mb-4 sm:mb-8">
+              <h2 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                {isCollectionView ? "My Collection" : "Pack Review"}
+              </h2>
+              {!isCollectionView && isGodPack(cards) && (
+                <div className="flex items-center gap-2 px-4 py-1 rounded-full border border-amber-300/80 bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 text-amber-200 text-xs font-black tracking-widest uppercase shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-pulse">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" style={{ animationDuration: "5s" }} />
+                  <span>👑 GOD PACK • ALL FOIL CARDS 👑</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" style={{ animationDuration: "5s" }} />
+                </div>
+              )}
+            </div>
 
             {isCollectionView && (
               <div className="w-full space-y-4 mb-8 max-w-5xl">
@@ -272,18 +282,22 @@ export const CardGrid = ({
                     >
                       <div className={`w-full h-full bg-gradient-to-br ${colors.bg} rounded-xl p-0.5 sm:p-1 shadow-2xl relative ${card.isFoil ? 'ring-2 ring-amber-300/80 shadow-[0_0_25px_rgba(236,72,153,0.5),0_0_40px_rgba(59,130,246,0.35)] animate-foil-border' : ''}`}>
                         <div className={`w-full h-full border sm:border-2 ${card.isFoil ? 'border-amber-300/60' : colors.border} ${colors.animate} rounded-lg flex flex-col bg-black/20 backdrop-blur-sm relative overflow-hidden group`}>
-                          <img
-                            referrerPolicy="no-referrer"
-                            src={getAssetUrl(card.poster || "/rickroll.gif")}
-                            onError={(e) => {
-                              const fallback = getAssetUrl("/rickroll.gif");
-                              if (e.currentTarget.src !== fallback) {
-                                e.currentTarget.src = fallback;
-                              }
-                            }}
-                            alt={card.name}
-                            className={`absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
-                          />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center bg-gradient-to-b from-slate-900/95 via-neutral-950/90 to-slate-900/95">
+                            <Sparkles className="w-6 h-6 text-white/30 mb-1" />
+                            <span className="text-[11px] font-bold text-white/70 line-clamp-2">{card.name}</span>
+                            <span className="text-[8px] text-white/30 uppercase tracking-wider mt-0.5">Image Unavailable</span>
+                          </div>
+                          {card.poster && (
+                            <img
+                              referrerPolicy="no-referrer"
+                              src={getAssetUrl(card.poster)}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                              alt={card.name}
+                              className={`absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 mix-blend-normal transition-opacity duration-300 ${card.type === 'dragonball' ? 'object-cover object-[50%_10%]' : 'object-cover'}`}
+                            />
+                          )}
 
                           {card.type !== 'yugioh' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && (
                             <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/20 to-transparent" />

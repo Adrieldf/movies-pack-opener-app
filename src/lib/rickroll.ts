@@ -3,9 +3,9 @@ import { getAssetUrl } from "./assets";
 
 export const RICK_ROLL_CARD: CardData = {
   id: "rick-roll-fallback",
-  name: "Never Gonna Give You Up",
+  name: "Consolation Prize",
   rarity: "Legendary",
-  description: "Oops! API failed or returned 0 cards... Enjoy Rick Astley!",
+  description: "Consolation prize: pack was missing",
   poster: getAssetUrl("/rickroll.gif"),
   rating: 10.0,
   year: 1987,

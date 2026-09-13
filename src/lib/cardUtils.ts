@@ -110,16 +110,29 @@ export const formatListeners = (num?: number): string => {
 };
 
 export const FOIL_CHANCE = 0.005; // 0.5% chance (1 in 200)
+export const GODPACK_CHANCE = 0.0005; // 0.05% chance (1 in 2000)
+
+export const isGodPack = (cards: CardData[]): boolean =>
+  cards.length > 0 && cards.every(c => Boolean(c.isFoil));
 
 export const applyFoilChance = (cards: CardData[]): CardData[] => {
   if (!cards || cards.length === 0) return [];
   
-  // Quick override for testing via URL query param: ?foil=true
-  const forceFoil = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("foil") === "true";
+  // Quick overrides for testing via URL query param: ?godpack=true, ?god=true, or ?foil=true
+  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const forceGodPack = searchParams?.get("godpack") === "true" || searchParams?.get("god") === "true";
+  const forceFoil = searchParams?.get("foil") === "true";
 
   // If cards already have foil designated, preserve them
   if (cards.some(c => c.isFoil)) return cards;
 
+  // Check for GODPACK: 0.05% chance that every card in the pack is holographic foil
+  const isGod = forceGodPack || Math.random() < GODPACK_CHANCE;
+  if (isGod) {
+    return cards.map(c => ({ ...c, isFoil: true }));
+  }
+
+  // Normal foil check: 0.5% chance for a single card in the pack
   const hasFoilCard = forceFoil || Math.random() < FOIL_CHANCE;
   if (!hasFoilCard) {
     return cards.map(c => ({ ...c, isFoil: false }));
