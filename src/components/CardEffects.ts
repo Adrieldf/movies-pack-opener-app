@@ -131,7 +131,7 @@ export const useCardEffects = ({
       const rarityEmoji: Record<Rarity, string> = {
         Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
       };
-      const foilTag = isGodPack ? "✨👑 [GODPACK FOIL] 👑✨ " : card.isFoil ? "✨ [FOIL] ✨ " : "";
+      const foilTag = (isGodPack && card.isFoil) ? "✨👑 [GOD PACK FOIL] 👑✨ " : card.isFoil ? "✨ [FOIL] ✨ " : "";
       const typeLabel = 
         card.type === "movie" ? "🎬 Movie" : 
         card.type === "game" ? "🎮 Game" : 
@@ -192,7 +192,7 @@ export const useCardEffects = ({
         twitchSend(msg);
       }, 1000);
     }
-  }, [isFlipped, isActive, cardIndex, card, username, twitchStatus, twitchSend]);
+  }, [isFlipped, isActive, cardIndex, card, username, twitchStatus, twitchSend, isGodPack]);
 
   // Reset tracking when the hook is used for a new session (e.g. pack reset)
   const reset = useCallback(() => {
