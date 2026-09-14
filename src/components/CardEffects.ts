@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { CardData } from "../lib/tmdb";
-import { Rarity } from "../lib/cardUtils";
+import { Rarity, formatPackName } from "../lib/cardUtils";
 
 type TwitchStatus = "disconnected" | "connecting" | "connected" | "error";
 
@@ -132,7 +132,9 @@ export const useCardEffects = ({
         Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
       };
       const foilTag = (isGodPack && card.isFoil) ? "✨👑 [GOD PACK FOIL] 👑✨ " : card.isFoil ? "✨ [FOIL] ✨ " : "";
+      const isConsolation = card.id === "rick-roll-fallback" || card.name === "Consolation Prize";
       const typeLabel = 
+        isConsolation ? "🎁 Consolation" :
         card.type === "movie" ? "🎬 Movie" : 
         card.type === "game" ? "🎮 Game" : 
         card.type === "music" ? "🎵 Music" : 
@@ -153,7 +155,12 @@ export const useCardEffects = ({
         
       const stars = "⭐".repeat(Math.round(card.rating / 2));
       let extraInfo = "";
-      if (card.type === "movie" || card.type === "tv" || card.type === "ghibli") {
+      if (isConsolation) {
+        const packTitle = card.originalPack ? `${formatPackName(card.originalPack)} Pack` : "Pack";
+        extraInfo = card.originalPack
+          ? ` (Intended: ${packTitle} - Ran into a problem)`
+          : ` (Ran into a problem opening pack)`;
+      } else if (card.type === "movie" || card.type === "tv" || card.type === "ghibli") {
         if (card.year) extraInfo = ` (${card.year})`;
       } else if (card.type === "game") {
         const platforms = card.platforms?.slice(0, 3).join(", ");

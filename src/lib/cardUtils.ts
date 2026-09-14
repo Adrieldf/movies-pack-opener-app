@@ -187,3 +187,35 @@ export const getFilteredCollection = (cardList: CardData[], typeFilter: TypeFilt
   if (typeFilter === "all") return cardList;
   return cardList.filter(card => card.type === typeFilter);
 };
+
+export const formatPackName = (packType?: string): string => {
+  if (!packType) return "Unknown";
+  const normalized = packType.toLowerCase();
+  const map: Record<string, string> = {
+    movies: "Cinema",
+    movie: "Cinema",
+    games: "Gaming",
+    game: "Gaming",
+    music: "Music",
+    musics: "Music",
+    anime: "Anime",
+    pokemon: "Pokémon",
+    boardgame: "Board Game",
+    boardgames: "Board Game",
+    giphy: "Giphy",
+    yugioh: "Yu-Gi-Oh!",
+    mtg: "MTG",
+    disney: "Disney",
+    digimon: "Digimon",
+    lorcana: "Lorcana",
+    countries: "World",
+    country: "World",
+    pokemontcg: "Pokémon TCG",
+    ghibli: "Studio Ghibli",
+    dragonball: "Dragon Ball",
+    ero: "Ero",
+    random: "Random",
+  };
+  return map[normalized] || (packType.charAt(0).toUpperCase() + packType.slice(1));
+};
+

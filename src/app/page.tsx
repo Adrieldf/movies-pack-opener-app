@@ -224,7 +224,7 @@ export default function Home() {
     }
 
     if (!fetchedCards || fetchedCards.length === 0) {
-      fetchedCards = getRickRollPack();
+      fetchedCards = getRickRollPack(packType || undefined);
     }
 
     // Apply 0.05% chance for GODPACK (all foil) or 0.5% chance for single foil

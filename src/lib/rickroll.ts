@@ -1,5 +1,6 @@
 import { CardData } from "./tmdb";
 import { getAssetUrl } from "./assets";
+import { formatPackName } from "./cardUtils";
 
 export const RICK_ROLL_CARD: CardData = {
   id: "rick-roll-fallback",
@@ -13,6 +14,15 @@ export const RICK_ROLL_CARD: CardData = {
   imdb_link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
 };
 
-export const getRickRollPack = (): CardData[] => {
-  return [{ ...RICK_ROLL_CARD, poster: getAssetUrl("/rickroll.gif") }];
+export const getRickRollPack = (originalPack?: string): CardData[] => {
+  const packTitle = originalPack ? `${formatPackName(originalPack)} Pack` : "Pack";
+  return [{
+    ...RICK_ROLL_CARD,
+    poster: getAssetUrl("/rickroll.gif"),
+    originalPack,
+    description: originalPack
+      ? `Consolation prize: ${packTitle} ran into a problem`
+      : "Consolation prize: pack was missing",
+  }];
 };
+

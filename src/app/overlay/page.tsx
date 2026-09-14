@@ -148,7 +148,7 @@ export default function OverlayPage() {
     }
 
     if (!fetched || fetched.length === 0) {
-      fetched = getRickRollPack();
+      fetched = getRickRollPack(type);
     }
 
     // Apply 0.05% chance for GODPACK (all foil) or 0.5% chance for single foil
