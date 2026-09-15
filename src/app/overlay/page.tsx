@@ -20,6 +20,7 @@ import { fetchRandomPokemonTcgPack } from "../../lib/pokemontcg";
 import { fetchRandomGhibliPack } from "../../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../../lib/dragonball";
 import { fetchRandomEroPack } from "../../lib/ero";
+import { fetchRandomNumbersPack } from "../../lib/numbers";
 import { getRickRollPack } from "../../lib/rickroll";
 import { useTwitchChat } from "../../lib/useTwitchChat";
 import { applyFoilChance, isGodPack } from "../../lib/cardUtils";
@@ -142,6 +143,7 @@ export default function OverlayPage() {
         : type === "ghibli" ? await fetchRandomGhibliPack(count)
         : type === "dragonball" ? await fetchRandomDragonBallPack(count)
         : type === "ero" ? await fetchRandomEroPack(count)
+        : type === "numbers" ? await fetchRandomNumbersPack(count)
         : await fetchRandomPack(count);
     } catch (err) {
       console.error("Overlay API error, defaulting to Rick Roll:", err);

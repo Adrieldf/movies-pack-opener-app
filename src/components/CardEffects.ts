@@ -151,6 +151,7 @@ export const useCardEffects = ({
         card.type === "pokemontcg" ? "⚡ PTCG" :
         card.type === "ghibli" ? "🍃 Ghibli" :
         card.type === "dragonball" ? "🐉 Dragon Ball" :
+        card.type === "numbers" ? "🔢 Number" :
         "📺 TV Series";
         
       const stars = "⭐".repeat(Math.round(card.rating / 2));
@@ -186,10 +187,12 @@ export const useCardEffects = ({
       } else if (card.type === "dragonball") {
         const kiInfo = card.platforms?.find(p => p.startsWith("KI:"));
         if (kiInfo) extraInfo = ` [${kiInfo}]`;
+      } else if (card.type === "numbers") {
+        if (card.description) extraInfo = ` [${card.description}]`;
       }
       
       const userPrefix = username ? `${username} found a ` : "";
-      const showRating = !["yugioh", "mtg", "digimon", "lorcana", "pokemontcg", "ghibli", "dragonball", "country"].includes(card.type);
+      const showRating = !["yugioh", "mtg", "digimon", "lorcana", "pokemontcg", "ghibli", "dragonball", "country", "numbers"].includes(card.type);
       const ratingPart = showRating && card.rating > 0 ? ` | ⭐ ${card.rating.toFixed(1)}/10 ${stars}` : "";
       
       const msg = `${userPrefix}${typeLabel} | ${foilTag}${rarityEmoji[card.rarity]} [${card.rarity.toUpperCase()}] ${card.name}${extraInfo}${ratingPart}`;

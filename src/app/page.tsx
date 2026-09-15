@@ -22,6 +22,7 @@ import { fetchRandomPokemonTcgPack } from "../lib/pokemontcg";
 import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { fetchRandomEroPack } from "../lib/ero";
+import { fetchRandomNumbersPack } from "../lib/numbers";
 import { getRickRollPack } from "../lib/rickroll";
 import { sanitizeCards, Rarity, applyFoilChance, isGodPack } from "../lib/cardUtils";
 
@@ -94,7 +95,7 @@ export default function Home() {
       if (!isNaN(n)) setPackSize(Math.max(1, Math.min(100, n)));
     }
     const pType = params.get("pack");
-    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney", "digimon", "lorcana", "countries", "pokemontcg", "ghibli", "dragonball"];
+    const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney", "digimon", "lorcana", "countries", "pokemontcg", "ghibli", "dragonball", "numbers"];
     if (pType === "random") {
       const chosen = validTypes[Math.floor(Math.random() * validTypes.length)];
       setPackType(chosen);
@@ -218,7 +219,9 @@ export default function Home() {
                                           ? await fetchRandomDragonBallPack(packSize)
                                           : packType === "ero"
                                             ? await fetchRandomEroPack(packSize)
-                                            : await fetchRandomPack(packSize);
+                                            : packType === "numbers"
+                                              ? await fetchRandomNumbersPack(packSize)
+                                              : await fetchRandomPack(packSize);
     } catch (err) {
       console.error("Error opening pack, defaulting to Rick Roll card:", err);
     }
@@ -380,7 +383,7 @@ export default function Home() {
       <PackSelector onSelect={(t) => {
         let finalType = t;
         if (t === "random") {
-          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney", "digimon"];
+          const validTypes: PackType[] = ["movies", "games", "music", "anime", "pokemon", "giphy", "yugioh", "mtg", "boardgame", "disney", "digimon", "numbers"];
           finalType = validTypes[Math.floor(Math.random() * validTypes.length)];
         }
         setPackType(finalType);

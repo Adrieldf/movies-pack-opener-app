@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Film, Tv, Gamepad2, Headphones, Music, Image, ChevronDown, LayoutGrid, Globe } from "lucide-react";
+import { X, Sparkles, Film, Tv, Gamepad2, Headphones, Music, Image, ChevronDown, LayoutGrid, Globe, Hash } from "lucide-react";
 import { CardData } from "../lib/tmdb";
 import {
   getRarityColors,
@@ -187,6 +187,7 @@ export const CardGrid = ({
                         { value: "yugioh", label: "Yu-Gi-Oh!", icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
                         { value: "giphy", label: "GIFs", icon: <Image className="w-4 h-4 text-cyan-400" /> },
                         { value: "digimon", label: "Digimon", icon: <Sparkles className="w-4 h-4 text-orange-400" /> },
+                        { value: "numbers", label: "Numbers", icon: <Hash className="w-4 h-4 text-indigo-400" /> },
                       ]}
                     />
                   </div>
@@ -327,7 +328,7 @@ export const CardGrid = ({
                             <div className="flex flex-col gap-1 items-end">
                             {card.type !== "yugioh" && card.type !== "lorcana" && card.type !== "pokemontcg" && (
                               <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 flex items-center gap-1 border border-white/10">
-                                {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : card.type === "music" ? <Headphones className="w-2.5 h-2.5 text-slate-400" /> : card.type === "anime" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-2.5 h-2.5 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-2.5 h-2.5 text-amber-400" /> : card.type === "giphy" ? <Image className="w-2.5 h-2.5 text-cyan-400" /> : card.type === "digimon" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "country" ? <Globe className="w-2.5 h-2.5 text-emerald-400" /> : card.type === "ghibli" ? <Sparkles className="w-2.5 h-2.5 text-sky-400" /> : card.type === "dragonball" ? <Sparkles className="w-2.5 h-2.5 text-red-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
+                                {card.type === "movie" ? <Film className="w-2.5 h-2.5 text-slate-400" /> : card.type === "game" ? <Gamepad2 className="w-2.5 h-2.5 text-slate-400" /> : card.type === "music" ? <Headphones className="w-2.5 h-2.5 text-slate-400" /> : card.type === "anime" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "pokemon" ? <Sparkles className="w-2.5 h-2.5 text-yellow-400" /> : card.type === "boardgame" ? <Sparkles className="w-2.5 h-2.5 text-amber-400" /> : card.type === "giphy" ? <Image className="w-2.5 h-2.5 text-cyan-400" /> : card.type === "digimon" ? <Sparkles className="w-2.5 h-2.5 text-orange-400" /> : card.type === "country" ? <Globe className="w-2.5 h-2.5 text-emerald-400" /> : card.type === "ghibli" ? <Sparkles className="w-2.5 h-2.5 text-sky-400" /> : card.type === "dragonball" ? <Sparkles className="w-2.5 h-2.5 text-red-400" /> : card.type === "numbers" ? <Hash className="w-2.5 h-2.5 text-indigo-400" /> : <Tv className="w-2.5 h-2.5 text-slate-400" />}
                                 <span className="text-[8px] font-black uppercase text-slate-400">{card.type}</span>
                               </div>
                             )}
@@ -340,7 +341,7 @@ export const CardGrid = ({
                                 <div className="bg-red-600 text-white text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">New!</div>
                               )}
                             </div>
-                            {card.type !== 'yugioh' && card.type !== 'digimon' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && card.type !== 'ghibli' && card.type !== 'dragonball' && (
+                            {card.type !== 'yugioh' && card.type !== 'digimon' && card.type !== 'lorcana' && card.type !== 'pokemontcg' && card.type !== 'ghibli' && card.type !== 'dragonball' && card.type !== 'numbers' && (
                               <div className="bg-black/50 backdrop-blur rounded px-1.5 py-0.5 sm:px-2 sm:py-1">
                                 <span className="text-yellow-400 font-bold text-[10px] sm:text-xs lg:text-sm">⭐ {(card.rating ?? 0).toFixed(1)}</span>
                               </div>
