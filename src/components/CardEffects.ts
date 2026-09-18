@@ -132,7 +132,7 @@ export const useCardEffects = ({
         Junk: "🗑️", Common: "⚪", Uncommon: "🟢", Rare: "🔵", Epic: "🟣", Legendary: "🌟",
       };
       const foilTag = (isGodPack && card.isFoil) ? "✨👑 [GOD PACK FOIL] 👑✨ " : card.isFoil ? "✨ [FOIL] ✨ " : "";
-      const isConsolation = card.id === "rick-roll-fallback" || card.name === "Consolation Prize";
+      const isConsolation = card.id === "rick-roll-fallback" || card.name === "Consolation Prize" || !!card.isConsolation;
       const typeLabel = 
         isConsolation ? "🎁 Consolation" :
         card.type === "movie" ? "🎬 Movie" : 

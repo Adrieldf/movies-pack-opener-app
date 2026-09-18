@@ -23,7 +23,7 @@ import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { fetchRandomEroPack } from "../lib/ero";
 import { fetchRandomNumbersPack } from "../lib/numbers";
-import { getRickRollPack } from "../lib/rickroll";
+import { getRickRollPack, getConsolationNumbersPack } from "../lib/rickroll";
 import { sanitizeCards, Rarity, applyFoilChance, isGodPack } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
@@ -227,7 +227,12 @@ export default function Home() {
     }
 
     if (!fetchedCards || fetchedCards.length === 0) {
-      fetchedCards = getRickRollPack(packType || undefined);
+      try {
+        fetchedCards = await getConsolationNumbersPack(packSize, packType || undefined);
+      } catch (err) {
+        console.error("Consolation numbers pack failed, falling back to Rick Roll card:", err);
+        fetchedCards = getRickRollPack(packType || undefined);
+      }
     }
 
     // Apply 0.05% chance for GODPACK (all foil) or 0.5% chance for single foil

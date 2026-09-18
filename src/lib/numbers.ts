@@ -1,7 +1,32 @@
 import { CardData, Rarity } from "./tmdb";
 
-const GIPHY_BASE = "https://api.giphy.com/v1/gifs";
-const PUBLIC_BETA_KEY = "dc6zaTOxFJmzC";
+const DICEBEAR_BASE = "https://api.dicebear.com/9.x";
+
+// A mix of DiceBear's character-style collections; one is picked at random per card.
+const DICEBEAR_STYLES = [
+  "adventurer",
+  "adventurer-neutral",
+  "avataaars",
+  "avataaars-neutral",
+  "big-ears",
+  "big-ears-neutral",
+  "big-smile",
+  "bottts",
+  "bottts-neutral",
+  "croodles",
+  "croodles-neutral",
+  "fun-emoji",
+  "lorelei",
+  "lorelei-neutral",
+  "micah",
+  "miniavs",
+  "notionists",
+  "notionists-neutral",
+  "open-peeps",
+  "personas",
+  "pixel-art",
+  "pixel-art-neutral",
+];
 
 const LEGENDARY_NUMBERS = new Set([69, 67, 666, 777, 999]);
 
@@ -26,78 +51,27 @@ const pickUniqueNumbers = (count: number): number[] => {
   return Array.from(numbers);
 };
 
-// Giphy titles rarely spell out an arbitrary number, but the slug
-// (e.g. "trealtorr-america-250-250th-anniversary-...") very often does.
-// Match on word boundaries so "3" doesn't false-positive inside "373".
-const gifMatchesNumber = (gif: any, n: number): boolean => {
-  const boundary = new RegExp(`(^|[^0-9])${n}([^0-9]|$)`);
-  return boundary.test(`${gif.title || ""} ${gif.slug || ""}`);
-};
-
-// Try a couple of query phrasings and prefer whichever result actually
-// contains the drawn number (via title/slug), instead of blindly taking
-// the first hit for a generic "number N" search.
-const findBestGif = async (n: number, apiKey: string): Promise<any | null> => {
-  const queries = [String(n), `number ${n}`];
-  let fallback: any = null;
-
-  for (const q of queries) {
-    try {
-      const query = encodeURIComponent(q);
-      const res = await fetch(`${GIPHY_BASE}/search?api_key=${apiKey}&q=${query}&limit=15&rating=pg-13`);
-      if (!res.ok) continue;
-      const data = await res.json();
-      const results = data.data || [];
-      if (!fallback && results[0]) fallback = results[0];
-
-      const exactMatch = results.find((g: any) => gifMatchesNumber(g, n));
-      if (exactMatch) return exactMatch;
-    } catch {
-      // try the next query phrasing
-    }
-  }
-
-  return fallback;
+const getAvatarUrl = (n: number): string => {
+  const style = DICEBEAR_STYLES[Math.floor(Math.random() * DICEBEAR_STYLES.length)];
+  return `${DICEBEAR_BASE}/${style}/svg?seed=${n}`;
 };
 
 export const fetchRandomNumbersPack = async (count: number = 5): Promise<CardData[]> => {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY || PUBLIC_BETA_KEY;
     const numbers = pickUniqueNumbers(count);
 
-    // Resolve each number's best-matching Giphy result in parallel, falling
-    // back to a blank-poster card on a per-number failure so the pack always
-    // comes back with exactly `count` cards instead of falling short.
-    const cards: CardData[] = await Promise.all(
-      numbers.map(async (n): Promise<CardData> => {
-        const rarity = getRarityForNumber(n);
-        try {
-          const gif = await findBestGif(n, apiKey);
-
-          return {
-            id: `number-${n}`,
-            rarity,
-            name: `${n}`,
-            description: gif?.title || "",
-            poster: gif?.images?.fixed_height?.url || gif?.images?.original?.url || "",
-            rating: 0,
-            type: "numbers",
-            imdb_link: gif?.url,
-          };
-        } catch (e) {
-          console.error(`Failed to fetch gif for number ${n}`, e);
-          return {
-            id: `number-${n}`,
-            rarity,
-            name: `${n}`,
-            description: "",
-            poster: "",
-            rating: 0,
-            type: "numbers",
-          };
-        }
-      })
-    );
+    const cards: CardData[] = numbers.map((n): CardData => {
+      const rarity = getRarityForNumber(n);
+      return {
+        id: `number-${n}`,
+        rarity,
+        name: `${n}`,
+        description: "",
+        poster: getAvatarUrl(n),
+        rating: 0,
+        type: "numbers",
+      };
+    });
 
     return cards.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
   } catch (e) {
