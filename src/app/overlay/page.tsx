@@ -21,7 +21,7 @@ import { fetchRandomGhibliPack } from "../../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../../lib/dragonball";
 import { fetchRandomEroPack } from "../../lib/ero";
 import { fetchRandomNumbersPack } from "../../lib/numbers";
-import { getRickRollPack, getConsolationNumbersPack } from "../../lib/rickroll";
+import { getRickRollPack, getConsolationNumbersPack, withPackTimeout } from "../../lib/rickroll";
 import { useTwitchChat } from "../../lib/useTwitchChat";
 import { applyFoilChance, isGodPack } from "../../lib/cardUtils";
 import { PackVisual, PackType } from "../../components/PackVisual";
@@ -127,24 +127,24 @@ export default function OverlayPage() {
     const { type, count } = currentPack;
     let fetched: CardData[] = [];
     try {
-      fetched = type === "games" ? await fetchRandomGamePack(count)
-        : type === "music" ? await fetchRandomMusicPack(count)
-        : type === "anime" ? await fetchRandomAnimePack(count)
-        : type === "pokemon" ? await fetchRandomPokemonPack(count)
-        : type === "boardgame" ? await fetchRandomBoardGamePack(count)
-        : type === "giphy" ? await fetchRandomGiphyPack(count)
-        : type === "yugioh" ? await fetchRandomYugiohPack(count)
-        : type === "mtg" ? await fetchRandomMtgPack(count)
-        : type === "disney" ? await fetchRandomDisneyPack(count)
-        : type === "digimon" ? await fetchRandomDigimonPack(count)
-        : type === "lorcana" ? await fetchRandomLorcanaPack(count)
-        : type === "countries" ? await fetchRandomCountriesPack(count)
-        : type === "pokemontcg" ? await fetchRandomPokemonTcgPack(count)
-        : type === "ghibli" ? await fetchRandomGhibliPack(count)
-        : type === "dragonball" ? await fetchRandomDragonBallPack(count)
-        : type === "ero" ? await fetchRandomEroPack(count)
-        : type === "numbers" ? await fetchRandomNumbersPack(count)
-        : await fetchRandomPack(count);
+      fetched = await withPackTimeout(type === "games" ? fetchRandomGamePack(count)
+        : type === "music" ? fetchRandomMusicPack(count)
+        : type === "anime" ? fetchRandomAnimePack(count)
+        : type === "pokemon" ? fetchRandomPokemonPack(count)
+        : type === "boardgame" ? fetchRandomBoardGamePack(count)
+        : type === "giphy" ? fetchRandomGiphyPack(count)
+        : type === "yugioh" ? fetchRandomYugiohPack(count)
+        : type === "mtg" ? fetchRandomMtgPack(count)
+        : type === "disney" ? fetchRandomDisneyPack(count)
+        : type === "digimon" ? fetchRandomDigimonPack(count)
+        : type === "lorcana" ? fetchRandomLorcanaPack(count)
+        : type === "countries" ? fetchRandomCountriesPack(count)
+        : type === "pokemontcg" ? fetchRandomPokemonTcgPack(count)
+        : type === "ghibli" ? fetchRandomGhibliPack(count)
+        : type === "dragonball" ? fetchRandomDragonBallPack(count)
+        : type === "ero" ? fetchRandomEroPack(count)
+        : type === "numbers" ? fetchRandomNumbersPack(count)
+        : fetchRandomPack(count));
     } catch (err) {
       console.error("Overlay API error, defaulting to Rick Roll:", err);
     }

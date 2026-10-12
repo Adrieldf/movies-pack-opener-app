@@ -452,7 +452,7 @@ export const CardReveal = ({
                       className="bg-[#f5c518] hover:bg-[#d6ab15] text-black text-xs font-bold py-1.5 px-3 rounded shadow-md transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {card.type === "game" ? "GAME" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "MAL" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : card.type === "digimon" ? "Wiki" : card.type === "numbers" ? "GIF" : "Info"}
+                      {card.type === "game" ? "GAME" : card.type === "music" ? "Apple" : card.type === "giphy" ? "Giphy" : card.type === "anime" ? "AniList" : card.type === "pokemon" ? "Dex" : card.type === "boardgame" ? "BGG" : card.type === "digimon" ? "Wiki" : card.type === "numbers" ? "GIF" : "Info"}
                     </a>
                   )}
                 </div>

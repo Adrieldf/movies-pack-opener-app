@@ -23,7 +23,7 @@ import { fetchRandomGhibliPack } from "../lib/ghibli";
 import { fetchRandomDragonBallPack } from "../lib/dragonball";
 import { fetchRandomEroPack } from "../lib/ero";
 import { fetchRandomNumbersPack } from "../lib/numbers";
-import { getRickRollPack, getConsolationNumbersPack } from "../lib/rickroll";
+import { getRickRollPack, getConsolationNumbersPack, withPackTimeout } from "../lib/rickroll";
 import { sanitizeCards, Rarity, applyFoilChance, isGodPack } from "../lib/cardUtils";
 
 import { PackSelector, PackType } from "../components/PackSelector";
@@ -187,41 +187,41 @@ export default function Home() {
 
     let fetchedCards: CardData[] = [];
     try {
-      fetchedCards = packType === "games"
-        ? await fetchRandomGamePack(packSize)
+      fetchedCards = await withPackTimeout(packType === "games"
+        ? fetchRandomGamePack(packSize)
         : packType === "music"
-          ? await fetchRandomMusicPack(packSize)
+          ? fetchRandomMusicPack(packSize)
           : packType === "anime"
-            ? await fetchRandomAnimePack(packSize)
+            ? fetchRandomAnimePack(packSize)
             : packType === "pokemon"
-              ? await fetchRandomPokemonPack(packSize)
+              ? fetchRandomPokemonPack(packSize)
               : packType === "boardgame"
-                ? await fetchRandomBoardGamePack(packSize)
+                ? fetchRandomBoardGamePack(packSize)
                 : packType === "giphy"
-                  ? await fetchRandomGiphyPack(packSize)
+                  ? fetchRandomGiphyPack(packSize)
                       : packType === "yugioh"
-                        ? await fetchRandomYugiohPack(packSize)
+                        ? fetchRandomYugiohPack(packSize)
                         : packType === "mtg"
-                          ? await fetchRandomMtgPack(packSize)
+                          ? fetchRandomMtgPack(packSize)
                           : packType === "disney"
-                            ? await fetchRandomDisneyPack(packSize)
+                            ? fetchRandomDisneyPack(packSize)
                             : packType === "digimon"
-                              ? await fetchRandomDigimonPack(packSize)
+                              ? fetchRandomDigimonPack(packSize)
                               : packType === "lorcana"
-                                ? await fetchRandomLorcanaPack(packSize)
+                                ? fetchRandomLorcanaPack(packSize)
                                 : packType === "countries"
-                                  ? await fetchRandomCountriesPack(packSize)
+                                  ? fetchRandomCountriesPack(packSize)
                                   : packType === "pokemontcg"
-                                    ? await fetchRandomPokemonTcgPack(packSize)
+                                    ? fetchRandomPokemonTcgPack(packSize)
                                     : packType === "ghibli"
-                                      ? await fetchRandomGhibliPack(packSize)
+                                      ? fetchRandomGhibliPack(packSize)
                                         : packType === "dragonball"
-                                          ? await fetchRandomDragonBallPack(packSize)
+                                          ? fetchRandomDragonBallPack(packSize)
                                           : packType === "ero"
-                                            ? await fetchRandomEroPack(packSize)
+                                            ? fetchRandomEroPack(packSize)
                                             : packType === "numbers"
-                                              ? await fetchRandomNumbersPack(packSize)
-                                              : await fetchRandomPack(packSize);
+                                              ? fetchRandomNumbersPack(packSize)
+                                              : fetchRandomPack(packSize));
     } catch (err) {
       console.error("Error opening pack, defaulting to Rick Roll card:", err);
     }

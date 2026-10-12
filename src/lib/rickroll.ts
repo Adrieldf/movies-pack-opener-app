@@ -34,3 +34,15 @@ export const getRickRollPack = (originalPack?: string): CardData[] => {
   }];
 };
 
+export const PACK_TIMEOUT_MS = 30000;
+
+// Caps how long a pack fetch may take. Rejecting sends it down the same error
+// path as a failed fetch, so a hung API yields the consolation pack instead of
+// leaving the pack stuck on loading.
+export const withPackTimeout = <T>(promise: Promise<T>, ms: number = PACK_TIMEOUT_MS): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Pack fetch timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+};

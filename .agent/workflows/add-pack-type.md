@@ -10,7 +10,7 @@ For reference, look at the existing packs:
 - **Movies/TV** → `src/lib/tmdb.ts` (uses TMDB API)
 - **Games** → `src/lib/games.ts` (uses RAWG API)
 - **Music** → `src/lib/music.ts` (uses iTunes + Last.fm)
-- **Anime** → `src/lib/anime.ts` (uses Jikan API)
+- **Anime** → `src/lib/anime.ts` (uses AniList GraphQL API)
 
 ---
 
