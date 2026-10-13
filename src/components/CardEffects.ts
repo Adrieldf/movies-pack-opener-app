@@ -125,7 +125,7 @@ export const useCardEffects = ({
 
       if (isGodPack && cardIndex === 0) {
         const godFinder = username ? `${username} found a GOD PACK! ` : "";
-        const godMsg = `✨👑🔥 [GODPACK DETECTED] 🔥👑✨ ${godFinder}Every single card in this pack is HOLOGRAPHIC FOIL!`;
+        const godMsg = `${godFinder}✨👑🔥 [GODPACK DETECTED] 🔥👑✨ Every single card in this pack is HOLOGRAPHIC FOIL!`;
         twitchSend(godMsg);
       }
 
